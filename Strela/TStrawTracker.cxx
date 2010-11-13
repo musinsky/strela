@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 24 Jun 2008
+// @(#) 02 Aug 2010
 
 #include <TMath.h>
 #include <TH2.h>
@@ -14,7 +14,8 @@ const Int_t kMaxHits    = 50;
 const Int_t kMaxPairs   = 200; // sum(kMaxHits - 1)
 const Int_t kMaxChecked = 50;  // <= kMaxHits
 
-Bool_t TStrawTracker::fgJoinCutTime = kTRUE;
+Bool_t TStrawTracker::fgOnlyOneTrack = kFALSE;
+Bool_t TStrawTracker::fgJoinCutTime  = kTRUE;
 
 ClassImp(TStrawTracker)
 
@@ -23,12 +24,15 @@ TStrawTracker::TStrawTracker()
 {
   //  Info("TStrawTracker", "Default constructor");
   fLayers         = 0;
+  fTubes          = 0;
   fId             = -1;
   fNHits          = 0;
   fHit            = 0;
   fTime           = 0;
   fRadius         = 0;
   fMinNHits       = 0;
+  fMaxNHits       = 0;
+  fNTracks        = 0;
   fAz             = 0;
   fBz             = 0;
   fChi2           = 0;
@@ -58,7 +62,10 @@ TStrawTracker::TStrawTracker()
   fhAz            = 0;
   fhBz            = 0;
   fhRes           = 0;
+  fhSumR          = 0;
+  fhSumD          = 0;
   fhDisRes        = 0;
+  fhBzRes         = 0;
 }
 //______________________________________________________________________________
 TStrawTracker::TStrawTracker(Int_t id)
@@ -66,6 +73,7 @@ TStrawTracker::TStrawTracker(Int_t id)
 {
   //  Info("TStrawTracker", "Normal constructor");
   fLayers         = 0;
+  fTubes          = 0;
   fId             = id;
   SetName(Form("tracker_%d", fId));
   fNHits          = 0;
@@ -73,7 +81,9 @@ TStrawTracker::TStrawTracker(Int_t id)
   fTime           = new Int_t[kMaxHits];
   fRadius         = new Double_t[kMaxHits];
   fMinNHits       = 9999; // never
+  fMaxNHits       = kMaxHits - 1;
 
+  fNTracks        = 0;
   fAz             = 0;
   fBz             = 0;
   fChi2           = 0;
@@ -106,7 +116,10 @@ TStrawTracker::TStrawTracker(Int_t id)
   fhAz            = 0;
   fhBz            = 0;
   fhRes           = 0;
+  fhSumR          = 0;
+  fhSumD          = 0;
   fhDisRes        = 0;
+  fhBzRes         = 0;
   InitHistograms();
 }
 //______________________________________________________________________________
@@ -114,6 +127,7 @@ TStrawTracker::~TStrawTracker()
 {
   Info("~TStrawTracker", "Destructor");
   delete fLayers; // layers are not deleted
+  delete fTubes;  // tubes are not deleted
   delete [] fHit;
   delete [] fTime;
   delete [] fRadius;
@@ -130,7 +144,10 @@ TStrawTracker::~TStrawTracker()
   delete fhAz;      fhAz = 0;
   delete fhBz;      fhBz = 0;
   delete fhRes;     fhRes = 0;
+  delete fhSumR;    fhSumR = 0;
+  delete fhSumD;    fhSumD = 0;
   delete fhDisRes;  fhDisRes = 0;
+  delete fhBzRes;   fhBzRes = 0;
 }
 //______________________________________________________________________________
 void TStrawTracker::Print(Option_t *option) const
@@ -165,45 +182,165 @@ void TStrawTracker::Print(Option_t *option) const
 //______________________________________________________________________________
 void TStrawTracker::InitHistograms()
 {
-  fhAz = new TH1F(Form("%s_az", GetName()), "slope; rad", 1000, -0.2, 0.2);
+  fhAz = new TH1F(Form("%s_az", GetName()), "slope; rad", 1000, -0.12, 0.12);
+  fhAz->SetMinimum(1);
   gStrela->HistoManager(fhAz, "add");
   fhBz = new TH1F(Form("%s_bz", GetName()), "intercept; cm", 1000, -13, 13);
+  fhBz->SetMinimum(1);
   gStrela->HistoManager(fhBz, "add");
-  fhRes = new TH1F(Form("%s_res", GetName()), "residual; cm", 1000, -0.2, 0.2);
+  fhRes = new TH1F(Form("%s_res", GetName()),
+                   "residual; cm", 1000, -0.15, 0.15);
+  fhRes->SetMinimum(1);
   gStrela->HistoManager(fhRes, "add");
-  fhResTan = new TH1F(Form("%s_rest", GetName()),
-                      "residual (candidate); cm", 1000, -0.2, 0.2);
+  fhResTan = new TH1F(Form("%s_restan", GetName()),
+                      "residual (candidate); cm", 1000, -0.15, 0.15);
+  fhResTan->SetMinimum(1);
   fhResTan->SetLineColor(kGray + 1);
   gStrela->HistoManager(fhResTan, "add");
+  fhSumR = new TH1F(Form("%s_sumR", GetName()), "sum of R; cm", 1000, 1.8, 2.4);
+  fhSumR->SetMinimum(1);
+  fhSumR->SetLineColor(kGray + 1);
+  gStrela->HistoManager(fhSumR, "add");
+  fhSumD = new TH1F(Form("%s_sumD", GetName()), "sum of D; cm", 1000, 1.8, 2.4);
+  fhSumD->SetMinimum(1);
+  gStrela->HistoManager(fhSumD, "add");
   fhDisZTan = new TH1F(Form("%s_dzt", GetName()),
-                       "z - component of distance from wire; cm",
+                       "z - component of distance from wire (candidate); cm",
                        1000, -0.5, 0.5);
+  fhDisZTan->SetMinimum(0);
   gStrela->HistoManager(fhDisZTan, "add");
   fhChi2Tan = new TH1F(Form("%s_chi2t", GetName()),
                        "#chi^{2}/ndf (candidate)", 1000, 0, 0.02);
+  fhChi2Tan->SetMinimum(0);
   gStrela->HistoManager(fhChi2Tan, "add");
 
   fhDisRes = new TH2F(Form("%s_dis_res", GetName()),
-                      "distance from wire : residual; distance from wire, cm; residual, cm",
+                      "distance from wire : residual; dist., cm; residual, cm",
                       100, -2.2, 2.2, 100, -0.15, 0.15);
   fhDisRes->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhDisRes, "add");
+  fhBzRes = new TH2F(Form("%s_bz_res", GetName()),
+                     "intercept : residual; intercept, cm; residual, cm",
+                     100, -13, 13, 100, -0.15, 0.15);
+  fhBzRes->GetYaxis()->CenterTitle();
+  gStrela->HistoManager(fhBzRes, "add");
+}
+//______________________________________________________________________________
+void TStrawTracker::SetMaxNHits(Int_t n)
+{
+  fMaxNHits = n;
+  if (fMaxNHits >= kMaxHits) {
+    Warning("SetMaxNHits", "max. hits must be < %d", kMaxHits);
+    fMaxNHits = kMaxHits - 1;
+  }
 }
 //______________________________________________________________________________
 void TStrawTracker::AllocateLayers()
 {
-  // called(allocated) only once
-  if (!fLayers) fLayers = new TList();
+  // called (allocated) only once
+  if (!fLayers || !fTubes) {
+    fLayers = new TList();
+    fTubes  = new TList();
+  }
   else {
     Warning("AllocateLayers", "%s re-allocated layers list", GetName());
     fLayers->Clear();
+    fTubes->Clear();
   }
 
   TIter next(gStrela->StrawCham()->Layers());
-  TStrawLayer *layer;
-  while ((layer = (TStrawLayer *)next()))
-    if (layer->GetTracker() == this) fLayers->Add(layer);
+  TStrawLayer *l;
+  while ((l = (TStrawLayer *)next()))
+    if (l->GetTracker() == this) fLayers->Add(l);
   fLayers->Sort(); // sort by increasing Z (tubes in each layer are ordered)
+
+  TIter layers(fLayers);
+  TStrawLayer *layer;
+  while ((layer = (TStrawLayer *)layers())) {
+    TIter tubes(layer->Tubes());
+    TStrawTube *tube;
+    while ((tube = (TStrawTube *)tubes())) {
+      fTubes->Add(tube); // tubes are fully ordered by geometry of tracker
+    }
+  }
+
+  // find layers with half tubes
+  Int_t nt, nt0 = GetLayer(0)->Tubes()->GetSize();
+  Int_t maxtubes = nt0, maxdelta = 0;
+  for (Int_t il = 1; il < fLayers->GetSize(); il++) {
+    nt = GetLayer(il)->Tubes()->GetSize();
+    maxtubes = TMath::Max(nt, maxtubes);
+    maxdelta = TMath::Max(TMath::Abs(nt0 - nt), maxdelta);
+  }
+  if (maxdelta != 1) {
+    Info("AllocateLayers", "cannot determine half-layers in %s", GetName());
+    maxtubes = -1;
+  }
+
+  TStrawTube *first, *last;
+  for (Int_t il = 0; il < fLayers->GetSize(); il++) {
+    first = (TStrawTube *)GetLayer(il)->Tubes()->First();
+    last  = (TStrawTube *)GetLayer(il)->Tubes()->Last();
+    if (GetLayer(il)->Tubes()->GetSize() == maxtubes) {
+      first->SetMargin(TStrawTube::kHalfPos);
+      last->SetMargin(TStrawTube::kHalfNeg);
+    }
+    else {
+      first->SetMargin(TStrawTube::kMargin);
+      last->SetMargin(TStrawTube::kMargin);
+    }
+  }
+}
+//______________________________________________________________________________
+void TStrawTracker::MarginalTubes(Int_t set, Bool_t onlyhalf) const
+{
+  TIter tubes(fTubes);
+  TStrawTube *tube;
+  while ((tube = (TStrawTube *)tubes())) {
+    if (tube->GetMargin() == TStrawTube::kNoMargin) continue;
+    if (onlyhalf && (tube->GetMargin() == TStrawTube::kMargin)) continue;
+    switch (set) {
+    case 0: // to default
+      tube->SetDisabled(kFALSE);
+      tube->SetNoMultiSum(kFALSE);
+      break;
+    case 1:
+      tube->SetNoMultiSum(kTRUE);
+      break;
+    case -1:
+      tube->SetNoMultiSum(kFALSE);
+      break;
+    case 2:
+      tube->SetDisabled(kTRUE);
+      break;
+    case -2:
+      tube->SetDisabled(kFALSE);
+      break;
+    default:
+      Warning("MarginalTubes", "%s without changing", tube->GetName());
+    }
+  }
+}
+//______________________________________________________________________________
+TStrawTube *TStrawTracker::GetTube(Int_t il0, Int_t it0, Bool_t info) const
+{
+  TStrawLayer *layer = GetLayer(il0);
+  if (!layer) {
+    Printf("%s: %d-th layer does not exist", GetName(), il0);
+    return 0;
+  }
+  TStrawTube *tube = layer->GetTube(it0);
+  if (!tube) {
+    Printf("%s: %d-th tube of %dth layer does not exist", GetName(), it0, il0);
+    return 0;
+  }
+
+  if (info) {
+    Printf("%s", tube->GetTitle());
+    tube->HighLight();
+  }
+
+  return tube;
 }
 //______________________________________________________________________________
 void TStrawTracker::SetMinNHitsAdvanced(Int_t n)
@@ -224,7 +361,7 @@ void TStrawTracker::AddHit(Int_t itube, Int_t tdc)
 {
   if (fNHits >= kMaxHits) {
     if (gDebug > 0) {
-      Error("AddHit", "to many hits, limit is %d", kMaxHits);
+      Info("AddHit", "to many hits in %s, limit is %d", GetName(), kMaxHits);
       Printf(gStrela->GetEventInfo());
     }
     return;
@@ -238,7 +375,9 @@ void TStrawTracker::AddHit(Int_t itube, Int_t tdc)
 //______________________________________________________________________________
 void TStrawTracker::FindTracks()
 {
-  if ((fNHits < fMinNHits) || (fNHits == kMaxHits)) return;
+  fNTracks = 0;
+  // number of hits must be exact in <fMinNHits, fMaxNHits>
+  if ((fNHits < fMinNHits) || (fNHits > fMaxNHits)) return;
 
   FindPairs();                             // find all posible pairs from hits
   if (fNPairs == 0) return;                // exist pair ?
@@ -258,9 +397,14 @@ void TStrawTracker::FindTracks()
       else if (fPrecision == 2)            // only method B
         PrecisionTrackB();
       AddTrack();                          // add track
-      FillHistoPerTrack();                 // filling histograms (each track)
+      if (!fgOnlyOneTrack)
+        FillHistoPerTrack();               // filling histograms (each track)
+      fNTracks++;
     }
   } while (fNCheckPairs < fNPairs);        // next pair
+
+  if (fgOnlyOneTrack && (fNTracks == 1))
+    FillHistoPerTrack();                   // only one track event
   FillHistoPerEvent();                     // filling histograms (each event)
 }
 //______________________________________________________________________________
@@ -635,7 +779,7 @@ void TStrawTracker::FillHistoPerTrack() const
   fhBz->Fill(fBz);
 
   Int_t ihit;
-  Double_t d, res, d0 = TMath::Sqrt(1.0 + fAz*fAz);
+  Double_t d, res, d0 = TMath::Sqrt(1.0 + fAz*fAz), sumr = 0.0, sumd = 0.0;
   TStrawTube *tube;
 
   for (Int_t i = 0; i < fTrackNHits; i++) {
@@ -643,14 +787,24 @@ void TStrawTracker::FillHistoPerTrack() const
     tube = GetTubeHit(ihit);
     d    = (fAz*Z(ihit) - X(ihit) + fBz)/d0;
     res  = R(ihit) - TMath::Abs(d);
+    sumr += R(ihit);
+    sumd += TMath::Abs(d);
 
     fhRes->Fill(res);
     fhDisRes->Fill(d, res);
+    fhBzRes->Fill(fBz, res);
 
     tube->HisCutTime()->Fill(T(ihit) + tube->GetT0());
+    tube->HisRad2()->Fill(R(ihit));
     tube->HisDis1()->Fill(d);
     tube->HisTimeRes()->Fill(T(ihit), res);
     tube->HisDisTime()->Fill(d, T(ihit));
+    tube->HisBzRes()->Fill(fBz - tube->GetCenter(), res);
+  }
+
+  if ((fLayers->GetSize() == 4) && (fTrackNHits == 4)) { // only 4layers tracker
+    fhSumR->Fill(sumr/2.0);
+    fhSumD->Fill(sumd/2.0);
   }
   TracingHits();
 }
@@ -681,13 +835,15 @@ void TStrawTracker::TracingHits() const
   }
 }
 //______________________________________________________________________________
-void TStrawTracker::ShowHistograms() const
+void TStrawTracker::ShowHistograms(Option_t *option) const
 {
   TVirtualPad *save = gPad;
   TCanvas *c = (TCanvas *)gROOT->GetListOfCanvases()->FindObject("c_tracker");
   if (!c) {
     c = new TCanvas("c_tracker");
-    c->Divide(2, 3, 0.001, 0.001);
+    c->Divide(2, 4, 0.001, 0.001);
+    c->GetPad(3)->SetGrid();
+    c->GetPad(4)->SetGrid();
   }
   else c->Clear("D"); // subpads are cleared but not deleted
 
@@ -698,11 +854,16 @@ void TStrawTracker::ShowHistograms() const
   c->cd(3);
   fhDisRes->Draw();
   c->cd(4);
+  fhBzRes->Draw();
+  c->cd(5);
+  fhSumD->Draw();
+  fhSumR->Draw("same");
+  c->cd(6);
   fhRes->Draw();
   fhResTan->Draw("same");
-  c->cd(5);
+  c->cd(7);
   fhChi2Tan->Draw();
-  c->cd(6);
+  c->cd(8);
   fhDisZTan->Draw();
 
   c->SetTitle(GetName());
@@ -712,6 +873,7 @@ void TStrawTracker::ShowHistograms() const
 //______________________________________________________________________________
 void TStrawTracker::TubesCutTimeInterval() const
 {
+  // maybe better use macros/tracker_TDC.C
   TList straight1, straight2;
   TStrawTube *tube;
   Double_t x1 = 9999, x2 = -9999;

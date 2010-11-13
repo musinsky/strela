@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 18 Jun 2008
+// @(#) 11 Nov 2010
 
 #include "TVirtualModule.h"
 #include "TVME.h"
@@ -28,6 +28,19 @@ TVirtualModule::~TVirtualModule()
 {
   Info("~TVirtualModule", "Destructor");
   if (gVME) gVME->Modules()->Remove(this);
+}
+//______________________________________________________________________________
+Int_t TVirtualModule::MapChannel(Int_t tdcid, Int_t tdcch) const
+{
+  // override this function
+  return -1;
+}
+//______________________________________________________________________________
+Bool_t TVirtualModule::GetChannelIdCh(Int_t ch, Int_t &tdcid,
+                                      Int_t &tdcch) const
+{
+  // override this function
+  return kFALSE;
 }
 //______________________________________________________________________________
 void TVirtualModule::ConnectorChannels(Int_t con, Int_t *pins,

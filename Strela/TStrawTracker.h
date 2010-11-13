@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 24 Jun 2008
+// @(#) 02 Aug 2010
 
 #ifndef STRELA_TStrawTracker
 #define STRELA_TStrawTracker
@@ -22,13 +22,16 @@ class TStrawTracker : public TNamed {
 
 private:
   TList        *fLayers;   //->list of tracker layeres
+  TList        *fTubes;    //->list of tracker tubes
   Int_t         fId;       //  id number of tracker
   Int_t         fNHits;    //  number of hits
   Int_t        *fHit;      //[fNHits] index of hit tube (TStrawCham::fTubes)
   Int_t        *fTime;     //[fNHits] time of tube
   Double_t     *fRadius;   //[fNHits] radius of tube
   Int_t         fMinNHits; //  min. number of hits
+  Int_t         fMaxNHits; //  max. number of hits ( < kMaxHits)
 
+  Int_t         fNTracks;       //! number of tracks
   Double_t      fAz;            //! Az of track
   Double_t      fBz;            //! Bz of track
   Double_t      fChi2;          //! Chi2 of track
@@ -53,6 +56,7 @@ private:
   Double_t      fMaxDisZTan;    //  max. z-component of drift radius for tangent
   Double_t      fMaxResTan;     //  max. residuals for tangent
   Int_t         fPrecision;     //  method of precision tracking
+  static Bool_t fgOnlyOneTrack; //! histo with only one track event
   static Bool_t fgJoinCutTime;  //! histo with(out) jointed cut time interval
 
   TH1F         *fhDisZTan;      //! z component of distance of tagent
@@ -61,7 +65,10 @@ private:
   TH1F         *fhAz;           //! az
   TH1F         *fhBz;           //! bz
   TH1F         *fhRes;          //! residual
+  TH1F         *fhSumR;         //! sum of R
+  TH1F         *fhSumD;         //! sum of D
   TH2F         *fhDisRes;       //! distance vs. residual
+  TH2F         *fhBzRes;        //! Bz vs. residual
   void          InitHistograms();
 
 public:
@@ -70,8 +77,15 @@ public:
   virtual      ~TStrawTracker();
 
   TList        *Layers() const { return fLayers; }
+  TStrawLayer  *GetLayer(Int_t il) const { return
+      (TStrawLayer *)fLayers->At(il); }
   TStrawLayer  *FindLayer(const char *name) const { return
       (TStrawLayer *)fLayers->FindObject(name); }
+  TList        *Tubes() const { return fTubes; }
+  TStrawTube   *GetTube(Int_t it) const { return
+      (TStrawTube *)fTubes->At(it); }
+  TStrawTube   *FindTube(const char *name) const { return
+      (TStrawTube *)fTubes->FindObject(name); }
   Int_t         GetId() const { return fId; }
   Int_t         GetNHits() const { return fNHits; }
   void          ResetHits() { fNHits = 0; }
@@ -87,6 +101,7 @@ public:
 
   void        SetMinNHits(Int_t n) { fMinNHits = n; }
   Int_t       GetMinNHits() const { return fMinNHits; }
+  Int_t       GetMaxNHits() const { return fMaxNHits; }
   void        SetMinDistPair(Double_t d) { fMinDistPair = d; }
   Double_t    GetMinDistPair() const { return fMinDistPair; }
   void        SetTrackMinNHits(Int_t n) { fTrackMinNHits = n; }
@@ -99,6 +114,9 @@ public:
   Double_t    GetMaxResTan() const { return fMaxResTan; }
   void        SetPrecision(Int_t p) { fPrecision = p; }
   Int_t       GetPrecision() const { return fPrecision; }
+  Int_t       GetNTracks() const { return fNTracks; }
+  static void   OnlyOneTrack(Bool_t o = kFALSE) { fgOnlyOneTrack = o; }
+  static Bool_t IsOnlyOneTrack() { return fgOnlyOneTrack; }
   static void   JoinCutTime(Bool_t j = kTRUE) { fgJoinCutTime = j; }
   static Bool_t IsJoinCutTime() { return fgJoinCutTime; }
 
@@ -108,11 +126,17 @@ public:
   TH1F       *HisAz() const { return fhAz; }
   TH1F       *HisBz() const { return fhBz; }
   TH1F       *HisRes() const { return fhRes; }
+  TH1F       *HisSumR() const { return fhSumR; }
+  TH1F       *HisSumD() const { return fhSumD; }
   TH2F       *HisDisRes() const { return fhDisRes; }
+  TH2F       *HisBzRes() const { return fhBzRes; }
 
   virtual void Print(Option_t *option = "") const;
 
+  void         SetMaxNHits(Int_t n);
   void         AllocateLayers();
+  void         MarginalTubes(Int_t set = 0, Bool_t onlyhalf = kTRUE) const;
+  TStrawTube  *GetTube(Int_t il0, Int_t it0, Bool_t info = kTRUE) const;
   void         SetMinNHitsAdvanced(Int_t n);
   void         AddHit(Int_t itube, Int_t tdc);
   void         FindTracks();
@@ -130,7 +154,7 @@ public:
   void         FillHistoPerTrack() const;
   void         FillHistoPerEvent() const;
   void         TracingHits() const;
-  void         ShowHistograms() const;
+  void         ShowHistograms(Option_t *option = "") const;
   void         TubesCutTimeInterval() const;
 
   ClassDef(TStrawTracker, 1) // StrawTracker, find tracks

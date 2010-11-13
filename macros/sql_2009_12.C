@@ -1,7 +1,9 @@
-// root[] .x macros/sql_2009_12.C
-
 // Author: Jan Musinsky
-// 24/06/2010
+// 11/11/2010
+
+/*
+  .x macros/sql_2009_12.C
+*/
 
 // connectors enumeration in PhTDC and TDC96 modules
 //

@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 25 Apr 2008
+// @(#) 01 Nov 2010
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -8,6 +8,7 @@
 #include <TF1.h>
 #include <TMath.h>
 #include <TFile.h>
+#include <Varargs.h>
 
 #include "TStrawMulti.h"
 #include "TStrawTracker.h"
@@ -56,14 +57,27 @@ TStrawMulti::~TStrawMulti()
   if (gStrela) gStrela->StrawCham()->Multies()->Remove(this);
 }
 //______________________________________________________________________________
-void TStrawMulti::Add(const TStrawLayer *layer)
+void TStrawMulti::AddAnything(TObject *va_(obj1), ...)
 {
-  if (!layer) {
-    Warning("Add", "%s, pointer to TStrawLayer is null", GetName());
-    return;
-  }
+  //  Printf("Remember, list of trackers/layers/tubes must be temrinated by 0");
+  if (!va_(obj1)) return;
 
-  AddAll(layer->Tubes());
+  va_list ap;
+  va_start(ap, va_(obj1));
+  TObject *obj = va_(obj1);
+
+  do {
+    if (obj->InheritsFrom(TStrawTracker::Class()))
+      Add((TStrawTracker *)obj);
+    else if (obj->InheritsFrom(TStrawLayer::Class()))
+      Add((TStrawLayer *)obj);
+    else if (obj->InheritsFrom(TStrawTube::Class()))
+      Add((TStrawTube *)obj);
+    else
+      Warning("AddAnything", "add %s is not possible", obj->GetName());
+  } while ((obj = va_arg(ap, TObject *)));
+
+  va_end(ap);
 }
 //______________________________________________________________________________
 void TStrawMulti::Add(const TStrawTracker *tracker)
@@ -73,45 +87,66 @@ void TStrawMulti::Add(const TStrawTracker *tracker)
     return;
   }
 
-  TIter next(gStrela->StrawCham()->Layers());
+  TIter next(tracker->Layers());
   TStrawLayer *layer;
   while((layer = (TStrawLayer *)next()))
-    if (tracker == layer->GetTracker())
-      Add(layer);
+    Add(layer);
 }
 //______________________________________________________________________________
-void TStrawMulti::AddAll(const TCollection *col)
+void TStrawMulti::Add(const TStrawLayer *layer)
 {
-  if (!fTubes) fTubes = new TList();
+  if (!layer) {
+    Warning("Add", "%s, pointer to TStrawLayer is null", GetName());
+    return;
+  }
 
-  TIter next(col);
+  TIter next(layer->Tubes());
   TStrawTube *tube;
-  while ((tube = (TStrawTube *)next())) {
-    if (!tube->InheritsFrom(TStrawTube::Class())) continue;
-    TStrawMulti *prevMulti = tube->GetMulti();
+  while((tube = (TStrawTube *)next()))
+    Add(tube);
+}
+//______________________________________________________________________________
+void TStrawMulti::Add(TStrawTube *tube)
+{
+  if (!tube) {
+    Warning("Add", "%s, pointer to TStrawTube is null", GetName());
+    return;
+  }
 
-    if (prevMulti == this) {
-      Warning("AddAll", "%s already assigned to %s", tube->GetName(),
-              GetName());
-      continue;
-    }
-    else if (prevMulti) {
-      Warning("AddAll", "%s change from %s to %s", tube->GetName(),
-              prevMulti->GetName(), GetName());
-      prevMulti->Tubes()->Remove(tube);
-      tube->SetMulti(0);
-    }
+  TStrawMulti *prevMulti = tube->GetMulti();
+  if (prevMulti == this) {
+    Warning("Add", "%s already assigned to %s", tube->GetName(), GetName());
+    return;
+  }
+  else if (prevMulti) {
+    Warning("Add", "%s change from %s to %s", tube->GetName(),
+            prevMulti->GetName(), GetName());
+    prevMulti->RemoveTube(tube);
+  }
 
-    if (fTubes->IsEmpty()) fRange = tube->GetRange(); // only first time
-    if (fRange != tube->GetRange()) {
-      Warning("AddAll", "%s from %s has other range", tube->GetName(),
-              GetName());
-      continue;
-    }
+  if (!fTubes) fRange = tube->GetRange(); // only once
+  if (fRange != tube->GetRange()) {
+    Warning("Add", "%s from %s has another range", tube->GetName(), GetName());
+    return;
+  }
+  fTimeMax = TMath::Max(fTimeMax, tube->GetTMax() - tube->GetTMin());
 
-    fTimeMax = TMath::Max(fTimeMax, tube->GetTMax() - tube->GetTMin());
-    fTubes->Add(tube);
-    tube->SetMulti(this);
+  if (!fTubes) fTubes = new TList();
+  fTubes->Add(tube);
+  tube->SetMulti(this);
+}
+//______________________________________________________________________________
+void TStrawMulti::RemoveTube(TStrawTube *tube)
+{
+  if (!tube) {
+    Warning("RemoveTube", "%s, pointer to TStrawTube is null", GetName());
+    return;
+  }
+
+  if (fTubes) {
+    if (tube == fTubes->Remove(tube)) tube->SetMulti(0);
+    else Warning("RemoveTube", "%s is not assigned to %s",
+                 tube->GetName(), GetName());
   }
 }
 //______________________________________________________________________________
@@ -123,10 +158,9 @@ void TStrawMulti::SumTimeRes()
     return;
   }
 
-  if (!fhTimeRes) {
+  if (!fhTimeRes) { // create histo frame (only once)
     fhTimeRes = new TH2F(*((TStrawTube *)fTubes->First())->HisTimeRes());
     fhTimeRes->SetName(Form("%s_time_res", GetName()));
-    fhTimeRes->SetTitle(GetTitle());
     gStrela->HistoManager(fhTimeRes, "add");
   }
 
@@ -134,7 +168,7 @@ void TStrawMulti::SumTimeRes()
   TIter next(fTubes);
   TStrawTube *tube;
   while ((tube = (TStrawTube *)next()))
-    fhTimeRes->Add(tube->HisTimeRes());
+    if (!tube->IsNoMultiSum()) fhTimeRes->Add(tube->HisTimeRes());
 }
 //______________________________________________________________________________
 void TStrawMulti::SumTime()
@@ -145,11 +179,11 @@ void TStrawMulti::SumTime()
     return;
   }
 
-  if (!fhTime) {
+  if (!fhTime) { // create and first time fill histo (only once)
     // all projection histograms are deleted when file is closed
     fhTime = new TH1F(*((TH1F *)fhTimeRes->ProjectionX()));
     fhTime->SetName(Form("%s_time", GetName()));
-    fhTime->SetTitle(GetTitle());
+    fhTime->SetTitle(Form("tdc   <%d, %d>; 10ns", 0, fTimeMax));
     gStrela->HistoManager(fhTime, "add");
     return;
   }
@@ -189,7 +223,7 @@ void TStrawMulti::IterFirst()
 
   if (fCorrect) delete fCorrect;
   fCorrect = new TGraph();
-  fCorrect->SetTitle("correction after autocalibration");
+  fCorrect->SetTitle(Form("%s correction after autocalibration", GetName()));
   fCorrect->SetMarkerStyle(8);
 }
 //______________________________________________________________________________

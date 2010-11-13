@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 16 Apr 2008
+// @(#) 11 Nov 2010
 
 #include <TBrowser.h>
 
@@ -66,9 +66,21 @@ void TStrelaBase::Init()
     Info("Init", "remove from analyze");
 }
 //______________________________________________________________________________
+Bool_t TStrelaBase::ReadSQL(TSQLServer *ser)
+{
+  // override this function
+  return kTRUE;
+}
+//______________________________________________________________________________
 void TStrelaBase::AnalyzeBegin()
 {
-  // override this function, called before looping
+  // override this function, called before a loop start
+}
+//______________________________________________________________________________
+void TStrelaBase::AnalyzeEntry()
+{
+  // must override this function, called for each event
+  AbstractMethod("AnalyzeEntry");
 }
 //______________________________________________________________________________
 void TStrelaBase::AnalyzeTerminate()

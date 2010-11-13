@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 05 Mar 2008
+// @(#) 02 Aug 2010
 
 #ifndef STRELA_TStrawMulti
 #define STRELA_TStrawMulti
@@ -15,6 +15,7 @@ class TH1F;
 class TGraph;
 class TFile;
 
+class TStrawTube;
 class TStrawLayer;
 class TStrawTracker;
 
@@ -37,14 +38,17 @@ public:
   TList        *Tubes() const { return fTubes; }
   TSpline3     *GetSpline() const { return fSpline; }
   Int_t         GetTimeMax() const { return fTimeMax; }
+  void          SetRange(Double_t r) { fRange = r; }
   Double_t      GetRange() const { return fRange; }
   TH2F         *HisTimeRes() { SumTimeRes(); return fhTimeRes; }
   TH1F         *HisTime() { SumTime(); return fhTime; }
   TGraph       *GetCorrect() const { return fCorrect; }
 
-  void          Add(const TStrawLayer *layer);
+  void          AddAnything(TObject *obj1, ...);
   void          Add(const TStrawTracker *tracker);
-  void          AddAll(const TCollection *col);
+  void          Add(const TStrawLayer *layer);
+  void          Add(TStrawTube *tube);
+  void          RemoveTube(TStrawTube *tube);
   void          SumTimeRes();
   void          SumTime();
   void          IterFirst();

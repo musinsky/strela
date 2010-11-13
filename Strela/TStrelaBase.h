@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 16 Apr 2008
+// @(#) 11 Nov 2010
 
 #ifndef STRELA_TStrelaBase
 #define STRELA_TStrelaBase
@@ -39,9 +39,10 @@ public:
   virtual void   Clear(Option_t *option = "") { fContainer->Clear(option); }
 
   virtual void   Init();
-  virtual Bool_t ReadSQL(TSQLServer *ser) { return kTRUE; }
+  virtual Bool_t ReadSQL(TSQLServer *ser);
   virtual void   AnalyzeBegin();
-  virtual void   AnalyzeEntry() = 0;
+  virtual void   AnalyzeEntry();
+  //  virtual void   AnalyzeEntry() = 0;
   virtual void   AnalyzeTerminate();
   virtual void   CreateBranch(TTree *tree);
 

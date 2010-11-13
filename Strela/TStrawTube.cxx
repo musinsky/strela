@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 17 Jun 2008
+// @(#) 01 Nov 2010
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -8,13 +8,16 @@
 #include <TCanvas.h>
 #include <TLine.h>
 #include <TGClient.h>
+#include <TTimer.h>
+#include <TF1.h>
 
 #include "TStrawTube.h"
 #include "TStrawTracker.h"
 #include "TStrawMulti.h"
 #include "TVME.h"
+#include "TStrelaDisplay.h"
 
-Double_t TStrawTube::fgWireRadius     = 0.0025/2;
+Double_t TStrawTube::fgWireRadius     = 0.0; // 0.0025/2
 Int_t    TStrawTube::fgShowHistograms = 0;
 
 ClassImp(TStrawTube)
@@ -33,14 +36,17 @@ TStrawTube::TStrawTube()
   fMulti    = 0;
   fCutT1    = 0;
   fCutT2    = 0;
+  fMargin   = kNoMargin;
   fhTime    = 0;
   fhCutTime = 0;
-  fhRadius  = 0;
+  fhRad1    = 0;
+  fhRad2    = 0;
   fhDis1    = 0;
   fhDis2    = 0;
   fhEffi    = 0;
   fhTimeRes = 0;
   fhDisTime = 0;
+  fhBzRes   = 0;
 }
 //______________________________________________________________________________
 TStrawTube::TStrawTube(Double_t center) : TEllipse()
@@ -56,14 +62,17 @@ TStrawTube::TStrawTube(Double_t center) : TEllipse()
   fMulti    = 0;
   fCutT1    = 0;
   fCutT2    = 0;
+  fMargin   = kNoMargin;
   fhTime    = 0;
   fhCutTime = 0;
-  fhRadius  = 0;
+  fhRad1    = 0;
+  fhRad2    = 0;
   fhDis1    = 0;
   fhDis2    = 0;
   fhEffi    = 0;
   fhTimeRes = 0;
   fhDisTime = 0;
+  fhBzRes   = 0;
 }
 //______________________________________________________________________________
 TStrawTube::~TStrawTube()
@@ -71,12 +80,14 @@ TStrawTube::~TStrawTube()
   //  Info("~TStrawTube", "Destructor");
   delete fhTime;    fhTime = 0;
   delete fhCutTime; fhCutTime = 0;
-  delete fhRadius;  fhRadius = 0;
+  delete fhRad1;    fhRad1 = 0;
+  delete fhRad2;    fhRad2 = 0;
   delete fhDis1;    fhDis1 = 0;
   delete fhDis2;    fhDis2 = 0;
   delete fhEffi;    fhEffi = 0;
   delete fhTimeRes; fhTimeRes = 0;
   delete fhDisTime; fhDisTime = 0;
+  delete fhBzRes;   fhBzRes = 0;
 }
 //______________________________________________________________________________
 Int_t TStrawTube::Compare(const TObject *obj) const
@@ -119,7 +130,9 @@ void TStrawTube::ExecuteEvent(Int_t event, Int_t px, Int_t py)
     return;
 
   case kButton1Double:
-    GetTracker()->ShowHistograms();
+    TCanvas *c = (TCanvas *)gROOT->GetListOfCanvases()->FindObject("c_tracker");
+    if (c) c->Close();
+    else GetTracker()->ShowHistograms();
     return;
   }
 }
@@ -155,36 +168,76 @@ const char *TStrawTube::GetTitle() const
               fLayer->GetName(), fLayer->GetNumb(), fLayer->GetTitle());
 }
 //______________________________________________________________________________
+void TStrawTube::SetDisabled(Bool_t set)
+{
+  if (IsDisabled() == set) return;
+  SetBit(kIsDisabled, set);
+  if (set) SetLineColor(GetLineColor() + 17); // gray18
+  else     SetLineColor(GetLineColor() - 17);
+  if (gStrela->GetDisplay()) gStrela->GetDisplay()->FindPad(this);
+}
+//______________________________________________________________________________
+void TStrawTube::SetNoMultiSum(Bool_t set)
+{
+  if (IsNoMultiSum() == set) return;
+  SetBit(kNoMultiSum, set);
+  if (set) SetLineColor(GetLineColor() + 5); // magenta
+  else     SetLineColor(GetLineColor() - 5);
+  if (gStrela->GetDisplay()) gStrela->GetDisplay()->FindPad(this);
+}
+//______________________________________________________________________________
+void TStrawTube::HighLight(Bool_t flash, Int_t ms)
+{
+  if (flash) {
+    SetLineColor(GetLineColor() + 3); // blue
+    SetLineWidth(GetLineWidth() + 2);
+    TTimer::SingleShot(ms, IsA()->GetName(), this, "HighLight(=kFALSE)");
+  }
+  else {
+    SetLineColor(GetLineColor() - 3);
+    SetLineWidth(GetLineWidth() - 2);
+  }
+  if (gStrela->GetDisplay()) gStrela->GetDisplay()->FindPad(this);
+}
+//______________________________________________________________________________
 void TStrawTube::InitHistograms()
 {
   // called(initialized) only once
 
   fhTime = new TH1F(Form("%s_time", GetName()),
                     Form("tdc   <%d, %d>; 10ns", fTMin, fTMax),
-                    12000/30, 0, 12000);
+                    9000/30, 0, 9000);
   fhTime->SetMinimum(0);
   fhTime->SetLineColor(kGray + 1);
   gStrela->HistoManager(fhTime, "add");
   fhCutTime = new TH1F(Form("%s_cut", GetName()),
                        Form("tdc(cut)   <%d, %d>; 10ns", fCutT1, fCutT2),
-                       12000/30, 0, 12000);
+                       9000/30, 0, 9000);
   fhCutTime->SetMinimum(0);
   gStrela->HistoManager(fhCutTime, "add");
-  fhRadius = new TH1F(Form("%s_radius", GetName()), "radius; cm",
-                      200*GetRange(), 0, GetRange());
-  fhRadius->SetMinimum(0);
-  gStrela->HistoManager(fhRadius, "add");
+  fhRad1 = new TH1F(Form("%s_rad1", GetName()), "radius(1); cm",
+                    200*GetRange(), 0, GetRange());
+  fhRad1->SetMinimum(0);
+  fhRad1->SetLineColor(kGray + 1);
+  gStrela->HistoManager(fhRad1, "add");
+  fhRad2 = new TH1F(Form("%s_rad2", GetName()), "radius(2); cm",
+                    200*GetRange(), 0, GetRange());
+  fhRad2->SetMinimum(0);
+  gStrela->HistoManager(fhRad2, "add");
   fhDis1 = new TH1F(Form("%s_dis1", GetName()), "distance(1) from wire; cm",
                     50*GetRange(), -GetRange(), GetRange());
+  fhDis1->SetMinimum(0);
   gStrela->HistoManager(fhDis1, "add");
   fhDis2 = new TH1F(Form("%s_dis2", GetName()), "distance(2) from wire; cm",
                     50*GetRange(), -GetRange(), GetRange());
+  fhDis2->SetMinimum(0);
   fhDis2->SetLineColor(kGray + 1);
   gStrela->HistoManager(fhDis2, "add");
   fhEffi = new TH1F(Form("%s_effi", GetName()),
                     "efficiency; distance from wire, cm; efficiency",
                     50*GetRange(), -GetRange(), GetRange());
   fhEffi->Sumw2();
+  fhEffi->SetLineColor(kGreen);
   gStrela->HistoManager(fhEffi, "add");
 
   fhTimeRes = new TH2F(Form("%s_time_res", GetName()),
@@ -193,10 +246,17 @@ void TStrawTube::InitHistograms()
   fhTimeRes->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhTimeRes, "add");
   fhDisTime = new TH2F(Form("%s_dis_time", GetName()),
-                       "distance from wire : tdc; distance from wire, cm; tdc, 10ns",
+                       "distance from wire : tdc; dist., cm; tdc, 10ns",
                        50*GetRange(), -1.1*GetRange(), 1.1*GetRange(),
                        100, 0, 5500);
+  fhDisTime->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhDisTime, "add");
+  fhBzRes = new TH2F(Form("%s_bz_res", GetName()),
+                     "intercept : residual; intercept, cm; residual, cm",
+                     50*GetRange(), -1.1*GetRange(), 1.1*GetRange(),
+                     100, -0.15, 0.15);
+  fhBzRes->GetYaxis()->CenterTitle();
+  gStrela->HistoManager(fhBzRes, "add");
 }
 //______________________________________________________________________________
 void TStrawTube::SetTime(Int_t t0, Int_t tmax)
@@ -220,7 +280,6 @@ void TStrawTube::SetTime(Int_t t0, Int_t tmax)
   }
 
   fDriftVel = (GetRange() - fgWireRadius)/(fTMax - fTMin);
-  // !!!
   // fDriftVel = (GetRange() - fgWireRadius)/4300; // !!! 4300 !!!
 }
 //______________________________________________________________________________
@@ -230,10 +289,9 @@ Double_t TStrawTube::T2R(Int_t time) const
   if (fMulti && fMulti->GetSpline()) radius = fMulti->GetSpline()->Eval(time);
   else                               radius = fgWireRadius + fDriftVel*time;
 
-  // !!! = 0 ???
   if (radius < fgWireRadius) radius = fgWireRadius;
   if (radius > GetRange()) radius = GetRange();
-  fhRadius->Fill(radius);
+  fhRad1->Fill(radius);
   return radius;
 }
 //______________________________________________________________________________
@@ -248,11 +306,14 @@ void TStrawTube::SetShowHistograms(Option_t *option) const
   TString opt = option;
   if (opt.Contains("cut", TString::kIgnoreCase))
     c->Divide(1, 2);
-  else
+  else {
     c->Divide(2, 3, 0.001, 0.001);
+    c->GetPad(3)->SetGrid();
+    c->GetPad(4)->SetGrid();
+  }
 }
 //______________________________________________________________________________
-void TStrawTube::ShowHistograms() const
+void TStrawTube::ShowHistograms(Option_t *option) const
 {
   TVirtualPad *save = gPad;
   TCanvas *c = (TCanvas *)gROOT->GetListOfCanvases()->FindObject("c_tube");
@@ -276,18 +337,23 @@ void TStrawTube::ShowHistoFull(TCanvas *can) const
   fhTime->Draw();
   TLine line;
   line.SetLineColor(kBlue);
+  line.SetLineStyle(2);
   line.DrawLine(fTMin, fhTime->GetMinimum(), fTMin, fhTime->GetMaximum());
   line.DrawLine(fTMax, fhTime->GetMinimum(), fTMax, fhTime->GetMaximum());
   fhCutTime->Draw("same");
   can->cd(2);
-  fhRadius->Draw();
+  fhRad1->Draw();
+  fhRad2->Draw("same");
   can->cd(3);
+  fhTimeRes->Draw();
+  can->cd(4);
+  fhBzRes->Draw();
+  can->cd(5);
   fhDis2->Draw();
   fhDis1->Draw("same");
-  can->cd(4);
-  fhTimeRes->Draw();
-  can->cd(5);
-  fhEffi->Draw();
+  Double_t max = fhDis2->GetMaximum()/2.0, maxe = fhEffi->GetMaximum();
+  if ((Int_t) max != (Int_t) maxe) fhEffi->Scale(max/maxe);
+  fhEffi->Draw("same");
   can->cd(6);
   fhDisTime->Draw();
 
@@ -321,4 +387,64 @@ void TStrawTube::SetCutTime(Int_t t1, Int_t t2)
     fhCutTime->SetTitle(Form("tdc(cut)   <%d, %d>", fCutT1, fCutT2));
   if (fCutT1 == fCutT2)
     Warning("SetCutTime", "tube %d has CutT1 = CutT2  = %d", fNadc, fCutT1);
+}
+//______________________________________________________________________________
+void TStrawTube::AlignCenter()
+{
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Int_t fb = fhBzRes->GetXaxis()->FindBin(-2.1*0.9);
+  Int_t lb = fhBzRes->GetXaxis()->FindBin(-2.1*0.1);
+  TH1D *proj = fhBzRes->ProjectionY("_py", fb, lb);
+  //  Double_t en = proj->GetEntries();
+
+  TF1 *g = (TF1 *)gROOT->GetFunction("gaus");
+  if (!g) {
+    Warning("IterNext", "unknown function gaus");
+    return;
+  }
+  proj->Fit(g, "QN");
+  Double_t delMinus = g->GetParameter(1);
+  if (g->GetParameter(2) > 0.05) {
+    Printf("Problem minus");
+    return;
+  }
+  g->SetParameters(1, 0, 1); // default gaus
+
+  fb = fhBzRes->GetXaxis()->FindBin(2.1*0.1);
+  lb = fhBzRes->GetXaxis()->FindBin(2.1*0.9);
+  proj = fhBzRes->ProjectionY("_py", fb, lb);
+  //  if (TMath::Abs(en - proj->GetEntries())/en < 0.25) {
+  //    Printf("velky rozdiel v L/R entries");
+  //    return;
+  //  }
+
+  proj->Fit(g, "QN");
+  Double_t delPlus = g->GetParameter(1);
+  if (g->GetParameter(2) > 0.05) {
+    Printf("Problem plus");
+    return;
+  }
+
+  Double_t delta = (delPlus-delMinus)/2.0; // len polovicu !!!!!
+  // !!!!!!!!!!
+  //  Printf("%s pred  %7.3f", GetName(), GetCenter());
+  SetCenter(GetCenter() - delta);
+  //  Printf("%s potom %7.3f", GetName(), GetCenter());
+  Printf("%s rozdiel %5.3f",  GetName(), delta);
+}
+//______________________________________________________________________________
+void TStrawTube::AlignCenterTime()
+{
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  TH1D *proj = fhTimeRes->ProjectionY();
+  TF1 *g = (TF1 *)gROOT->GetFunction("gaus");
+  if (!g) {
+    Warning("IterNext", "unknown function gaus");
+    return;
+  }
+  proj->Fit(g, "QN");
+  Double_t mean = g->GetParameter(1);
+  Printf("%s pred  %d", GetName(), fTMin);
+  SetTime(fTMin + (mean/fDriftVel), fTMax);
+  Printf("%s potom %d", GetName(), fTMin);
 }

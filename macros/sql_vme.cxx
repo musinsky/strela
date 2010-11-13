@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 23/06/2008
+// 11/11/2010
 
 #include <TList.h>
 #include <TSystem.h>
@@ -166,14 +166,14 @@ void TVirtualChamber::Print(Option_t *option) const
 
   if (list->First() != this) {
     if (opt.Contains("channels")) Printf("--\n-- next cham\n--");
-    else if (opt.Contains("layers")) Printf("");
+    else if (opt.Contains("layers")) printf("\n");
   }
   for (Int_t i = 0; i < fNLayers; i++) {
     opt = option;
     if ((list->First() == this) && (i == 0)) opt += "first";
     if ((list->Last() == this) && (i == (fNLayers - 1))) opt += "last";
     fLayers[i]->Print(opt.Data());
-    if ((i != (fNLayers - 1)) && opt.Contains("channels")) Printf("");
+    if ((i != (fNLayers - 1)) && opt.Contains("channels")) printf("\n");
   }
 }
 

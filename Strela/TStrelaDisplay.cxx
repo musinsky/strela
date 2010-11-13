@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 16 May 2008
+// @(#) 11 Nov 2010
 
 #include <TCanvas.h>
 #include <TButton.h>
@@ -21,20 +21,23 @@ TStrelaDisplay::TStrelaDisplay(Int_t xsize)
   //  Info("TStrelaDisplay", "Default constructor");
   if (!gStrela) return;
 
-  gStrela->SetDisplay(this);
   fCanvas = new TCanvas("canvas", "STRELA Display", 0, 0,
                         xsize, Int_t(xsize/1.5));
   fPad = new TPad("pad", "Detectors display", 0.00, 0.07, 1.00, 1.00);
+  fPad->Connect("Closed()", "TStrelaDisplay", this, "~TStrelaDisplay()");
   fPad->Draw();
   DisplayButtons();
   AppendPad();
   fPad->cd();
   fCanvas->Update();
+  gStrela->SetDisplay(this); // must be after fPad->Connect
 }
 //______________________________________________________________________________
 TStrelaDisplay::~TStrelaDisplay()
 {
-  Info("~TStrelaDisplay", "Destructor");
+  //  Info("~TStrelaDisplay", "Destructor");
+  fCanvas = 0;
+  fPad    = 0;
   if (gStrela) gStrela->SetDisplay(0);
 }
 //______________________________________________________________________________
@@ -254,4 +257,30 @@ void TStrelaDisplay::ReDraw() const
     DrawTracker((TStrawTracker *)obj, "same");
 
   DisplayNextEvent(0);
+}
+//______________________________________________________________________________
+TVirtualPad *TStrelaDisplay::FindPad(const TObject *obj, Bool_t update,
+                                     TVirtualPad *pad) const
+{
+  if (!pad) pad = fPad;
+  TList *primitives = pad->GetListOfPrimitives();
+  if (primitives->FindObject(obj)) {
+    if (update) {
+      pad->Modified();
+      pad->Update();
+    }
+    return pad;
+  }
+
+  TObject *cur;
+  TVirtualPad *found;
+  TIter next(primitives);
+  while ((cur = next())) {
+    if (cur->InheritsFrom(TVirtualPad::Class())) {
+      found = FindPad(obj, update, (TVirtualPad *)cur); // recursive calls
+      if (found) return found;
+    }
+  }
+
+  return 0;
 }

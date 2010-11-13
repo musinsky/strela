@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 18 Jun 2008
+// @(#) 26 Oct 2010
 
 #include "TModulePhTDC.h"
 #include "TVME.h"
@@ -105,7 +105,7 @@ void TModulePhTDC::Print(Option_t *option) const
         printf("\t%3d [%d][%2d]\n", channelR, id, ch);
       }
     }
-    Printf("");
+    printf("\n");
   }
 }
 //______________________________________________________________________________

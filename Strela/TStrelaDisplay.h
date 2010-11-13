@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 24 Oct 2007
+// @(#) 29 Oct 2010
 
 #ifndef STRELA_TStrelaDisplay
 #define STRELA_TStrelaDisplay
@@ -11,6 +11,7 @@
 
 class TCanvas;
 class TPad;
+class TVirtualPad;
 
 class TStrawTracker;
 
@@ -37,6 +38,8 @@ public:
   void          DeletePrimitives() const;
   void          DisplayNextEvent(Int_t delta) const;
   void          ReDraw() const;
+  TVirtualPad  *FindPad(const TObject *obj, Bool_t update = kTRUE,
+                        TVirtualPad *pad = 0) const;
 
   ClassDef(TStrelaDisplay, 0) // StrelaDisplay
 };

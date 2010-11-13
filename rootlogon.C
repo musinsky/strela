@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 24/06/2010
+// 20/07/2010
 
 {
   if (gROOT->GetClass("TStrela")) {
@@ -8,6 +8,7 @@
   }
 
   gSystem->AddIncludePath("-Iinclude");
+  gSystem->SetBuildDir("tmp", kTRUE);
 
   gSystem->Load("libGpad");
   gSystem->Load("libSQLIO");
@@ -15,6 +16,7 @@
   gSystem->Load("lib/libStrela.so");
 
   gROOT->SetStyle("Plain"); // Default
+  gStyle->SetGridColor(kGray + 2);
   gStyle->SetOptStat();     // 000001111
   gStyle->SetOptFit();      // 0111
   gStyle->SetStatW();       // 0.19

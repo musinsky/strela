@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 17 Jun 2008
+// @(#) 02 Aug 2010
 
 #include <TSQLServer.h>
 #include <TSQLResult.h>
@@ -294,6 +294,7 @@ void TStrawCham::AnalyzeEntry()
     // substract trigAdc (only if exist, otherwise adc without change)
     adc    -= trigAdc;
     tube->HisTime()->Fill(adc);
+    if (tube->IsDisabled()) continue;
     // t0 can be tmin or tmax
     if ((adc < tube->GetTMin()) || (adc > tube->GetTMax())) continue;
     tube->GetTracker()->AddHit(pos, TMath::Abs(adc - tube->GetT0()));
@@ -321,14 +322,17 @@ void TStrawCham::IterNext(Int_t ne)
     return;
   }
 
-  gStrela->HistoManager("tube_*", "reset");
-  gStrela->HistoManager("tracker_*", "reset");
+  //  gStrela->HistoManager("tube_*", "reset");
+  //  gStrela->HistoManager("tracker_*", "reset");
+  gStrela->HistoManager("*", "reset");
   if ((ne == 0) || (ne > gStrela->GetEntries())) ne = gStrela->GetEntries();
   Printf("Iteration number = %2d, entries = %d", fgIter, ne);
+  AnalyzeBegin();
   for (Int_t i = 0; i < ne; i++) {
     gStrela->GetChain()->GetEntry(i);
     AnalyzeEntry();
   }
+  AnalyzeTerminate();
 
   TIter next(fMulties);
   TStrawMulti *multi;

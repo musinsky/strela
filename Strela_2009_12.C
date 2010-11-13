@@ -22,34 +22,34 @@
   // 840 + 4900 // t10,t11 // koniec s magnetom 840, 840+4800
   // t3,t4 blizsie k t1,t2
   TStrawTracker *t1 = gStrela->StrawCham()->FindTracker("tracker_1");
-  t1->SetPrecision(2);
+  t1->SetPrecision(1);
   t1->SetMinNHitsAdvanced(4);
 
   TStrawTracker *t2 = gStrela->StrawCham()->FindTracker("tracker_2");
-  t2->SetPrecision(2);
+  t2->SetPrecision(1);
   t2->SetMinNHitsAdvanced(4);
 
   TStrawTracker *t3 = gStrela->StrawCham()->FindTracker("tracker_3");
-  t3->SetPrecision(2);
+  t3->SetPrecision(1);
   t3->SetMinNHitsAdvanced(4);
 
   TStrawTracker *t4 = gStrela->StrawCham()->FindTracker("tracker_4");
-  t4->SetPrecision(2);
+  t4->SetPrecision(1);
   t4->SetMinNHitsAdvanced(4);
 
   TStrawTracker *t5 = gStrela->StrawCham()->FindTracker("tracker_5");
-  t5->SetPrecision(2);
+  t5->SetPrecision(1);
   t5->SetMinNHitsAdvanced(4);
 
   TStrawTracker *t10 = gStrela->StrawCham()->FindTracker("tracker_10");
-  t10->SetPrecision(2);
+  t10->SetPrecision(1);
   t10->SetMinNHitsAdvanced(4);
   //  t10->SetMaxChi2Tan(0.02);
   //  t10->SetMaxDisZTan(1.0);
   //  t10->SetMaxResTan(2.0);
 
   TStrawTracker *t11 = gStrela->StrawCham()->FindTracker("tracker_11");
-  t11->SetPrecision(2);
+  t11->SetPrecision(1);
   t11->SetMinNHitsAdvanced(4);
   //  t11->SetMaxChi2Tan(0.02);
   //  t11->SetMaxDisZTan(1.0);
@@ -68,7 +68,8 @@
   //  m2->ReadWriteSpline(f);
   //  f->Close();
 
-  TStrelaDisplay *display = gStrela->GetDisplay();
+//    break;
+//  TStrelaDisplay *display = gStrela->GetDisplay();
   gROOT->LoadMacro("macros/DisplayTracker.C");
   //  DisplayTracker(2, 1, t10, t11);
   //  DisplayTracker(2, 1, t1, t2);

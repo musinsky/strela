@@ -1,14 +1,11 @@
-// root[] .L macros/DisplayTracker.C
-
 // Author: Jan Musinsky
-// 24/06/2010
+// 11/11/2010
 
-TStrelaDisplay *DisplayTracker()
+void DisplayTracker()
 {
   // all trackers
-  if (display && gROOT->GetListOfCanvases()->FindObject(display->GetCanvas()))
-    return display;
-  display = new TStrelaDisplay();
+  if (gStrela->GetDisplay()) return;
+  TStrelaDisplay *display = new TStrelaDisplay();
 
   Double_t xl[3] = {0.00, 0.25, 0.75};
   Double_t xu[3] = {0.25, 0.75, 1.00};
@@ -52,17 +49,14 @@ TStrelaDisplay *DisplayTracker()
   display->DrawTracker(t5);
 
   pad0->cd(0);
-  return display;
 }
 
-TStrelaDisplay *DisplayTracker(Int_t nx, Int_t ny,
-                               TStrawTracker *tr1, TStrawTracker *tr2,
-                               TStrawTracker *tr3 = 0, TStrawTracker *tr4 = 0)
+void DisplayTracker(Int_t nx, Int_t ny, TStrawTracker *tr1, TStrawTracker *tr2,
+                    TStrawTracker *tr3 = 0, TStrawTracker *tr4 = 0)
 {
   // (double)pair of trackers
-  if (display && gROOT->GetListOfCanvases()->FindObject(display->GetCanvas()))
-    return display;
-  display = new TStrelaDisplay();
+  if (gStrela->GetDisplay()) return;
+  TStrelaDisplay *display = new TStrelaDisplay();
 
   TPad *pad0 = display->GetPad();
   pad0->Divide(nx, ny, 0.0, 0.0);
@@ -79,17 +73,14 @@ TStrelaDisplay *DisplayTracker(Int_t nx, Int_t ny,
     display->DrawTracker(tr4);
   }
   pad0->cd(0);
-  return display;
 }
 
-TStrelaDisplay *DisplayTracker(TStrawTracker *tr)
+void DisplayTracker(TStrawTracker *tr)
 {
   // one tracker
-  if (display && gROOT->GetListOfCanvases()->FindObject(display->GetCanvas()))
-    return display;
-  display = new TStrelaDisplay();
+  if (gStrela->GetDisplay()) return;
+  TStrelaDisplay *display = new TStrelaDisplay();
 
   display->DrawTracker(tr);
   display->GetPad()->cd(0);
-  return display;
 }

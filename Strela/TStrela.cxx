@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 26 May 2008
+// @(#) 20 Sep 2010
 
 #include <TROOT.h>
 #include <TSQLServer.h>
@@ -206,7 +206,7 @@ void TStrela::AnalyzeEntries(Int_t ne, Option_t *option, Bool_t timer) const
     detector->AnalyzeTerminate();
 
   watch.Stop();
-  if (timer) Printf("CP time = %.2f sec", watch.CpuTime());
+  if (timer) Printf("Real time = %.2f sec", watch.RealTime());
 }
 //______________________________________________________________________________
 void TStrela::AddFriend(Option_t *option, const char *dirname) const
