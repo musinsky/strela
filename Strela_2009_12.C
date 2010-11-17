@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 13/11/2010
+// 17/11/2010
 
 /*
   .x Strela_2009_12.C
@@ -55,4 +55,7 @@
   gROOT->LoadMacro("macros/DisplayTracker.C");
   //  DisplayTracker(2, 1, t10, t11);
   DisplayTracker();
+
+  gStrela->StrawCham()->SetTubesTime(0, 800, 7000);
+  TStrawTube::SetBaseT0(0);
 }
