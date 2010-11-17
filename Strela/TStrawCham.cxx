@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 02 Aug 2010
+// @(#) 17 Nov 2010
 
 #include <TSQLServer.h>
 #include <TSQLResult.h>
@@ -159,7 +159,8 @@ Bool_t TStrawCham::ReadSQL(TSQLServer *ser)
         if (nchan == 1) {
           row = res->Next();
           tube->SetNadc(atoi(row->GetField(0)));
-          tube->SetTime(atoi(row->GetField(1)), atoi(row->GetField(2)));
+          tube->SetT0(atoi(row->GetField(1)));
+          tube->SetTMinMax(atoi(row->GetField(1)), atoi(row->GetField(2)));
           delete row;
         }
         else if (nchan == 0)
@@ -202,6 +203,7 @@ TStrawTube *TStrawCham::SearchTube(Int_t nadc) const
 void TStrawCham::SetTubesTime(Int_t del, Int_t t1, Int_t t2) const
 {
   Int_t ntubes = fTubes->GetEntriesFast();
+  Printf("!!!!!!!!!!!!!!!!!TREBA MENIT!!!!!!!!!!!!!!");
 
   static Bool_t first = kTRUE;
   static TArrayI defaultMin(ntubes), defaultMax(ntubes);
@@ -219,9 +221,9 @@ void TStrawCham::SetTubesTime(Int_t del, Int_t t1, Int_t t2) const
     tube = GetTube(i);
     prevMin = tube->GetTMin();
     prevMax = tube->GetTMax();
-    if      (del == 1) tube->SetTime(prevMin + t1, prevMax + t2);
-    else if (del == 0) tube->SetTime(t1, t2);
-    else               tube->SetTime(defaultMin[i], defaultMax[i]);
+    if      (del == 1) tube->SetTMinMax(prevMin + t1, prevMax + t2);
+    else if (del == 0) tube->SetTMinMax(t1, t2);
+    else               tube->SetTMinMax(defaultMin[i], defaultMax[i]);
     if (gDebug > 0)
       Printf("%s\t tmin = %4d, tmax = %4d",
              tube->GetName(), tube->GetTMin(), tube->GetTMax());
@@ -266,6 +268,7 @@ void TStrawCham::AnalyzeEntry()
   TStrawTube *tube;
 
   // first find trigger tdc (quick), in mostly cases trigger is first hit
+  // starting from the seance 2009_12 is no longer necessary
   if (fgTrigNadc > 0) {
     Bool_t findTrig = kFALSE;
     for (Int_t ih = 0; ih < gemEvent->GetNumOfAdcHits1(); ih++) {
@@ -295,9 +298,8 @@ void TStrawCham::AnalyzeEntry()
     adc    -= trigAdc;
     tube->HisTime()->Fill(adc);
     if (tube->IsDisabled()) continue;
-    // t0 can be tmin or tmax
     if ((adc < tube->GetTMin()) || (adc > tube->GetTMax())) continue;
-    tube->GetTracker()->AddHit(pos, TMath::Abs(adc - tube->GetT0()));
+    tube->GetTracker()->AddHit(pos, tube->TInT0(adc));
   }
   if (fgTracking == 0) return;
 

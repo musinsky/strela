@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 01 Nov 2010
+// @(#) 17 Nov 2010
 
 #ifndef STRELA_TStrawTube
 #define STRELA_TStrawTube
@@ -34,8 +34,9 @@ private:
   Int_t           fT0;       //  zero time
   Int_t           fTMin;     //  minimum time
   Int_t           fTMax;     //  maximum time
+  static Int_t    fgBaseT0;     //! base zero time
+  static Double_t fgDriftVel;   //! velocity of drift
   static Double_t fgWireRadius; //! radius of tungsten wire
-  Double_t        fDriftVel; //  velocity of drift
   Int_t           fNadc;     //  unique number from SQL
   TStrawLayer    *fLayer;    //! pointer to parent layer
   TStrawMulti    *fMulti;    //! pointer to parent multi
@@ -54,6 +55,7 @@ private:
   TH2F         *fhTimeRes; //! time vs. residual
   TH2F         *fhDisTime; //! distance vs. time
   TH2F         *fhBzRes;   //! Bz(tube) vs. residual
+  void          TimesChanged();
   void          InitHistograms();
   void          ShowHistoFull(TCanvas *can) const;
   void          ShowHistoCut(TCanvas *can) const;
@@ -65,11 +67,15 @@ public:
 
   void            SetCenter(Double_t center) { fCenter = center; }
   Double_t        GetCenter() const { return fCenter; }
+  void            SetT0(Int_t t0) { fT0 = t0; TimesChanged(); }
   Int_t           GetT0() const { return fT0; }
   Int_t           GetTMin() const { return fTMin; }
   Int_t           GetTMax() const { return fTMax; }
+  static void     SetBaseT0(Int_t bt0) { fgBaseT0 = bt0; }
+  static Int_t    GetBaseT0() { return fgBaseT0; }
+  static void     SetDriftVel(Double_t dv) { fgDriftVel = dv; }
+  static Double_t GetDriftVel() { return fgDriftVel; }
   static Double_t GetWireRadius() { return fgWireRadius; }
-  Double_t        GetDriftVel() const { return fDriftVel; }
   void            SetNadc(Int_t nadc) { fNadc = nadc; }
   Int_t           GetNadc() const { return fNadc; }
   void            SetLayer(TStrawLayer *layer) { fLayer = layer; }
@@ -107,10 +113,12 @@ public:
   virtual const char *GetName() const;
   virtual const char *GetTitle() const;
 
-  void           SetDisabled(Bool_t set = kTRUE); // *TOGGLE* *GETTER=IsDisabled
-  void           HighLight(Bool_t flash = kTRUE, Int_t ms = 1000);
-  void           SetTime(Int_t t0, Int_t tmax); // *MENU*
+  void           SetDisabled(Bool_t set = kTRUE);   // *TOGGLE* *GETTER=IsDisabled
   void           SetNoMultiSum(Bool_t set = kTRUE); // *TOGGLE* *GETTER=IsNoMultiSum
+  void           HighLight(Bool_t flash = kTRUE, Int_t ms = 1000);
+  void           SetTMinMax(Int_t tmin, Int_t tmax, Bool_t delta = kFALSE);
+  Int_t          TInT0(Int_t tex) const { return tex + (fgBaseT0 - fT0); }
+  Int_t          TExT0(Int_t tin) const { return tin - (fgBaseT0 - fT0); }
   Double_t       T2R(Int_t time) const;
   void           SetShowHistograms(Option_t *option = "") const; // *MENU*
   void           ShowHistograms(Option_t *option = "") const;

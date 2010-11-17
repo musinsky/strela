@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 02 Aug 2010
+// @(#) 17 Nov 2010
 
 #include <TMath.h>
 #include <TH2.h>
@@ -794,7 +794,7 @@ void TStrawTracker::FillHistoPerTrack() const
     fhDisRes->Fill(d, res);
     fhBzRes->Fill(fBz, res);
 
-    tube->HisCutTime()->Fill(T(ihit) + tube->GetT0());
+    tube->HisCutTime()->Fill(tube->TExT0(T(ihit)));
     tube->HisRad2()->Fill(R(ihit));
     tube->HisDis1()->Fill(d);
     tube->HisTimeRes()->Fill(T(ihit), res);
@@ -874,6 +874,7 @@ void TStrawTracker::ShowHistograms(Option_t *option) const
 void TStrawTracker::TubesCutTimeInterval() const
 {
   // maybe better use macros/tracker_TDC.C
+  // !!! vsetko " + tube->GetT0()" prerobit na tube->TExT0 !!!
   TList straight1, straight2;
   TStrawTube *tube;
   Double_t x1 = 9999, x2 = -9999;
