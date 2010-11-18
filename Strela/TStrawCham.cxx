@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 17 Nov 2010
+// @(#) 18 Nov 2010
 
 #include <TSQLServer.h>
 #include <TSQLResult.h>
@@ -200,10 +200,9 @@ TStrawTube *TStrawCham::SearchTube(Int_t nadc) const
   return 0;
 }
 //______________________________________________________________________________
-void TStrawCham::SetTubesTime(Int_t del, Int_t t1, Int_t t2) const
+void TStrawCham::SetTubesTMinMax(Int_t del, Int_t t1, Int_t t2) const
 {
   Int_t ntubes = fTubes->GetEntriesFast();
-  Printf("!!!!!!!!!!!!!!!!!TREBA MENIT!!!!!!!!!!!!!!");
 
   static Bool_t first = kTRUE;
   static TArrayI defaultMin(ntubes), defaultMax(ntubes);
@@ -216,13 +215,13 @@ void TStrawCham::SetTubesTime(Int_t del, Int_t t1, Int_t t2) const
   }
 
   TStrawTube *tube;
-  Int_t prevMin, prevMax;
+  Int_t t0;
   for (Int_t i = 0; i < ntubes; i++) {
     tube = GetTube(i);
-    prevMin = tube->GetTMin();
-    prevMax = tube->GetTMax();
-    if      (del == 1) tube->SetTMinMax(prevMin + t1, prevMax + t2);
-    else if (del == 0) tube->SetTMinMax(t1, t2);
+    t0 = tube->GetT0();
+    if      (del == 0) tube->SetTMinMax(t1, t2, kFALSE);
+    else if (del == 1) tube->SetTMinMax(t1, t2, kTRUE);
+    else if (del == 2) tube->SetTMinMax(t0 + t1, t0 + t2);
     else               tube->SetTMinMax(defaultMin[i], defaultMax[i]);
     if (gDebug > 0)
       Printf("%s\t tmin = %4d, tmax = %4d",

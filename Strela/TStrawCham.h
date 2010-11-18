@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 17 Jun 2008
+// @(#) 18 Nov 2010
 
 #ifndef STRELA_TStrawCham
 #define STRELA_TStrawCham
@@ -68,7 +68,8 @@ public:
 
   TStrawTube    *SearchTube(Int_t nadc) const;
   void           DeleteArrays();
-  void           SetTubesTime(Int_t del = -1, Int_t t1 = 0, Int_t t2 = 0) const;
+  void           SetTubesTMinMax(Int_t del = -1,
+                                 Int_t t1 = 0, Int_t t2 = 0) const;
   void           SetTubesCutTime(Option_t *option, Int_t t1, Int_t t2) const;
   static void    IterReset() { fgIter = 0; }
   void           IterNext(Int_t ne = 0);
