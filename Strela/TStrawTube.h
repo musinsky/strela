@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 17 Nov 2010
+// @(#) 18 Nov 2010
 
 #ifndef STRELA_TStrawTube
 #define STRELA_TStrawTube
@@ -40,13 +40,11 @@ private:
   Int_t           fNadc;     //  unique number from SQL
   TStrawLayer    *fLayer;    //! pointer to parent layer
   TStrawMulti    *fMulti;    //! pointer to parent multi
-  Int_t           fCutT1;    //  minimum time inside interval
-  Int_t           fCutT2;    //  maximum time inside interval
   EMarginType     fMargin;   //  type of tube margin
 
   static Int_t  fgShowHistograms; //  on/off drawing histograms
-  TH1F         *fhTime;    //! raw time (all hits)
-  TH1F         *fhCutTime; //! time (if found track) or cutting time
+  TH1F         *fhTime1;   //! raw time (all hits)
+  TH1F         *fhTime2;   //! time (if found track) or pure track time
   TH1F         *fhRad1;    //! radius (all hits)
   TH1F         *fhRad2;    //! radius (if found track)
   TH1F         *fhDis1;    //! distance (from real track)
@@ -58,7 +56,7 @@ private:
   void          TimesChanged();
   void          InitHistograms();
   void          ShowHistoFull(TCanvas *can) const;
-  void          ShowHistoCut(TCanvas *can) const;
+  void          ShowHistoTime(TCanvas *can) const;
 
 public:
   TStrawTube();
@@ -71,9 +69,9 @@ public:
   Int_t           GetT0() const { return fT0; }
   Int_t           GetTMin() const { return fTMin; }
   Int_t           GetTMax() const { return fTMax; }
-  static void     SetBaseT0(Int_t bt0) { fgBaseT0 = bt0; }
+  static void     BaseT0(Int_t bt0) { fgBaseT0 = bt0; }
   static Int_t    GetBaseT0() { return fgBaseT0; }
-  static void     SetDriftVel(Double_t dv) { fgDriftVel = dv; }
+  static void     DriftVel(Double_t dv) { fgDriftVel = dv; }
   static Double_t GetDriftVel() { return fgDriftVel; }
   static Double_t GetWireRadius() { return fgWireRadius; }
   void            SetNadc(Int_t nadc) { fNadc = nadc; }
@@ -82,15 +80,13 @@ public:
   TStrawLayer    *GetLayer() const { return fLayer; }
   void            SetMulti(TStrawMulti *multi) { fMulti = multi; }
   TStrawMulti    *GetMulti() const { return fMulti; }
-  Int_t           GetCutT1() const { return fCutT1; }
-  Int_t           GetCutT2() const { return fCutT2; }
   void            SetMargin(EMarginType mtype) { fMargin = mtype; }
   EMarginType     GetMargin() const { return fMargin; }
   Bool_t          IsDisabled() const { return TestBit(kIsDisabled); }
   Bool_t          IsNoMultiSum() const { return TestBit(kNoMultiSum); }
 
-  TH1F         *HisTime() const { return fhTime; }
-  TH1F         *HisCutTime() const { return fhCutTime; }
+  TH1F         *HisTime1() const { return fhTime1; }
+  TH1F         *HisTime2() const { return fhTime2; }
   TH1F         *HisRad1() const { return fhRad1; }
   TH1F         *HisRad2() const { return fhRad2; }
   TH1F         *HisDis1() const { return fhDis1; }
@@ -122,7 +118,6 @@ public:
   Double_t       T2R(Int_t time) const;
   void           SetShowHistograms(Option_t *option = "") const; // *MENU*
   void           ShowHistograms(Option_t *option = "") const;
-  void           SetCutTime(Int_t t1, Int_t t2);
   void           AlignCenter(); // *MENU*
   void           AlignCenterTime(); // *MENU*
 

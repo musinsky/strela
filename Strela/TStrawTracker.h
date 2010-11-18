@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 02 Aug 2010
+// @(#) 18 Nov 2010
 
 #ifndef STRELA_TStrawTracker
 #define STRELA_TStrawTracker
@@ -57,7 +57,6 @@ private:
   Double_t      fMaxResTan;     //  max. residuals for tangent
   Int_t         fPrecision;     //  method of precision tracking
   static Bool_t fgOnlyOneTrack; //! histo with only one track event
-  static Bool_t fgJoinCutTime;  //! histo with(out) jointed cut time interval
 
   TH1F         *fhDisZTan;      //! z component of distance of tagent
   TH1F         *fhResTan;       //! residual of tangent
@@ -117,8 +116,6 @@ public:
   Int_t       GetNTracks() const { return fNTracks; }
   static void   OnlyOneTrack(Bool_t o = kFALSE) { fgOnlyOneTrack = o; }
   static Bool_t IsOnlyOneTrack() { return fgOnlyOneTrack; }
-  static void   JoinCutTime(Bool_t j = kTRUE) { fgJoinCutTime = j; }
-  static Bool_t IsJoinCutTime() { return fgJoinCutTime; }
 
   TH1F       *HisDisZTan() const { return fhDisZTan; }
   TH1F       *HisResTan() const { return fhResTan; }
@@ -155,7 +152,7 @@ public:
   void         FillHistoPerEvent() const;
   void         TracingHits() const;
   void         ShowHistograms(Option_t *option = "") const;
-  void         TubesCutTimeInterval() const;
+  void         PureTrackHits() const;
 
   ClassDef(TStrawTracker, 1) // StrawTracker, find tracks
 };

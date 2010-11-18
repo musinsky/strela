@@ -68,9 +68,7 @@ public:
 
   TStrawTube    *SearchTube(Int_t nadc) const;
   void           DeleteArrays();
-  void           SetTubesTMinMax(Int_t del = -1,
-                                 Int_t t1 = 0, Int_t t2 = 0) const;
-  void           SetTubesCutTime(Option_t *option, Int_t t1, Int_t t2) const;
+  void           SetTubesTimes(Int_t x = -1, Int_t t1 = 0, Int_t t2 = 0) const;
   static void    IterReset() { fgIter = 0; }
   void           IterNext(Int_t ne = 0);
   void           EfficiencyTubes() const;

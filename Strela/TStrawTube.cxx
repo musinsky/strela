@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 17 Nov 2010
+// @(#) 18 Nov 2010
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -35,11 +35,9 @@ TStrawTube::TStrawTube()
   fNadc     = -1;
   fLayer    = 0;
   fMulti    = 0;
-  fCutT1    = 0;
-  fCutT2    = 0;
   fMargin   = kNoMargin;
-  fhTime    = 0;
-  fhCutTime = 0;
+  fhTime1   = 0;
+  fhTime2   = 0;
   fhRad1    = 0;
   fhRad2    = 0;
   fhDis1    = 0;
@@ -60,11 +58,9 @@ TStrawTube::TStrawTube(Double_t center) : TEllipse()
   fNadc     = -1;
   fLayer    = 0;
   fMulti    = 0;
-  fCutT1    = 0;
-  fCutT2    = 0;
   fMargin   = kNoMargin;
-  fhTime    = 0;
-  fhCutTime = 0;
+  fhTime1   = 0;
+  fhTime2   = 0;
   fhRad1    = 0;
   fhRad2    = 0;
   fhDis1    = 0;
@@ -78,8 +74,8 @@ TStrawTube::TStrawTube(Double_t center) : TEllipse()
 TStrawTube::~TStrawTube()
 {
   //  Info("~TStrawTube", "Destructor");
-  delete fhTime;    fhTime = 0;
-  delete fhCutTime; fhCutTime = 0;
+  delete fhTime1;   fhTime1 = 0;
+  delete fhTime2;   fhTime2 = 0;
   delete fhRad1;    fhRad1 = 0;
   delete fhRad2;    fhRad2 = 0;
   delete fhDis1;    fhDis1 = 0;
@@ -209,17 +205,17 @@ void TStrawTube::InitHistograms()
     return;
   }
 
-  fhTime = new TH1F(Form("%s_time", GetName()),
-                    Form("T0 = %d, tdc   <%d, %d>; 10ns", fT0, fTMin, fTMax),
-                    9000/30, 0, 9000);
-  fhTime->SetMinimum(0);
-  fhTime->SetLineColor(kGray + 1);
-  gStrela->HistoManager(fhTime, "add");
-  fhCutTime = new TH1F(Form("%s_cut", GetName()),
-                       Form("tdc(cut)   <%d, %d>; 10ns", fCutT1, fCutT2),
-                       9000/30, 0, 9000);
-  fhCutTime->SetMinimum(0);
-  gStrela->HistoManager(fhCutTime, "add");
+  fhTime1 = new TH1F(Form("%s_time1", GetName()),
+                     Form("T0 = %d, tdc   <%d, %d>; 10ns", fT0, fTMin, fTMax),
+                     9000/30, 0, 9000);
+  fhTime1->SetMinimum(0);
+  fhTime1->SetLineColor(kGray + 1);
+  gStrela->HistoManager(fhTime1, "add");
+  fhTime2 = new TH1F(Form("%s_time2", GetName()),
+                     Form("tdc   <%d, %d>; 10ns", fTMin, fTMax),
+                     9000/30, 0, 9000);
+  fhTime2->SetMinimum(0);
+  gStrela->HistoManager(fhTime2, "add");
   fhRad1 = new TH1F(Form("%s_rad1", GetName()), "radius(1); cm",
                     200*GetRange(), 0, GetRange());
   fhRad1->SetMinimum(0);
@@ -282,17 +278,19 @@ void TStrawTube::SetTMinMax(Int_t tmin, Int_t tmax, Bool_t delta)
 //______________________________________________________________________________
 void TStrawTube::TimesChanged()
 {
-  if (!fhTime)
+  if (!fhTime1)
     InitHistograms(); // only once
-  else
-    fhTime->SetTitle(Form("T0 = %d, tdc   <%d, %d>", fT0, fTMin, fTMax));
+  else {
+    fhTime1->SetTitle(Form("T0 = %d, tdc   <%d, %d>", fT0, fTMin, fTMax));
+    fhTime2->SetTitle(Form("tdc   <%d, %d>", fTMin, fTMax));
+  }
 }
 //______________________________________________________________________________
 Double_t TStrawTube::T2R(Int_t time) const
 {
   Double_t radius;
   if (fMulti && fMulti->GetSpline()) radius = fMulti->GetSpline()->Eval(time);
-  else                               radius = fgWireRadius + fgDriftVel*time;
+  else radius = fgWireRadius + fgDriftVel*time; // use with fgBaseT0 = 0
 
   if (radius < fgWireRadius) radius = fgWireRadius;
   if (radius > GetRange()) radius = GetRange();
@@ -309,7 +307,7 @@ void TStrawTube::SetShowHistograms(Option_t *option) const
   TCanvas *c = new TCanvas("c_tube", "", gClient->GetDisplayWidth() - ww, 0,
                            ww, (UInt_t)(ww*1.20));
   TString opt = option;
-  if (opt.Contains("cut", TString::kIgnoreCase))
+  if (opt.Contains("time", TString::kIgnoreCase))
     c->Divide(1, 2);
   else {
     c->Divide(2, 3, 0.001, 0.001);
@@ -329,7 +327,7 @@ void TStrawTube::ShowHistograms(Option_t *option) const
   c->Clear("D"); // subpads are cleared but not deleted
 
   if (c->GetPad(3)) ShowHistoFull(c);
-  else ShowHistoCut(c);
+  else ShowHistoTime(c);
 
   c->SetTitle(GetTitle());
   c->Update();
@@ -339,16 +337,16 @@ void TStrawTube::ShowHistograms(Option_t *option) const
 void TStrawTube::ShowHistoFull(TCanvas *can) const
 {
   can->cd(1);
-  fhTime->Draw();
+  fhTime1->Draw();
   TLine line;
+  line.SetLineColor(kBlack);
+  line.SetLineStyle(3);
+  line.DrawLine(fTMin, fhTime1->GetMinimum(), fTMin, fhTime1->GetMaximum());
+  line.DrawLine(fTMax, fhTime1->GetMinimum(), fTMax, fhTime1->GetMaximum());
   line.SetLineColor(kGreen);
   line.SetLineStyle(2);
-  line.DrawLine(fTMin, fhTime->GetMinimum(), fTMin, fhTime->GetMaximum());
-  line.DrawLine(fTMax, fhTime->GetMinimum(), fTMax, fhTime->GetMaximum());
-  line.SetLineColor(kBlue);
-  line.SetLineStyle(3);
-  line.DrawLine(fT0, fhTime->GetMinimum(), fT0, fhTime->GetMaximum());
-  fhCutTime->Draw("same");
+  line.DrawLine(fT0, fhTime1->GetMinimum(), fT0, fhTime1->GetMaximum());
+  fhTime2->Draw("same");
   can->cd(2);
   fhRad1->Draw();
   fhRad2->Draw("same");
@@ -373,28 +371,21 @@ void TStrawTube::ShowHistoFull(TCanvas *can) const
   last->ShowHistograms();
 }
 //______________________________________________________________________________
-void TStrawTube::ShowHistoCut(TCanvas *can) const
+void TStrawTube::ShowHistoTime(TCanvas *can) const
 {
   can->cd(1);
-  fhTime->Draw();
+  fhTime1->Draw();
   TLine line;
-  line.SetLineColor(kRed);
-  line.DrawLine(fCutT1, fhTime->GetMinimum(), fCutT1, fhTime->GetMaximum());
-  line.DrawLine(fCutT2, fhTime->GetMinimum(), fCutT2, fhTime->GetMaximum());
-  fhCutTime->Draw("same");
+  line.SetLineColor(kBlack);
+  line.SetLineStyle(3);
+  line.DrawLine(fTMin, fhTime1->GetMinimum(), fTMin, fhTime1->GetMaximum());
+  line.DrawLine(fTMax, fhTime1->GetMinimum(), fTMax, fhTime1->GetMaximum());
+  line.SetLineColor(kGreen);
+  line.SetLineStyle(2);
+  line.DrawLine(fT0, fhTime1->GetMinimum(), fT0, fhTime1->GetMaximum());
+  fhTime2->Draw("same");
   can->cd(2);
-  fhCutTime->Draw();
-}
-//______________________________________________________________________________
-void TStrawTube::SetCutTime(Int_t t1, Int_t t2)
-{
-  fCutT1 = TMath::Min(t1, t2);
-  fCutT2 = TMath::Max(t1, t2);
-
-  if (fhCutTime)
-    fhCutTime->SetTitle(Form("tdc(cut)   <%d, %d>", fCutT1, fCutT2));
-  if (fCutT1 == fCutT2)
-    Warning("SetCutTime", "tube %d has CutT1 = CutT2  = %d", fNadc, fCutT1);
+  fhTime2->Draw();
 }
 //______________________________________________________________________________
 void TStrawTube::AlignCenter()

@@ -200,17 +200,15 @@ TStrawTube *TStrawCham::SearchTube(Int_t nadc) const
   return 0;
 }
 //______________________________________________________________________________
-void TStrawCham::SetTubesTMinMax(Int_t del, Int_t t1, Int_t t2) const
+void TStrawCham::SetTubesTimes(Int_t x, Int_t t1, Int_t t2) const
 {
   Int_t ntubes = fTubes->GetEntriesFast();
 
   static Bool_t first = kTRUE;
-  static TArrayI defaultMin(ntubes), defaultMax(ntubes);
+  static TArrayI defaultT0(ntubes);
   if (first) {
-    for (Int_t i = 0; i < ntubes; i++) {
-      defaultMin[i] = GetTube(i)->GetTMin();
-      defaultMax[i] = GetTube(i)->GetTMax();
-    }
+    for (Int_t i = 0; i < ntubes; i++)
+      defaultT0[i] = GetTube(i)->GetT0();
     first = kFALSE;
   }
 
@@ -219,32 +217,14 @@ void TStrawCham::SetTubesTMinMax(Int_t del, Int_t t1, Int_t t2) const
   for (Int_t i = 0; i < ntubes; i++) {
     tube = GetTube(i);
     t0 = tube->GetT0();
-    if      (del == 0) tube->SetTMinMax(t1, t2, kFALSE);
-    else if (del == 1) tube->SetTMinMax(t1, t2, kTRUE);
-    else if (del == 2) tube->SetTMinMax(t0 + t1, t0 + t2);
-    else               tube->SetTMinMax(defaultMin[i], defaultMax[i]);
-    if (gDebug > 0)
-      Printf("%s\t tmin = %4d, tmax = %4d",
-             tube->GetName(), tube->GetTMin(), tube->GetTMax());
-  }
-}
-//______________________________________________________________________________
-void TStrawCham::SetTubesCutTime(Option_t *option, Int_t t1, Int_t t2) const
-{
-  TString opt = option;
-  TStrawTube *tube;
-
-  for (Int_t i = 0; i < fTubes->GetEntriesFast(); i++) {
-    tube = GetTube(i);
-    if      (opt == "tmin")
-      tube->SetCutTime(tube->GetTMin() + t1, tube->GetTMin() + t2);
-    else if (opt == "tmax")
-      tube->SetCutTime(tube->GetTMax() + t1, tube->GetTMax() + t2);
-    else
-      tube->SetCutTime(t1, t2);
-    if (gDebug > 0)
-      Printf("%s\t cutt1 = %4d, cutt2 = %4d",
-             tube->GetName(), tube->GetCutT1(), tube->GetCutT2());
+    // TMin, TMax
+    if      (x == 0) tube->SetTMinMax(t1, t2, kFALSE);   // directly
+    else if (x == 1) tube->SetTMinMax(t1, t2, kTRUE);    // from previous value
+    else if (x == 2) tube->SetTMinMax(t0 + t1, t0 + t2); // from T0
+    // T0
+    else if ((x == 3) && (t2 == 0)) tube->SetT0(t1);           // directly
+    else if (x == -1)               tube->SetT0(defaultT0[i]); // default
+    else Warning("SetTubesTimes", "wrong parameter(s)");
   }
 }
 //______________________________________________________________________________
@@ -295,7 +275,7 @@ void TStrawCham::AnalyzeEntry()
     if (nadc != tube->GetNadc()) continue;
     // substract trigAdc (only if exist, otherwise adc without change)
     adc    -= trigAdc;
-    tube->HisTime()->Fill(adc);
+    tube->HisTime1()->Fill(adc);
     if (tube->IsDisabled()) continue;
     if ((adc < tube->GetTMin()) || (adc > tube->GetTMax())) continue;
     tube->GetTracker()->AddHit(pos, tube->TInT0(adc));
@@ -305,7 +285,7 @@ void TStrawCham::AnalyzeEntry()
   next.Reset();
   if (fgTracking == -1)
     while ((tracker = (TStrawTracker *)next()))
-      tracker->TubesCutTimeInterval();
+      tracker->PureTrackHits();
   else
     while ((tracker = (TStrawTracker *)next()))
       tracker->FindTracks();

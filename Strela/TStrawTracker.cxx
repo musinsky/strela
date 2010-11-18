@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 17 Nov 2010
+// @(#) 18 Nov 2010
 
 #include <TMath.h>
 #include <TH2.h>
@@ -15,7 +15,6 @@ const Int_t kMaxPairs   = 200; // sum(kMaxHits - 1)
 const Int_t kMaxChecked = 50;  // <= kMaxHits
 
 Bool_t TStrawTracker::fgOnlyOneTrack = kFALSE;
-Bool_t TStrawTracker::fgJoinCutTime  = kTRUE;
 
 ClassImp(TStrawTracker)
 
@@ -794,7 +793,7 @@ void TStrawTracker::FillHistoPerTrack() const
     fhDisRes->Fill(d, res);
     fhBzRes->Fill(fBz, res);
 
-    tube->HisCutTime()->Fill(tube->TExT0(T(ihit)));
+    tube->HisTime2()->Fill(tube->TExT0(T(ihit)));
     tube->HisRad2()->Fill(R(ihit));
     tube->HisDis1()->Fill(d);
     tube->HisTimeRes()->Fill(T(ihit), res);
@@ -871,23 +870,23 @@ void TStrawTracker::ShowHistograms(Option_t *option) const
   if (save) save->cd();
 }
 //______________________________________________________________________________
-void TStrawTracker::TubesCutTimeInterval() const
+void TStrawTracker::PureTrackHits() const
 {
-  // maybe better use macros/tracker_TDC.C
-  // !!! vsetko " + tube->GetT0()" prerobit na tube->TExT0 !!!
+  // better use macros/tracker_TDC.C
+
   TList straight1, straight2;
   TStrawTube *tube;
   Double_t x1 = 9999, x2 = -9999;
-  Int_t count = 0, cutHit[kMaxHits];
+  Int_t count = 0, pureHit[kMaxHits];
 
   for (Int_t i = 0; i < fNHits; i++) {
     tube = GetTubeHit(i);
     if (straight1.FindObject(tube)) return; // only one hit per wire
-    if (((T(i) + tube->GetT0()) < tube->GetCutT1()) ||
-        ((T(i) + tube->GetT0()) > tube->GetCutT2())) continue;
+    if ( (tube->TExT0(T(i)) < tube->GetTMin()) ||
+         (tube->TExT0(T(i)) > tube->GetTMax()) ) continue;
     if (straight1.IsEmpty()) x1 = X(i);
-    else if (x1 != X(i)) continue;          // hits with same X
-    if (fgJoinCutTime) cutHit[count++] = i;
+    else if (x1 != X(i)) continue; // hits with same X
+    pureHit[count++] = i;          // first 2-hits
     straight1.Add(tube);
   }
   if (straight1.GetSize() < Int_t(fLayers->GetSize()/2.0)) return; // odd-even
@@ -899,13 +898,13 @@ void TStrawTracker::TubesCutTimeInterval() const
     if (TMath::Abs(x1 - X(i)) > (D(i) + 10e-06)) continue;
     if (straight2.IsEmpty()) x2 = X(i);
     else if (x2 != X(i)) continue;
-    cutHit[count++] = i;
+    pureHit[count++] = i;          // second 2-hits
     straight2.Add(tube);
   }
   if ((straight1.GetSize() + straight2.GetSize()) != fLayers->GetSize()) return;
 
   for (Int_t ih = 0; ih < count; ih++) {
-    tube = GetTubeHit(cutHit[ih]);
-    tube->HisCutTime()->Fill(T(cutHit[ih]) + tube->GetT0());
+    tube = GetTubeHit(pureHit[ih]);
+    tube->HisTime2()->Fill(tube->TExT0(T(pureHit[ih])));
   }
 }
