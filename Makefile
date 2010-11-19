@@ -1,4 +1,4 @@
-# @(#) 20 Jun 2008
+# @(#) 19 Nov 2010
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
@@ -77,7 +77,7 @@ updateinc:	$(ALLHDRS) # only for linux
 debug:		all
 
 clean:
-		@rm -fv macros/*.so macros/*.d
+		@rm -fv $(TMPDIR)/*.so $(TMPDIR)/*.d
 
 distclean:	clean
 
