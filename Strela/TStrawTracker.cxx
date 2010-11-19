@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 18 Nov 2010
+// @(#) 19 Nov 2010
 
 #include <TMath.h>
 #include <TH2.h>
@@ -882,8 +882,6 @@ void TStrawTracker::PureTrackHits() const
   for (Int_t i = 0; i < fNHits; i++) {
     tube = GetTubeHit(i);
     if (straight1.FindObject(tube)) return; // only one hit per wire
-    if ( (tube->TExT0(T(i)) < tube->GetTMin()) ||
-         (tube->TExT0(T(i)) > tube->GetTMax()) ) continue;
     if (straight1.IsEmpty()) x1 = X(i);
     else if (x1 != X(i)) continue; // hits with same X
     pureHit[count++] = i;          // first 2-hits
