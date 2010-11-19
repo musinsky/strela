@@ -4,7 +4,7 @@
 // root[] TDCMinMax(); > seans_channels_updateTDC.sql
 
 // Author: Jan Musinsky
-// 24/05/2008
+// 19/11/2010
 
 #include <TH1.h>
 #include <TF1.h>
@@ -16,7 +16,8 @@
 #include "TStrawTube.h"
 
 // hint: run with dt0 = dt1 = -9999, force common time interval
-const Int_t t0 = 3930, t1 = 8880; // common time interval, 2007_03
+// const Int_t t0 = 3930, t1 = 8880; // common time interval, 2007_03
+const Int_t t0 = 950, t1 = 5800; // common time interval, 2009_12
 const Double_t dt0 = (t1 - t0)*0.03, dt1 = (t1 - t0)*0.08;
 
 Int_t FindTime(TH1 *histo, Option_t *opt = "", Bool_t eol = kTRUE)
@@ -95,17 +96,17 @@ void TDCMinMax(const char *fname = 0)
   while ((tube = (TStrawTube *)next())) {
     if (hfile) {
       TH1F *fhis;
-      hfile->GetObject(tube->HisTime()->GetName(), fhis);
-      if (!fhis) Printf("%s does not exist", tube->HisTime()->GetName());
+      hfile->GetObject(tube->HisTime1()->GetName(), fhis);
+      if (!fhis) Printf("%s does not exist", tube->HisTime1()->GetName());
       else {
-        tube->HisTime()->Reset();
-        tube->HisTime()->Add(fhis);
-        tube->HisTime()->SetTitle(fhis->GetTitle());
+        tube->HisTime1()->Reset();
+        tube->HisTime1()->Add(fhis);
+        tube->HisTime1()->SetTitle(fhis->GetTitle());
       }
     }
 
     printf("UPDATE %s.channels SET ", gStrela->GetSeance());
-    Int_t check = FindTime(tube->HisTime(), "Q", kFALSE);
+    Int_t check = FindTime(tube->HisTime1(), "Q", kFALSE);
     printf(" WHERE channels.Nadc = %5d LIMIT 1;", tube->GetNadc());
     if (check == 3)      printf(" /* check T0, TMax */");
     else if (check == 2) printf(" /* check TMax */");
@@ -114,16 +115,3 @@ void TDCMinMax(const char *fname = 0)
   }
   delete hfile;
 }
-
-/*
-  TF1 *fun = new TF1("fun", "[4]*(TMath::Erfc((x - [0])/([1]*TMath::Sqrt(2.0)))
-  + TMath::Erfc((x - [2])/([3]*TMath::Sqrt(2.0))) - 2.0) + [5]", xmin, xmax);
-  Double_t p[6];
-  p[0] = histo->GetMean() + 1.50*histo->GetRMS();
-  p[1] = -10;
-  p[2] = histo->GetMean() - 1.50*histo->GetRMS();
-  p[3] = +100;
-  p[4] = -histo->GetMaximum()*0.10;
-  p[5] = histo->GetMaximum()*0.01;
-  fun->SetParameters(p);
-*/

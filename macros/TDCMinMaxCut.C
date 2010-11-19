@@ -1,8 +1,7 @@
 // root[] .x Strela.C
 // root[] .L macros/TDCMinMaxCut.C+
 // root[] TStrawCham::Tracking(-1)
-// root[] gStrela->StrawCham()->SetTubesTime(0, 0, 12000)
-// root[] gStrela->StrawCham()->SetTubesCutTime("", 0, 12000)
+// root[] gStrela->StrawCham()->SetTubesTimes(0, 0, 9000)
 // root[] gStrela->AnalyzeEntries()
 //
 // root[] TDCMinMaxCut()
@@ -10,7 +9,7 @@
 // root[] ExportMinMax(); > seans_channels_updateTDCcut.sql
 
 // Author: Jan Musinsky
-// 29/05/2008
+// 19/11/2010
 
 #include <TH1.h>
 #include <TROOT.h>
@@ -22,7 +21,8 @@
 #include "TStrawTracker.h"
 
 const UInt_t id1 = 11, id2 = 22;
-const Double_t t1out = 3500, t2out = 9700; // must be out of TDC time
+// const Double_t t1out = 3500, t2out = 9700; // must be out of TDC time
+const Double_t t1out = 700, t2out = 7000; // must be out of TDC time 2009_12
 
 TLine *FindLine(TH1F *histogram, UInt_t idline)
 {
@@ -105,28 +105,28 @@ void TDCMinMaxCut(Int_t range = 4400, const char *fname = 0)
   while ((tube = (TStrawTube *)next())) {
     if (hfile) {
       TH1F *fhis;
-      hfile->GetObject(tube->HisTime()->GetName(), fhis);
-      if (!fhis) Printf("%s does not exist", tube->HisTime()->GetName());
+      hfile->GetObject(tube->HisTime1()->GetName(), fhis);
+      if (!fhis) Printf("%s does not exist", tube->HisTime1()->GetName());
       else {
-	tube->HisTime()->Reset();
-	tube->HisTime()->Add(fhis);
-	tube->HisTime()->SetTitle(fhis->GetTitle());
+        tube->HisTime1()->Reset();
+        tube->HisTime1()->Add(fhis);
+        tube->HisTime1()->SetTitle(fhis->GetTitle());
       }
-      hfile->GetObject(tube->HisCutTime()->GetName(), fhis);
-      if (!fhis) Printf("%s does not exist", tube->HisCutTime()->GetName());
+      hfile->GetObject(tube->HisTime2()->GetName(), fhis);
+      if (!fhis) Printf("%s does not exist", tube->HisTime2()->GetName());
       else {
-	tube->HisCutTime()->Reset();
-	tube->HisCutTime()->Add(fhis);
-	tube->HisCutTime()->SetTitle(fhis->GetTitle());
+        tube->HisTime2()->Reset();
+        tube->HisTime2()->Add(fhis);
+        tube->HisTime2()->SetTitle(fhis->GetTitle());
       }
     }
     // need for log drawing
-    tube->HisTime()->SetMinimum();
-    if (tube->HisTime()->GetMinimum() < 1) tube->HisTime()->SetMinimum(1);
-    tube->HisCutTime()->SetMinimum();
-    if (tube->HisCutTime()->GetMinimum() < 1) tube->HisCutTime()->SetMinimum(1);
+    tube->HisTime1()->SetMinimum();
+    if (tube->HisTime1()->GetMinimum() < 1) tube->HisTime1()->SetMinimum(1);
+    tube->HisTime2()->SetMinimum();
+    if (tube->HisTime2()->GetMinimum() < 1) tube->HisTime2()->SetMinimum(1);
 
-    FindTimeCut(tube->HisCutTime(), range);
+    FindTimeCut(tube->HisTime2(), range);
   }
   delete hfile;
 }
@@ -143,12 +143,12 @@ void ExportMinMax()
       TIter tubes(layer->Tubes());
       TStrawTube *tube;
       while ((tube = (TStrawTube *)tubes())) {
-	printf("UPDATE %s.channels SET T0 = %5d, TMax = %5d",
-	       gStrela->GetSeance(),
-	       (Int_t)FindLine(tube->HisCutTime(), id1)->GetX1(),
-	       (Int_t)FindLine(tube->HisCutTime(), id2)->GetX1());
-	printf(" WHERE channels.Nadc = %5d LIMIT 1; /*%10s*/\n",
-	       tube->GetNadc(), layer->GetName());
+        printf("UPDATE %s.channels SET T0 = %5d, TMax = %5d",
+               gStrela->GetSeance(),
+               (Int_t)FindLine(tube->HisTime2(), id1)->GetX1(),
+               (Int_t)FindLine(tube->HisTime2(), id2)->GetX1());
+        printf(" WHERE channels.Nadc = %5d LIMIT 1; /*%10s*/\n",
+               tube->GetNadc(), layer->GetName());
       }
     }
   }
@@ -159,8 +159,8 @@ void ZoomAxis(Double_t x1 = -1, Double_t x2 = -1)
   TIter next(gStrela->StrawCham()->Tubes());
   TStrawTube *tube;
   while ((tube = (TStrawTube *)next())) {
-    tube->HisTime()->GetXaxis()->SetRangeUser(x1, x2);
-    tube->HisCutTime()->GetXaxis()->SetRangeUser(x1, x2);
+    tube->HisTime1()->GetXaxis()->SetRangeUser(x1, x2);
+    tube->HisTime2()->GetXaxis()->SetRangeUser(x1, x2);
   }
 }
 
@@ -170,15 +170,15 @@ void RebinCutHisto(Bool_t same = kFALSE, Int_t ng = 2)
   TStrawTube *tube;
   while ((tube = (TStrawTube *)next())) {
     if (same) {
-      Int_t bw1 = tube->HisTime()->GetBinWidth(0);
-      Int_t bw2 = tube->HisCutTime()->GetBinWidth(0);
+      Int_t bw1 = tube->HisTime1()->GetBinWidth(0);
+      Int_t bw2 = tube->HisTime2()->GetBinWidth(0);
       if (bw1 == bw2) continue;
-      if (bw1 > bw2) tube->HisCutTime()->Rebin(bw1/bw2);
-      else           tube->HisTime()->Rebin(bw2/bw1);
+      if (bw1 > bw2) tube->HisTime2()->Rebin(bw1/bw2);
+      else           tube->HisTime1()->Rebin(bw2/bw1);
     }
     else {
-      tube->HisTime()->Rebin(ng);
-      tube->HisCutTime()->Rebin(ng);
+      tube->HisTime1()->Rebin(ng);
+      tube->HisTime2()->Rebin(ng);
     }
   }
 }
@@ -216,7 +216,7 @@ void ShiftLine(UInt_t idline, Double_t xnew)
 
   if (idline == 0) {
     Printf("%s, %5d, %5d", his->GetName(), (Int_t)FindLine(his, id1)->GetX1(),
-	   (Int_t)FindLine(his, id2)->GetX1());
+           (Int_t)FindLine(his, id2)->GetX1());
     return;
   }
 

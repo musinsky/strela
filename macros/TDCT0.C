@@ -1,13 +1,12 @@
 // Author: Jan Musinsky
-// 26/10/2010
+// 19/11/2010
 
 /*
   .x Strela.C
   .L macros/TDCT0.C+
   TStrawCham::Tracking(-1)
-  gStrela->StrawCham()->SetTubesTime(0, 0, 9000)
-  gStrela->StrawCham()->SetTubesCutTime("", 0, 9000)
-  gStrela->StrawCham()->GetTube(0)->SetShowHistograms("cut")
+  gStrela->StrawCham()->SetTubesTimes(0, 0, 9000)
+  gStrela->StrawCham()->GetTube(0)->SetShowHistograms("time")
   gStrela->AnalyzeEntries()
   TDCT0(); > seans_YYYY_MM_channels_updateT0.sql
 */
@@ -36,7 +35,7 @@ void FindT0(TStrawTube *tube, Double_t p1coef, Option_t *opt = "")
   c->cd();
 
   Double_t p0, p1;
-  TH1F *histo = tube->HisTime();
+  TH1F *histo = tube->HisTime1();
   TF1 *fun = (TF1 *)gROOT->GetFunction("fun");
   if (!fun)
     fun = new TF1("fun", "[2]+[3]*TMath::Erfc((x-[0])/([1]*TMath::Sqrt2()))");
@@ -73,6 +72,7 @@ void FindT0(TStrawTube *tube, Double_t p1coef, Option_t *opt = "")
   if (!line) {
     line = new TLine(t0, ymin, t0, ymax);
     line->SetLineColor(kBlue);
+    line->SetLineWidth(2);
     histo->GetListOfFunctions()->Add(line);
   }
   else {
@@ -91,7 +91,7 @@ void FindT0(TStrawTube *tube, Double_t p1coef, Option_t *opt = "")
   }
 
   histo->GetXaxis()->UnZoom();
-  TH1F *histo2 = tube->HisCutTime();
+  TH1F *histo2 = tube->HisTime2();
   histo2->Scale(histo->GetMaximum()/histo2->GetMaximum());
 
   delete histo2->GetListOfFunctions()->Remove(histo2->FindObject("h_clone"));
@@ -133,11 +133,11 @@ void TDCT0(const char *fname = 0, Double_t coef = 1.75)
       for (Int_t k = 0; k < layer->Tubes()->GetSize(); k++) {
         tube = layer->GetTube(k);
         if (hfile) {
-          ReplaceHistoFromFile(tube->HisTime(), hfile);
-          ReplaceHistoFromFile(tube->HisCutTime(), hfile);
+          ReplaceHistoFromFile(tube->HisTime1(), hfile);
+          ReplaceHistoFromFile(tube->HisTime2(), hfile);
         }
-        tube->HisCutTime()->Scale(tube->HisTime()->GetMaximum()/
-                                  tube->HisCutTime()->GetMaximum());
+        tube->HisTime2()->Scale(tube->HisTime1()->GetMaximum()/
+                                tube->HisTime2()->GetMaximum());
         FindT0(tube, coef, "Q");
       }
     }
