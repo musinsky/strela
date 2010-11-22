@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 19/11/2010
+// 22/11/2010
 
 /*
   .x Strela.C
@@ -11,6 +11,8 @@
   TCut cut1 = "Ch(18)&&Ch(26)&&Ch(21)"
   TCut cut2 = "Ch(18)&&Ch(26)&&Ch(21)&&GetNHits()==4"
   tra->Draw("(T(18)+T(26))/2.+T(21)>>(600,4000,7000)", cut2)
+  TCut cut3 = "Ch(18)&&Ch(26)&&Ch(21)&&Ch(29)&&GetNHits()==4"
+  tra->Draw("(T(18)+T(26)+T(21)+T(29))/2.>>(600,4000,7000)", cut3)
 */
 
 void tracker_TDC(TStrawTracker *tracker = 0, Bool_t ext0 = kTRUE)
