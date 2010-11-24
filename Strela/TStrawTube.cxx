@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 18 Nov 2010
+// @(#) 23 Nov 2010
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -21,6 +21,8 @@ Int_t    TStrawTube::fgBaseT0         = 2000;
 Double_t TStrawTube::fgDriftVel       = 2.1/4400;
 Double_t TStrawTube::fgWireRadius     = 0.0025/2;
 Int_t    TStrawTube::fgShowHistograms = 0;
+
+const Int_t kBaseT0 = TStrawTube::GetBaseT0();
 
 ClassImp(TStrawTube)
 
@@ -243,13 +245,13 @@ void TStrawTube::InitHistograms()
 
   fhTimeRes = new TH2F(Form("%s_time_res", GetName()),
                        "tdc : residual; tdc, 10ns; residual, cm",
-                       100, 0, 5500, 100, -0.15, 0.15);
+                       200, kBaseT0-500, kBaseT0+5500, 100, -0.15, 0.15);
   fhTimeRes->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhTimeRes, "add");
   fhDisTime = new TH2F(Form("%s_dis_time", GetName()),
                        "distance from wire : tdc; dist., cm; tdc, 10ns",
                        50*GetRange(), -1.1*GetRange(), 1.1*GetRange(),
-                       100, 0, 5500);
+                       100, kBaseT0-500, kBaseT0+5500);
   fhDisTime->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhDisTime, "add");
   fhBzRes = new TH2F(Form("%s_bz_res", GetName()),
@@ -290,7 +292,7 @@ Double_t TStrawTube::T2R(Int_t time) const
 {
   Double_t radius;
   if (fMulti && fMulti->GetSpline()) radius = fMulti->GetSpline()->Eval(time);
-  else radius = fgWireRadius + fgDriftVel*time; // use with fgBaseT0 = 0
+  else radius = fgWireRadius + fgDriftVel*(time - kBaseT0);
 
   if (radius < fgWireRadius) radius = fgWireRadius;
   if (radius > GetRange()) radius = GetRange();
@@ -352,6 +354,8 @@ void TStrawTube::ShowHistoFull(TCanvas *can) const
   fhRad2->Draw("same");
   can->cd(3);
   fhTimeRes->Draw();
+  line.DrawLine(kBaseT0, fhTimeRes->GetYaxis()->GetXmin(),
+                kBaseT0, fhTimeRes->GetYaxis()->GetXmax());
   can->cd(4);
   fhBzRes->Draw();
   can->cd(5);

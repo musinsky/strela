@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 20 Sep 2010
+// @(#) 24 Nov 2010
 
 #include <TROOT.h>
 #include <TSQLServer.h>
@@ -303,9 +303,6 @@ void TStrela::HistoManager(TH1 *his, Option_t *option) const
   }
 
   if (action == "reset") his->Reset();
-
-  //  if (action == "on")    his->SetUniqueID(0); // default UniqueID = 0
-  //  if (action == "off")   his->SetUniqueID(9);
 }
 //______________________________________________________________________________
 void TStrela::HistoManager(const char *wildcard, Option_t *option) const
