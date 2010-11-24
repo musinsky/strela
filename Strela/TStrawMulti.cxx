@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 01 Nov 2010
+// @(#) 24 Nov 2010
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -21,10 +21,8 @@ TStrawMulti::TStrawMulti()
   //  Info("TStrawMulti", "Default constructor");
   fTubes    = 0;
   fSpline   = 0;
-  fTimeMax  = 0;
   fRange    = 0;
   fhTimeRes = 0;
-  fhTime    = 0;
   fCorrect  = 0;
 }
 //______________________________________________________________________________
@@ -34,10 +32,8 @@ TStrawMulti::TStrawMulti(const char *name, const char *title)
   //  Info("TStrawMulti", "Normal Constructor");
   fTubes    = 0;
   fSpline   = 0;
-  fTimeMax  = 0;
   fRange    = 0;
   fhTimeRes = 0;
-  fhTime    = 0;
   fCorrect  = 0;
 
   if (gStrela) gStrela->StrawCham()->Multies()->Add(this);
@@ -52,14 +48,13 @@ TStrawMulti::~TStrawMulti()
   delete fTubes; // tubes are not deleted
   delete fSpline;
   delete fhTimeRes; fhTimeRes = 0;
-  delete fhTime;    fhTime = 0;
   delete fCorrect;
   if (gStrela) gStrela->StrawCham()->Multies()->Remove(this);
 }
 //______________________________________________________________________________
 void TStrawMulti::AddAnything(TObject *va_(obj1), ...)
 {
-  //  Printf("Remember, list of trackers/layers/tubes must be temrinated by 0");
+  //  list of trackers/layers/tubes must be temrinated by 0
   if (!va_(obj1)) return;
 
   va_list ap;
@@ -129,7 +124,6 @@ void TStrawMulti::Add(TStrawTube *tube)
     Warning("Add", "%s from %s has another range", tube->GetName(), GetName());
     return;
   }
-  fTimeMax = TMath::Max(fTimeMax, tube->GetTMax() - tube->GetTMin());
 
   if (!fTubes) fTubes = new TList();
   fTubes->Add(tube);
@@ -171,55 +165,37 @@ void TStrawMulti::SumTimeRes()
     if (!tube->IsNoMultiSum()) fhTimeRes->Add(tube->HisTimeRes());
 }
 //______________________________________________________________________________
-void TStrawMulti::SumTime()
-{
-  if (!HisTimeRes()) {
-    if (fhTime) delete fhTime;
-    fhTime = 0;
-    return;
-  }
-
-  if (!fhTime) { // create and first time fill histo (only once)
-    // all projection histograms are deleted when file is closed
-    fhTime = new TH1F(*((TH1F *)fhTimeRes->ProjectionX()));
-    fhTime->SetName(Form("%s_time", GetName()));
-    fhTime->SetTitle(Form("tdc   <%d, %d>; 10ns", 0, fTimeMax));
-    gStrela->HistoManager(fhTime, "add");
-    return;
-  }
-
-  fhTime->Reset();
-  fhTime->Add(fhTimeRes->ProjectionX());
-}
-//______________________________________________________________________________
 void TStrawMulti::IterFirst()
 {
-  if (!HisTime()) {
-    Info("IterFirst", "%s, first fill histograms", GetName());
+  if (!HisTimeRes()) {
+    Warning("IterFirst", "%s without any tubes", GetName());
     return;
   }
 
-  Int_t n = fhTime->GetNbinsX() + 1;
-  Double_t x[n], y[n];
-  x[0] = y[0] = 0.0;
-  for (Int_t i = 1; i < n; i++) {
-    x[i] = fhTime->GetBinCenter(i);
-    y[i] = y[i-1] + fhTime->GetBinContent(i);
+  Int_t nb = fhTimeRes->GetNbinsX();
+  // all projection histograms are deleted when file is closed
+  TH1D *htemp = fhTimeRes->ProjectionX("_px", 1, nb);
+  Double_t x[nb], y[nb], sum = 0;
+  for (Int_t i = 0; i < nb; i++) {
+    x[i] = htemp->GetBinCenter(i+1);
+    sum += htemp->GetBinContent(i+1);
+    y[i] = sum;
   }
-  if (y[n-1] == 0) {
+
+  if (sum == 0) {
     if (fSpline) delete fSpline;
     fSpline = 0;
-    Warning("IterFirst", "%s, empty histograms", GetName());
+    Warning("IterFirst", "%s, first analyze entries", GetName());
     return;
   }
 
-  // last bin is also bin with maximum value
   Double_t rmin = TStrawTube::GetWireRadius();
-  Double_t norm = (fRange - rmin)/y[n-1];
-  for (Int_t i = 0; i < n; i++) y[i] = rmin + y[i]*norm;
+  Double_t norm = (fRange - rmin)/sum;
+  for (Int_t i = 0; i < nb; i++) y[i] = rmin + y[i]*norm;
 
   if (fSpline) delete fSpline;
-  fSpline = new TSpline3(Form("%s_spline", GetName()), x, y, n);
+  fSpline = new TSpline3(Form("%s_spline", GetName()), x, y, nb);
+  // need checking grows full time interval
 
   if (fCorrect) delete fCorrect;
   fCorrect = new TGraph();
