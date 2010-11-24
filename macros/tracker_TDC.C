@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 22/11/2010
+// 24/11/2010
 
 /*
   .x Strela.C
@@ -38,7 +38,7 @@ void tracker_TDC(TStrawTracker *tracker = 0, Bool_t ext0 = kTRUE)
     gStrela->AnalyzeEntry(i);
     for (Int_t j = 0; j < tracker->GetNHits(); j++) {
       if (ext0) t = tracker->GetTubeHit(j)->TExT0(tracker->T(j));
-      else      t = tracker->T(j);
+      else      t = tracker->T(j) - TStrawTube::GetBaseT0();
       event->AddHit(gVME->SearchChannel(tracker->GetTubeHit(j)->GetNadc()), t);
     }
     tree->Fill();
