@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 24/11/2010
+// 07/12/2010
 
 /*
   .x Strela.C
@@ -7,7 +7,10 @@
   TStrawCham::Tracking(0)
   gStrela->StrawCham()->SetTubesTimes(0, 0, 9000)
   tracker_TDC(t2)
-  tra->Draw("T(21)>>(700,0,7000)", "Ch(21)&&GetNHits()==4")
+  tra->Draw("T(21)>>(700,0,7000)", "Ch(21)")
+  tra->Draw("T(21)", "Ch(21)&&GetNHits()==4", "same")
+  tra->Draw("T_M(21, 0)>>(700,0,7000)", "Ch_M(21, 0)")
+  tra->Draw("T_M(21, 0)", "Ch_M(21, 1)", "same")
   TCut cut1 = "Ch(18)&&Ch(26)&&Ch(21)"
   TCut cut2 = "Ch(18)&&Ch(26)&&Ch(21)&&GetNHits()==4"
   tra->Draw("(T(18)+T(26))/2.+T(21)>>(600,4000,7000)", cut2)

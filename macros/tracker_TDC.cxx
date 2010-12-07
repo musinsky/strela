@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 12/07/2010
+// 07/12/2010
 
 #include <TFile.h>
 #include <TROOT.h>
@@ -54,9 +54,13 @@ public:
   void          AddHit(const Int_t chh, const Int_t th);
 
   Int_t         FindChannel(Int_t chan) const;
+  Int_t         FindChannel_M(Int_t chan, Int_t multi) const;
   Bool_t        Ch(Int_t ch) const { return
       (FindChannel(ch) == -1) ? kFALSE : kTRUE; }
+  Bool_t        Ch_M(Int_t ch, Int_t m = 0) const { return
+      (FindChannel_M(ch, m) == -1) ? kFALSE : kTRUE; }
   Int_t         T(Int_t ch) const;
+  Int_t         T_M(Int_t ch, Int_t m = 0) const;
 
   ClassDef(TEvent, 1) // TEvent class
 };
@@ -93,15 +97,41 @@ void TEvent::AddHit(const Int_t chh, const Int_t th)
 
 Int_t TEvent::FindChannel(Int_t chan) const
 {
-  // !!! find only first hit with channel (no multiple hits) !!!
-  for (Int_t ich = 0; ich < fNhits; ich++)
-    if (Hit(ich)->GetChannel() == chan) return ich;
+  // find only if once hit per channel
+  Int_t found = -1, count = 0;
+  for (Int_t ich = 0; ich < fNhits; ich++) {
+    if (Hit(ich)->GetChannel() == chan) {
+      found = ich;
+      count++;
+    }
+  }
+  if (count == 1) return found;
+  else return -1;
+}
+
+Int_t TEvent::FindChannel_M(Int_t chan, Int_t multi) const
+{
+  // find multiple hits per channel
+  Int_t count = 0;
+  for (Int_t ich = 0; ich < fNhits; ich++) {
+    if (Hit(ich)->GetChannel() == chan) {
+      if (count == multi) return ich;
+      count++;
+    }
+  }
   return -1;
 }
 
 Int_t TEvent::T(Int_t ch) const
 {
   Int_t ichan = FindChannel(ch);
+  if (ichan == -1) return MNULL;
+  return Hit(ichan)->GetTDC();
+}
+
+Int_t TEvent::T_M(Int_t ch, Int_t m) const
+{
+  Int_t ichan = FindChannel_M(ch, m);
   if (ichan == -1) return MNULL;
   return Hit(ichan)->GetTDC();
 }
