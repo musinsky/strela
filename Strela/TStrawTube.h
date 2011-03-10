@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 18 Nov 2010
+// @(#) 10 Mar 2011
 
 #ifndef STRELA_TStrawTube
 #define STRELA_TStrawTube
@@ -52,7 +52,8 @@ private:
   TH1F         *fhEffi;    //! efficiency (dis1/dis2)
   TH2F         *fhTimeRes; //! time vs. residual
   TH2F         *fhDisTime; //! distance vs. time
-  TH2F         *fhBzRes;   //! Bz(tube) vs. residual
+  TH2F         *fhBzRes;   //! Bz (tube) vs. residual
+  TH2F         *fhBzAz;    //! Bz vs. Az (tube)
   void          TimesChanged();
   void          InitHistograms();
   void          ShowHistoFull(TCanvas *can) const;
@@ -95,6 +96,7 @@ public:
   TH2F         *HisTimeRes() const { return fhTimeRes; }
   TH2F         *HisDisTime() const { return fhDisTime; }
   TH2F         *HisBzRes() const { return fhBzRes; }
+  TH2F         *HisBzAz() const { return fhBzAz; }
 
   Double_t       GetZ() const { return fLayer->GetZ(); }
   Double_t       GetRange() const { return fLayer->GetRange(); }

@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 18 Nov 2010
+// @(#) 09 Mar 2011
 
 #ifndef STRELA_TStrawTracker
 #define STRELA_TStrawTracker
@@ -68,6 +68,7 @@ private:
   TH1F         *fhSumD;         //! sum of D
   TH2F         *fhDisRes;       //! distance vs. residual
   TH2F         *fhBzRes;        //! Bz vs. residual
+  TH2F         *fhBzAz;         //! Bz vs. Az
   void          InitHistograms();
 
 public:
@@ -127,6 +128,7 @@ public:
   TH1F       *HisSumD() const { return fhSumD; }
   TH2F       *HisDisRes() const { return fhDisRes; }
   TH2F       *HisBzRes() const { return fhBzRes; }
+  TH2F       *HisBzAz() const { return fhBzAz; }
 
   virtual void Print(Option_t *option = "") const;
 

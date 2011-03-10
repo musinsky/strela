@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 23 Nov 2010
+// @(#) 10 Mar 2011
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -17,7 +17,7 @@
 #include "TVME.h"
 #include "TStrelaDisplay.h"
 
-Int_t    TStrawTube::fgBaseT0         = 2000;
+Int_t    TStrawTube::fgBaseT0         = 0;
 Double_t TStrawTube::fgDriftVel       = 2.1/4400;
 Double_t TStrawTube::fgWireRadius     = 0.0025/2;
 Int_t    TStrawTube::fgShowHistograms = 0;
@@ -48,6 +48,7 @@ TStrawTube::TStrawTube()
   fhTimeRes = 0;
   fhDisTime = 0;
   fhBzRes   = 0;
+  fhBzAz    = 0;
 }
 //______________________________________________________________________________
 TStrawTube::TStrawTube(Double_t center) : TEllipse()
@@ -71,6 +72,7 @@ TStrawTube::TStrawTube(Double_t center) : TEllipse()
   fhTimeRes = 0;
   fhDisTime = 0;
   fhBzRes   = 0;
+  fhBzAz    = 0;
 }
 //______________________________________________________________________________
 TStrawTube::~TStrawTube()
@@ -86,6 +88,7 @@ TStrawTube::~TStrawTube()
   delete fhTimeRes; fhTimeRes = 0;
   delete fhDisTime; fhDisTime = 0;
   delete fhBzRes;   fhBzRes = 0;
+  delete fhBzAz;    fhBzAz = 0;
 }
 //______________________________________________________________________________
 Int_t TStrawTube::Compare(const TObject *obj) const
@@ -260,6 +263,12 @@ void TStrawTube::InitHistograms()
                      100, -0.15, 0.15);
   fhBzRes->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhBzRes, "add");
+  fhBzAz = new TH2F(Form("%s_bz_az", GetName()),
+                    "intercept : slope; intercept, cm; slope, rad",
+                    50*GetRange(), -1.1*GetRange(), 1.1*GetRange(),
+                    100, -0.1, 0.1);
+  fhBzAz->GetYaxis()->CenterTitle();
+  gStrela->HistoManager(fhBzAz, "add");
 }
 //______________________________________________________________________________
 void TStrawTube::SetTMinMax(Int_t tmin, Int_t tmax, Bool_t delta)
@@ -365,7 +374,8 @@ void TStrawTube::ShowHistoFull(TCanvas *can) const
   if ((Int_t) max != (Int_t) maxe) fhEffi->Scale(max/maxe);
   fhEffi->Draw("same");
   can->cd(6);
-  fhDisTime->Draw();
+  //  fhDisTime->Draw();
+  fhBzAz->Draw();
 
   // tracker
   if (!gROOT->GetListOfCanvases()->FindObject("c_tracker")) return;

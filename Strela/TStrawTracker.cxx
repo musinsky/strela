@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 // Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 19 Nov 2010
+// @(#) 10 Mar 2011
 
 #include <TMath.h>
 #include <TH2.h>
@@ -65,6 +65,7 @@ TStrawTracker::TStrawTracker()
   fhSumD          = 0;
   fhDisRes        = 0;
   fhBzRes         = 0;
+  fhBzAz          = 0;
 }
 //______________________________________________________________________________
 TStrawTracker::TStrawTracker(Int_t id)
@@ -119,6 +120,7 @@ TStrawTracker::TStrawTracker(Int_t id)
   fhSumD          = 0;
   fhDisRes        = 0;
   fhBzRes         = 0;
+  fhBzAz          = 0;
   InitHistograms();
 }
 //______________________________________________________________________________
@@ -147,6 +149,7 @@ TStrawTracker::~TStrawTracker()
   delete fhSumD;    fhSumD = 0;
   delete fhDisRes;  fhDisRes = 0;
   delete fhBzRes;   fhBzRes = 0;
+  delete fhBzAz;    fhBzAz = 0;
 }
 //______________________________________________________________________________
 void TStrawTracker::Print(Option_t *option) const
@@ -223,6 +226,11 @@ void TStrawTracker::InitHistograms()
                      100, -13, 13, 100, -0.15, 0.15);
   fhBzRes->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhBzRes, "add");
+  fhBzAz = new TH2F(Form("%s_bz_az", GetName()),
+                    "intercept : slope; intercept, cm; slope, rad",
+                    130, -13, 13, 120, -0.12, 0.12);
+  fhBzAz->GetYaxis()->CenterTitle();
+  gStrela->HistoManager(fhBzAz, "add");
 }
 //______________________________________________________________________________
 void TStrawTracker::SetMaxNHits(Int_t n)
@@ -776,6 +784,7 @@ void TStrawTracker::FillHistoPerTrack() const
 {
   fhAz->Fill(fAz);
   fhBz->Fill(fBz);
+  fhBzAz->Fill(fBz, fAz); // fAz, fBz from projection ?!
 
   Int_t ihit;
   Double_t d, res, d0 = TMath::Sqrt(1.0 + fAz*fAz), sumr = 0.0, sumd = 0.0;
@@ -799,6 +808,7 @@ void TStrawTracker::FillHistoPerTrack() const
     tube->HisTimeRes()->Fill(T(ihit), res);
     tube->HisDisTime()->Fill(d, T(ihit));
     tube->HisBzRes()->Fill(fBz - tube->GetCenter(), res);
+    tube->HisBzAz()->Fill(fBz - tube->GetCenter(), fAz);
   }
 
   if ((fLayers->GetSize() == 4) && (fTrackNHits == 4)) { // only 4layers tracker
@@ -863,7 +873,8 @@ void TStrawTracker::ShowHistograms(Option_t *option) const
   c->cd(7);
   fhChi2Tan->Draw();
   c->cd(8);
-  fhDisZTan->Draw();
+  //  fhDisZTan->Draw();
+  fhBzAz->Draw();
 
   c->SetTitle(GetName());
   c->Update();
