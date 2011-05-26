@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 10 Mar 2011
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    10 Mar 2011
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -153,8 +152,7 @@ char *TStrawTube::GetObjectInfo(Int_t px, Int_t py) const
 //______________________________________________________________________________
 void TStrawTube::Print(Option_t *option) const
 {
-  Printf("%s: %s; T0 = %4d, tdc <%4d, %4d>", GetName(), GetTitle(),
-         fT0, fTMin, fTMax);
+  Printf("%s: %s; T0 = %4d, tdc <%4d, %4d>", GetName(), GetTitle(), fT0, fTMin, fTMax);
 }
 //______________________________________________________________________________
 const char *TStrawTube::GetName() const
@@ -210,24 +208,20 @@ void TStrawTube::InitHistograms()
     return;
   }
 
-  fhTime1 = new TH1F(Form("%s_time1", GetName()),
-                     Form("T0 = %d, tdc   <%d, %d>; 10ns", fT0, fTMin, fTMax),
+  fhTime1 = new TH1F(Form("%s_time1", GetName()), Form("T0 = %d, tdc   <%d, %d>; 10ns", fT0, fTMin, fTMax),
                      9000/30, 0, 9000);
   fhTime1->SetMinimum(0);
   fhTime1->SetLineColor(kGray + 1);
   gStrela->HistoManager(fhTime1, "add");
-  fhTime2 = new TH1F(Form("%s_time2", GetName()),
-                     Form("tdc   <%d, %d>; 10ns", fTMin, fTMax),
+  fhTime2 = new TH1F(Form("%s_time2", GetName()), Form("tdc   <%d, %d>; 10ns", fTMin, fTMax),
                      9000/30, 0, 9000);
   fhTime2->SetMinimum(0);
   gStrela->HistoManager(fhTime2, "add");
-  fhRad1 = new TH1F(Form("%s_rad1", GetName()), "radius(1); cm",
-                    200*GetRange(), 0, GetRange());
+  fhRad1 = new TH1F(Form("%s_rad1", GetName()), "radius(1); cm", 200*GetRange(), 0, GetRange());
   fhRad1->SetMinimum(0);
   fhRad1->SetLineColor(kGray + 1);
   gStrela->HistoManager(fhRad1, "add");
-  fhRad2 = new TH1F(Form("%s_rad2", GetName()), "radius(2); cm",
-                    200*GetRange(), 0, GetRange());
+  fhRad2 = new TH1F(Form("%s_rad2", GetName()), "radius(2); cm", 200*GetRange(), 0, GetRange());
   fhRad2->SetMinimum(0);
   gStrela->HistoManager(fhRad2, "add");
   fhDis1 = new TH1F(Form("%s_dis1", GetName()), "distance(1) from wire; cm",
@@ -239,34 +233,26 @@ void TStrawTube::InitHistograms()
   fhDis2->SetMinimum(0);
   fhDis2->SetLineColor(kGray + 1);
   gStrela->HistoManager(fhDis2, "add");
-  fhEffi = new TH1F(Form("%s_effi", GetName()),
-                    "efficiency; distance from wire, cm; efficiency",
+  fhEffi = new TH1F(Form("%s_effi", GetName()), "efficiency; distance from wire, cm; efficiency",
                     50*GetRange(), -GetRange(), GetRange());
   fhEffi->Sumw2();
   fhEffi->SetLineColor(kCyan);
   gStrela->HistoManager(fhEffi, "add");
 
-  fhTimeRes = new TH2F(Form("%s_time_res", GetName()),
-                       "tdc : residual; tdc, 10ns; residual, cm",
+  fhTimeRes = new TH2F(Form("%s_time_res", GetName()), "tdc : residual; tdc, 10ns; residual, cm",
                        200, kBaseT0-500, kBaseT0+5500, 100, -0.15, 0.15);
   fhTimeRes->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhTimeRes, "add");
-  fhDisTime = new TH2F(Form("%s_dis_time", GetName()),
-                       "distance from wire : tdc; dist., cm; tdc, 10ns",
-                       50*GetRange(), -1.1*GetRange(), 1.1*GetRange(),
-                       100, kBaseT0-500, kBaseT0+5500);
+  fhDisTime = new TH2F(Form("%s_dis_time", GetName()), "distance from wire : tdc; dist., cm; tdc, 10ns",
+                       50*GetRange(), -1.1*GetRange(), 1.1*GetRange(), 100, kBaseT0-500, kBaseT0+5500);
   fhDisTime->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhDisTime, "add");
-  fhBzRes = new TH2F(Form("%s_bz_res", GetName()),
-                     "intercept : residual; intercept, cm; residual, cm",
-                     50*GetRange(), -1.1*GetRange(), 1.1*GetRange(),
-                     100, -0.15, 0.15);
+  fhBzRes = new TH2F(Form("%s_bz_res", GetName()), "intercept : residual; intercept, cm; residual, cm",
+                     50*GetRange(), -1.1*GetRange(), 1.1*GetRange(), 100, -0.15, 0.15);
   fhBzRes->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhBzRes, "add");
-  fhBzAz = new TH2F(Form("%s_bz_az", GetName()),
-                    "intercept : slope; intercept, cm; slope, rad",
-                    50*GetRange(), -1.1*GetRange(), 1.1*GetRange(),
-                    100, -0.1, 0.1);
+  fhBzAz = new TH2F(Form("%s_bz_az", GetName()), "intercept : slope; intercept, cm; slope, rad",
+                    50*GetRange(), -1.1*GetRange(), 1.1*GetRange(), 100, -0.1, 0.1);
   fhBzAz->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhBzAz, "add");
 }
@@ -315,8 +301,7 @@ void TStrawTube::SetShowHistograms(Option_t *option) const
 
   fgShowHistograms = 1;
   Int_t ww = 610;
-  TCanvas *c = new TCanvas("c_tube", "", gClient->GetDisplayWidth() - ww, 0,
-                           ww, (UInt_t)(ww*1.20));
+  TCanvas *c = new TCanvas("c_tube", "", gClient->GetDisplayWidth() - ww, 0, ww, (UInt_t)(ww*1.20));
   TString opt = option;
   if (opt.Contains("time", TString::kIgnoreCase))
     c->Divide(1, 2);
@@ -363,8 +348,7 @@ void TStrawTube::ShowHistoFull(TCanvas *can) const
   fhRad2->Draw("same");
   can->cd(3);
   fhTimeRes->Draw();
-  line.DrawLine(kBaseT0, fhTimeRes->GetYaxis()->GetXmin(),
-                kBaseT0, fhTimeRes->GetYaxis()->GetXmax());
+  line.DrawLine(kBaseT0, fhTimeRes->GetYaxis()->GetXmin(), kBaseT0, fhTimeRes->GetYaxis()->GetXmax());
   can->cd(4);
   fhBzRes->Draw();
   can->cd(5);
@@ -405,6 +389,7 @@ void TStrawTube::ShowHistoTime(TCanvas *can) const
 void TStrawTube::AlignCenter()
 {
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // TODO
   Int_t fb = fhBzRes->GetXaxis()->FindBin(-2.1*0.9);
   Int_t lb = fhBzRes->GetXaxis()->FindBin(-2.1*0.1);
   TH1D *proj = fhBzRes->ProjectionY("_py", fb, lb);
@@ -449,6 +434,7 @@ void TStrawTube::AlignCenter()
 void TStrawTube::AlignCenterTime()
 {
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // TODO
   TH1D *proj = fhTimeRes->ProjectionY();
   TF1 *g = (TF1 *)gROOT->GetFunction("gaus");
   if (!g) {

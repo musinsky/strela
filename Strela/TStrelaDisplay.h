@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 29 Oct 2010
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    29 Oct 2010
 
 #ifndef STRELA_TStrelaDisplay
 #define STRELA_TStrelaDisplay
@@ -33,13 +32,11 @@ public:
   void          DrawTracker(TStrawTracker *tracker, Option_t *option = "")const;
   void          FindRange(Double_t pm = 0.10) const;
   void          DisplayEvent(Option_t *option = "") const;
-  void          DisplayEvent(const TStrawTracker *tracker,
-                             Option_t *option = "") const;
+  void          DisplayEvent(const TStrawTracker *tracker, Option_t *option = "") const;
   void          DeletePrimitives() const;
   void          DisplayNextEvent(Int_t delta) const;
   void          ReDraw() const;
-  TVirtualPad  *FindPad(const TObject *obj, Bool_t update = kTRUE,
-                        TVirtualPad *pad = 0) const;
+  TVirtualPad  *FindPad(const TObject *obj, Bool_t update = kTRUE, TVirtualPad *pad = 0) const;
 
   ClassDef(TStrelaDisplay, 0) // StrelaDisplay
 };

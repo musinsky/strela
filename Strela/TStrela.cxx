@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 24 Nov 2010
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    24 Nov 2010
 
 #include <TROOT.h>
 #include <TSQLServer.h>
@@ -42,8 +41,7 @@ TStrela::TStrela()
   fHistograms = 0;
 }
 //______________________________________________________________________________
-TStrela::TStrela(const char *name, const char *title)
-  : TNamed(name, title)
+TStrela::TStrela(const char *name, const char *title) : TNamed(name, title)
 {
   //  Info("TStrela", "Normal constructor");
   gStrela     = this;
@@ -264,8 +262,7 @@ void TStrela::AddFriend(Option_t *option, const char *dirname) const
 
   delete file; // delete in any case
   if (fChain->GetListOfFriends()) {
-    TFriendElement *oldFriend =
-      (TFriendElement *)fChain->GetListOfFriends()->FindObject(treeName.Data());
+    TFriendElement *oldFriend = (TFriendElement *)fChain->GetListOfFriends()->FindObject(treeName.Data());
     if (oldFriend) {
       if(onlyRead) {
         Error("AddFriend", "friend element %s already exists", treeName.Data());
@@ -281,8 +278,7 @@ void TStrela::AddFriend(Option_t *option, const char *dirname) const
 //______________________________________________________________________________
 const char *TStrela::GetEventInfo() const
 {
-  return Form("event: %lld from %s", fChain->GetReadEntry(),
-              fChain->GetCurrentFile()->GetName());
+  return Form("event: %lld from %s", fChain->GetReadEntry(), fChain->GetCurrentFile()->GetName());
 }
 //______________________________________________________________________________
 void TStrela::HistoManager(TH1 *his, Option_t *option) const

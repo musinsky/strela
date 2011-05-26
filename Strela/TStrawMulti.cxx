@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 24 Nov 2010
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    24 Nov 2010
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -26,8 +25,7 @@ TStrawMulti::TStrawMulti()
   fCorrect  = 0;
 }
 //______________________________________________________________________________
-TStrawMulti::TStrawMulti(const char *name, const char *title)
-  : TNamed(name, title)
+TStrawMulti::TStrawMulti(const char *name, const char *title) : TNamed(name, title)
 {
   //  Info("TStrawMulti", "Normal Constructor");
   fTubes    = 0;
@@ -114,8 +112,7 @@ void TStrawMulti::Add(TStrawTube *tube)
     return;
   }
   else if (prevMulti) {
-    Warning("Add", "%s change from %s to %s", tube->GetName(),
-            prevMulti->GetName(), GetName());
+    Warning("Add", "%s change from %s to %s", tube->GetName(), prevMulti->GetName(), GetName());
     prevMulti->RemoveTube(tube);
   }
 
@@ -139,8 +136,7 @@ void TStrawMulti::RemoveTube(TStrawTube *tube)
 
   if (fTubes) {
     if (tube == fTubes->Remove(tube)) tube->SetMulti(0);
-    else Warning("RemoveTube", "%s is not assigned to %s",
-                 tube->GetName(), GetName());
+    else Warning("RemoveTube", "%s is not assigned to %s", tube->GetName(), GetName());
   }
 }
 //______________________________________________________________________________
@@ -253,8 +249,7 @@ void TStrawMulti::IterNext(Int_t ndivide)
     y[count]  = fSpline->Eval(x[count]) - delta;
     if (y[count] > fRange)     y[count] = fRange;
     if (y[count] < y[count-1]) y[count] = y[count-1]; // must be increasing
-    if (gDebug > 0)
-      Printf("[%3d, %3d]; x = %6.1f, y = %5.3f", i0, i, x[count], y[count]);
+    if (gDebug > 0) Printf("[%3d, %3d]; x = %6.1f, y = %5.3f", i0, i, x[count], y[count]);
     sumdelta += delta*delta;
     i0 = i + 1;
     count++;

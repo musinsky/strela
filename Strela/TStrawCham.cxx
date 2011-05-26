@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 18 Nov 2010
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    18 Nov 2010
 
 #include <TSQLServer.h>
 #include <TSQLResult.h>
@@ -32,8 +31,7 @@ TStrawCham::TStrawCham()
   fTubesI    = 0;
 }
 //______________________________________________________________________________
-TStrawCham::TStrawCham(const char *name, const char *title)
-  : TStrelaBase(name, title)
+TStrawCham::TStrawCham(const char *name, const char *title) : TStrelaBase(name, title)
 {
   //  Info("TStrawCham", "Normal constructor");
   fTrackers   = 0;
@@ -68,8 +66,7 @@ void TStrawCham::Print(Option_t* option) const
 
     for (Int_t i = 0; i < layer->Tubes()->GetSize(); i++) {
       tube = (TStrawTube *)layer->Tubes()->At(i);
-      Printf(" %2d) %s %8.2f %8.2f (%3d)", i + 1,
-             gVME->GetChannelInfo(tube->GetNadc()),
+      Printf(" %2d) %s %8.2f %8.2f (%3d)", i + 1, gVME->GetChannelInfo(tube->GetNadc()),
              tube->GetCenter(), tube->GetZ(), fTubes->BinarySearch(tube));
     }
   }
@@ -124,8 +121,7 @@ Bool_t TStrawCham::ReadSQL(TSQLServer *ser)
         // make layers, tubes
         layer = new TStrawLayer(atoi(row->GetField(1)), row->GetField(2));
         fLayers->Add(layer);
-        layer->MakeTubes(atoi(row->GetField(3)), atof(row->GetField(4)),
-                         atoi(row->GetField(5)));
+        layer->MakeTubes(atoi(row->GetField(3)), atof(row->GetField(4)), atoi(row->GetField(5)));
         layer->SetZ(atof(row->GetField(6)));
         layer->Shift(atof(row->GetField(7)));
         layer->SetRange(atof(row->GetField(8)));

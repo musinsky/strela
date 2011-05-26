@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 25 Oct 2007
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    25 Oct 2007
 
 #include "TGemEvent.h"
 
@@ -28,7 +27,7 @@ TGemEvent::~TGemEvent()
 //______________________________________________________________________________
 void TGemEvent::Print(Option_t *option) const
 {
-  Printf("evnet = %d, nhits = %d", GetNEvent(), GetNHits());
+  Printf("event = %d, nhits = %d", GetNEvent(), GetNHits());
   TAdcHit1 *hit1;
 
   for (Int_t ih = 0; ih < GetNumOfAdcHits1(); ih++) {

@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 17 Jun 2008
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    17 Jun 2008
 
 #ifndef STRELA_TModuleTDC96
 #define STRELA_TModuleTDC96
@@ -19,8 +18,7 @@ public:
   virtual void   Print(Option_t *option = "") const;
   virtual Int_t  MapChannel(Int_t tdcid, Int_t tdcch) const;
   virtual Bool_t GetChannelIdCh(Int_t ch, Int_t &tdcid, Int_t &tdcch) const;
-  virtual void   ConnectorChannels(Int_t con, Int_t *pins,
-                                   Option_t *option) const;
+  virtual void   ConnectorChannels(Int_t con, Int_t *pins, Option_t *option) const;
 
   ClassDef(TModuleTDC96, 1) // TDC96 module (96 channels)
 };

@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 17 Jun 2008
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    17 Jun 2008
 
 #ifndef STRELA_TPommeEvent
 #define STRELA_TPommeEvent
@@ -67,13 +66,11 @@ public:
   Int_t         GetNWires() const { return (Int_t)fNwires; }
   TClonesArray *WireHits() const { return fWires; }
   Int_t         GetNumOfWires() const { return fWires->GetEntriesFast(); }
-  TChWire      *GetWireHit(Int_t iw) const { return
-      (TChWire *)fWires->UncheckedAt(iw); }
+  TChWire      *GetWireHit(Int_t iw) const { return (TChWire *)fWires->UncheckedAt(iw); }
   Int_t         GetNHits() const { return (Int_t)fNhits; }
   TClonesArray *AdcHits() const { return fAdcHits; }
   Int_t         GetNumOfAdcHits() const { return fAdcHits->GetEntriesFast(); }
-  TAdcHit      *GetAdcHit(Int_t ia) const { return
-      (TAdcHit *)fAdcHits->UncheckedAt(ia); }
+  TAdcHit      *GetAdcHit(Int_t ia) const { return (TAdcHit *)fAdcHits->UncheckedAt(ia); }
 
   ClassDef(TPommeEvent, 2) // PommeEvent class (not original)
 };

@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 11 Nov 2010
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    11 Nov 2010
 
 #include <TBrowser.h>
 
@@ -17,8 +16,7 @@ TStrelaBase::TStrelaBase()
   fBranchName = "";
 }
 //______________________________________________________________________________
-TStrelaBase::TStrelaBase(const char *name, const char *title)
-  : TNamed(name, title)
+TStrelaBase::TStrelaBase(const char *name, const char *title) : TNamed(name, title)
 {
   //  Info("TStrelaBase", "Normal constructor");
   fContainer  = 0;
@@ -30,8 +28,7 @@ TStrelaBase::TStrelaBase(const char *name, const char *title)
 TStrelaBase::~TStrelaBase()
 {
   Info("~TStrelaBase", "Destructor");
-  if (fContainer && fContainer->InheritsFrom("TClonesArray"))
-    fContainer->Delete();
+  if (fContainer && fContainer->InheritsFrom("TClonesArray")) fContainer->Delete();
   delete fContainer;
   fContainer = 0;
   if (gStrela) gStrela->Detectors()->Remove(this);

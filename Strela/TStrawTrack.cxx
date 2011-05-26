@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 16 may 2008
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    16 may 2008
 
 #include <string.h>
 

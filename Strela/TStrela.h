@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 09 Jun 2008
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    09 Jun 2008
 
 #ifndef STRELA_TStrela
 #define STRELA_TStrela
@@ -51,10 +50,8 @@ public:
   void          SetPath(const char *path) { fPath = path; }
   const char   *GetPath() const { return fPath.Data(); }
   TChain       *GetChain() const { return fChain; }
-  Int_t         GetEntries() const { return fChain ?
-      (Int_t)fChain->GetEntries() : 0; }
-  Int_t         GetEntry(Int_t en) const { return fChain ?
-      fChain->GetEntry(en) : 0; }
+  Int_t         GetEntries() const { return fChain ? (Int_t)fChain->GetEntries() : 0; }
+  Int_t         GetEntry(Int_t en) const { return fChain ? fChain->GetEntry(en) : 0; }
 
   TList        *RawEvents() const { return fRawEvents; }
   TPommeEvent  *PommeEvent() const { return fPommeEvent; }
@@ -62,16 +59,14 @@ public:
   TGemEvent    *GemEvent() const { return fGemEvent; }
   TList        *Detectors() const { return fDetectors; }
   Int_t         GetNumOfDetectors() const { return fDetectors->GetSize(); }
-  TStrelaBase  *FindDetector(const char *name) const { return
-      (TStrelaBase *)fDetectors->FindObject(name); }
+  TStrelaBase  *FindDetector(const char *name) const { return (TStrelaBase *)fDetectors->FindObject(name); }
   TWireCham    *WireCham() const { return fWireCham; }
   TStrawCham   *StrawCham() const { return fStrawCham; }
 
   void            SetDisplay(TStrelaDisplay *dis) { fDisplay = dis; }
   TStrelaDisplay *GetDisplay() const { return fDisplay; }
   TList          *Histograms() const { return fHistograms; }
-  TH1            *His(const char *name) const { return
-      (TH1 *)fHistograms->FindObject(name); }
+  TH1            *His(const char *name) const { return (TH1 *)fHistograms->FindObject(name); }
 
   virtual void   Browse(TBrowser *b);
   virtual Bool_t IsFolder() const { return kTRUE; }
@@ -80,17 +75,13 @@ public:
   TSQLServer   *ConnectSQL() const;
   void          SetRun(Int_t run); // *MENU*
   void          ChangeBranchAddress(TChain *chain);
-  void          ChangeBranchAddress(TTree *tree) {
-    ChangeBranchAddress((TChain *)tree); }
+  void          ChangeBranchAddress(TTree *tree) { ChangeBranchAddress((TChain *)tree); }
   void          AnalyzeEntry(Int_t entry) const; // *MENU*
-  void          AnalyzeEntries(Int_t ne = 0, Option_t *option = "",
-                               Bool_t timer = kFALSE) const;
-  void          AddFriend(Option_t *option = "READ",
-                          const char *dirname = "DST") const; // *MENU*
+  void          AnalyzeEntries(Int_t ne = 0, Option_t *option = "", Bool_t timer = kFALSE) const;
+  void          AddFriend(Option_t *option = "READ", const char *dirname = "DST") const; // *MENU*
   const char   *GetEventInfo() const;
   void          HistoManager(TH1 *his, Option_t *option = "") const;
-  void          HistoManager(const char *wildcard = "",
-                             Option_t *option = "") const;
+  void          HistoManager(const char *wildcard = "", Option_t *option = "") const;
 
   ClassDef(TStrela, 1) // Strela class - top level for all STRELA classes
 };

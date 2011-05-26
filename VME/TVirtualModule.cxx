@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 11 Nov 2010
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    11 Nov 2010
 
 #include "TVirtualModule.h"
 #include "TVME.h"
@@ -15,8 +14,7 @@ TVirtualModule::TVirtualModule()
   fChipNChannels = 0;
 }
 //______________________________________________________________________________
-TVirtualModule::TVirtualModule(const char *name, const char *title)
-  : TNamed(name, title)
+TVirtualModule::TVirtualModule(const char *name, const char *title) : TNamed(name, title)
 {
   //  Info("TVirtualModule", "Normal constructor");
   fNChips        = 0;
@@ -36,15 +34,13 @@ Int_t TVirtualModule::MapChannel(Int_t tdcid, Int_t tdcch) const
   return -1;
 }
 //______________________________________________________________________________
-Bool_t TVirtualModule::GetChannelIdCh(Int_t ch, Int_t &tdcid,
-                                      Int_t &tdcch) const
+Bool_t TVirtualModule::GetChannelIdCh(Int_t ch, Int_t &tdcid, Int_t &tdcch) const
 {
   // override this function
   return kFALSE;
 }
 //______________________________________________________________________________
-void TVirtualModule::ConnectorChannels(Int_t con, Int_t *pins,
-                                       Option_t *option) const
+void TVirtualModule::ConnectorChannels(Int_t con, Int_t *pins, Option_t *option) const
 {
   if (gVME->GetNChannels() != gVME->GetNChannelsFast())
     Error("ConnectorChannels", "must ReDecode all channels");

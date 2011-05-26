@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 26 May 2008
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    26 May 2008
 
 #include "TStrawLayer.h"
 #include "TStrawTube.h"
@@ -18,8 +17,7 @@ TStrawLayer::TStrawLayer()
   fTracker = 0;
 }
 //______________________________________________________________________________
-TStrawLayer::TStrawLayer(Int_t numb, const char *name, const char *title)
-  : TNamed(name, title)
+TStrawLayer::TStrawLayer(Int_t numb, const char *name, const char *title) : TNamed(name, title)
 {
   //  Info("TStrawLayer", "Normal Constructor");
   fTubes   = 0;

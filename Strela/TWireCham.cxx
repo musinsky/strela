@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 16 May 2008
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    16 May 2008
 
 #include <stdlib.h>
 
@@ -33,8 +32,7 @@ TWireCham::TWireCham()
   fWrongWire   = 0;
 }
 //______________________________________________________________________________
-TWireCham::TWireCham(const char *name, const char *title)
-  : TStrelaBase(name, title)
+TWireCham::TWireCham(const char *name, const char *title) : TStrelaBase(name, title)
 {
   //  Info("TWireCham", "Normal Constructor");
   fNPlanes     = 0;

@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 11 Nov 2010
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    11 Nov 2010
 
 #ifndef STRELA_TVirtualModule
 #define STRELA_TVirtualModule
@@ -26,8 +25,7 @@ public:
 
   virtual Int_t  MapChannel(Int_t tdcid, Int_t tdcch) const;
   virtual Bool_t GetChannelIdCh(Int_t ch, Int_t &tdcid, Int_t &tdcch) const;
-  virtual void   ConnectorChannels(Int_t con, Int_t *pins,
-                                   Option_t *option = "") const;
+  virtual void   ConnectorChannels(Int_t con, Int_t *pins, Option_t *option = "") const;
   virtual Int_t  DecodeChannel(UInt_t word) const;
 
   ClassDef(TVirtualModule, 1) // Module(virtual) class

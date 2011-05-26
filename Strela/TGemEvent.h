@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 25 Oct 2007
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    25 Oct 2007
 
 #ifndef STRELA_TGemEvent
 #define STRELA_TGemEvent
@@ -40,8 +39,7 @@ public:
   Int_t         GetNHits() const { return (Int_t)fNhits; }
   TClonesArray *AdcHits1() const { return fAdcHits; }
   Int_t         GetNumOfAdcHits1() const { return fAdcHits->GetEntriesFast(); }
-  TAdcHit1     *GetAdcHit1(Int_t ia) const { return
-      (TAdcHit1 *)fAdcHits->UncheckedAt(ia); }
+  TAdcHit1     *GetAdcHit1(Int_t ia) const { return (TAdcHit1 *)fAdcHits->UncheckedAt(ia); }
 
   virtual void  Print(Option_t *option = "") const;
 

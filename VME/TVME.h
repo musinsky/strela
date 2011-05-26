@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 17 Jun 2008
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    17 Jun 2008
 
 #ifndef STRELA_TVME
 #define STRELA_TVME
@@ -31,8 +30,7 @@ public:
   virtual     ~TVME();
 
   TObjArray      *Modules() const { return fModules; }
-  TVirtualModule *FindModule(const char *name) const { return
-      (TVirtualModule *)fModules->FindObject(name); }
+  TVirtualModule *FindModule(const char *name) const { return (TVirtualModule *)fModules->FindObject(name); }
   Int_t        GetNChannelsFast() const { return fNChannels; }
   Int_t       *GetChannel() const { return fChannel; }
 
@@ -43,8 +41,7 @@ public:
   Int_t        SearchChannel(Int_t nadc) const;
   const char  *GetChannelInfo(Int_t nadc) const;
 
-  void         DecodeFile(const char *fname,
-                          Int_t ne = 0, Int_t imod = -1) const;
+  void         DecodeFile(const char *fname, Int_t ne = 0, Int_t imod = -1) const;
 
   ClassDef(TVME, 1) // VME class
 };

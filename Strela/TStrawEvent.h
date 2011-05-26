@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 24 Oct 2007
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    24 Oct 2007
 
 #ifndef STRELA_TStrawEvent
 #define STRELA_TStrawEvent
@@ -44,8 +43,7 @@ public:
   Int_t         GetNStraws() const { return fNstraws; }
   TClonesArray *StrawHits() const { return fStraws; }
   Int_t         GetNumOfStraws() const { return fStraws->GetEntriesFast(); }
-  TStrawHit    *GetStrawHit(Int_t is) const { return
-      (TStrawHit *)fStraws->UncheckedAt(is); }
+  TStrawHit    *GetStrawHit(Int_t is) const { return (TStrawHit *)fStraws->UncheckedAt(is); }
 
   ClassDef(TStrawEvent, 2) // StrawEvent class (not original)
 };

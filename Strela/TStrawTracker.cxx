@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 10 Mar 2011
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    10 Mar 2011
 
 #include <TMath.h>
 #include <TH2.h>
@@ -68,8 +67,7 @@ TStrawTracker::TStrawTracker()
   fhBzAz          = 0;
 }
 //______________________________________________________________________________
-TStrawTracker::TStrawTracker(Int_t id)
-  : TNamed("", "tracker from straw tubes")
+TStrawTracker::TStrawTracker(Int_t id) : TNamed("", "tracker from straw tubes")
 {
   //  Info("TStrawTracker", "Normal constructor");
   fLayers         = 0;
@@ -160,8 +158,7 @@ void TStrawTracker::Print(Option_t *option) const
 
   for (Int_t ih = 0; ih < fNHits; ih++) {
     tube = GetTubeHit(ih);
-    printf("%2d) %s, %5d ~ %5.3f", ih, gVME->GetChannelInfo(tube->GetNadc()),
-           T(ih), R(ih));
+    printf("%2d) %s, %5d ~ %5.3f", ih, gVME->GetChannelInfo(tube->GetNadc()), T(ih), R(ih));
     if (!strcmp(option, "all")) {
       for (Int_t it = 0; it < cham->GetNumOfTracks(); it++) {
         track = cham->GetStrawTrack(it);
@@ -190,12 +187,10 @@ void TStrawTracker::InitHistograms()
   fhBz = new TH1F(Form("%s_bz", GetName()), "intercept; cm", 1000, -13, 13);
   fhBz->SetMinimum(1);
   gStrela->HistoManager(fhBz, "add");
-  fhRes = new TH1F(Form("%s_res", GetName()),
-                   "residual; cm", 1000, -0.15, 0.15);
+  fhRes = new TH1F(Form("%s_res", GetName()), "residual; cm", 1000, -0.15, 0.15);
   fhRes->SetMinimum(1);
   gStrela->HistoManager(fhRes, "add");
-  fhResTan = new TH1F(Form("%s_restan", GetName()),
-                      "residual (candidate); cm", 1000, -0.15, 0.15);
+  fhResTan = new TH1F(Form("%s_restan", GetName()), "residual (candidate); cm", 1000, -0.15, 0.15);
   fhResTan->SetMinimum(1);
   fhResTan->SetLineColor(kGray + 1);
   gStrela->HistoManager(fhResTan, "add");
@@ -206,28 +201,23 @@ void TStrawTracker::InitHistograms()
   fhSumD = new TH1F(Form("%s_sumD", GetName()), "sum of D; cm", 1000, 1.8, 2.4);
   fhSumD->SetMinimum(1);
   gStrela->HistoManager(fhSumD, "add");
-  fhDisZTan = new TH1F(Form("%s_dzt", GetName()),
-                       "z - component of distance from wire (candidate); cm",
+  fhDisZTan = new TH1F(Form("%s_dzt", GetName()), "z - component of distance from wire (candidate); cm",
                        1000, -0.5, 0.5);
   fhDisZTan->SetMinimum(0);
   gStrela->HistoManager(fhDisZTan, "add");
-  fhChi2Tan = new TH1F(Form("%s_chi2t", GetName()),
-                       "#chi^{2}/ndf (candidate)", 1000, 0, 0.02);
+  fhChi2Tan = new TH1F(Form("%s_chi2t", GetName()), "#chi^{2}/ndf (candidate)", 1000, 0, 0.02);
   fhChi2Tan->SetMinimum(0);
   gStrela->HistoManager(fhChi2Tan, "add");
 
-  fhDisRes = new TH2F(Form("%s_dis_res", GetName()),
-                      "distance from wire : residual; dist., cm; residual, cm",
+  fhDisRes = new TH2F(Form("%s_dis_res", GetName()), "distance from wire : residual; dist., cm; residual, cm",
                       100, -2.2, 2.2, 100, -0.15, 0.15);
   fhDisRes->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhDisRes, "add");
-  fhBzRes = new TH2F(Form("%s_bz_res", GetName()),
-                     "intercept : residual; intercept, cm; residual, cm",
+  fhBzRes = new TH2F(Form("%s_bz_res", GetName()), "intercept : residual; intercept, cm; residual, cm",
                      100, -13, 13, 100, -0.15, 0.15);
   fhBzRes->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhBzRes, "add");
-  fhBzAz = new TH2F(Form("%s_bz_az", GetName()),
-                    "intercept : slope; intercept, cm; slope, rad",
+  fhBzAz = new TH2F(Form("%s_bz_az", GetName()), "intercept : slope; intercept, cm; slope, rad",
                     130, -13, 13, 120, -0.12, 0.12);
   fhBzAz->GetYaxis()->CenterTitle();
   gStrela->HistoManager(fhBzAz, "add");
@@ -325,6 +315,7 @@ void TStrawTracker::MarginalTubes(Int_t set, Bool_t onlyhalf) const
       break;
     default:
       Warning("MarginalTubes", "%s without changing", tube->GetName());
+      break;
     }
   }
 }
@@ -571,8 +562,7 @@ Bool_t TStrawTracker::CheckHits(Int_t it)
   Double_t d0 = TMath::Sqrt(1.0 + fAzPair[it]*fAzPair[it]);
 
   for (Int_t i = 0; i < fNHits; i++) {
-    tangentHit = ((fPair[0][fMaxPair] == i) || (fPair[1][fMaxPair] == i)) ?
-      kTRUE : kFALSE;
+    tangentHit = ((fPair[0][fMaxPair] == i) || (fPair[1][fMaxPair] == i)) ? kTRUE : kFALSE;
 
     d  = (fAzPair[it]*Z(i) - X(i) + fBzPair[it])/d0;
     dz = d*fAzPair[it]/d0; // dz for radius = R(i)*fAzPair[it]/d0;
@@ -681,6 +671,7 @@ void TStrawTracker::LFit(Int_t np, const Double_t *x, const Double_t *y,
   }
 
   if (sumxx == 0.0) {
+    // FIXME
     Warning("LFit", "something wrong with %s geometry", GetName());
     a = 0.0; b = 0.0; chi2 = 9999;
     return;

@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 24 Oct 2007
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    24 Oct 2007
 
 #ifndef STRELA_TWireCham
 #define STRELA_TWireCham
@@ -35,8 +34,7 @@ public:
   Int_t         GetNWrongWires() const { return fNWrongWires; }
   Int_t        *GetWrongWire() const { return fWrongWire; }
   Int_t         GetNumOfPoints() const { return GetNumOfContainers(); }
-  TWirePoint   *GetWirePoint(Int_t ip) const { return
-      (TWirePoint *)Container(ip); }
+  TWirePoint   *GetWirePoint(Int_t ip) const { return (TWirePoint *)Container(ip); }
 
   virtual Bool_t ReadSQL(TSQLServer *ser);
   virtual void   AnalyzeEntry();

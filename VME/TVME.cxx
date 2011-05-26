@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 17 Jun 2008
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    17 Jun 2008
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -27,8 +26,7 @@ TVME::TVME()
   fSortCha   = 0;
 }
 //______________________________________________________________________________
-TVME::TVME(const char *name, const char *title)
-  : TNamed(name, title)
+TVME::TVME(const char *name, const char *title) : TNamed(name, title)
 {
   //  Info("TVME", "Normal constructor");
   gVME       = this;

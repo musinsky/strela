@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 11 Nov 2010
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    11 Nov 2010
 
 #include <TCanvas.h>
 #include <TButton.h>
@@ -21,8 +20,7 @@ TStrelaDisplay::TStrelaDisplay(Int_t xsize)
   //  Info("TStrelaDisplay", "Default constructor");
   if (!gStrela) return;
 
-  fCanvas = new TCanvas("canvas", "STRELA Display", 0, 0,
-                        xsize, Int_t(xsize/1.5));
+  fCanvas = new TCanvas("canvas", "STRELA Display", 0, 0, xsize, Int_t(xsize/1.5));
   fPad = new TPad("pad", "Detectors display", 0.00, 0.07, 1.00, 1.00);
   fPad->Connect("Closed()", "TStrelaDisplay", this, "~TStrelaDisplay()");
   fPad->Draw();
@@ -72,8 +70,7 @@ void TStrelaDisplay::DisplayButtons() const
 //______________________________________________________________________________
 void TStrelaDisplay::DrawTracker(const char *name, Option_t *option) const
 {
-  TStrawTracker *tracker = (TStrawTracker *)gStrela->StrawCham()
-    ->Trackers()->FindObject(name);
+  TStrawTracker *tracker = (TStrawTracker *)gStrela->StrawCham()->Trackers()->FindObject(name);
   if (!tracker) {
     Error("DrawTracker", "tracker %s does not exist", name);
     return;
@@ -164,8 +161,7 @@ void TStrelaDisplay::DisplayEvent(Option_t *option) const
   }
 }
 //______________________________________________________________________________
-void TStrelaDisplay::DisplayEvent(const TStrawTracker *tracker,
-                                  Option_t *option) const
+void TStrelaDisplay::DisplayEvent(const TStrawTracker *tracker, Option_t *option) const
 {
   if (!gPad) return;
 
@@ -175,8 +171,7 @@ void TStrelaDisplay::DisplayEvent(const TStrawTracker *tracker,
   eh.SetLineColor(kRed);
   for (Int_t i = 0; i < tracker->GetNHits(); i++) {
     // eh.SetBit(kCanDelete);
-    eh.DrawEllipse(tracker->Z(i), tracker->X(i),
-                   tracker->R(i), tracker->R(i), 0, 360, 0);
+    eh.DrawEllipse(tracker->Z(i), tracker->X(i), tracker->R(i), tracker->R(i), 0, 360, 0);
     gPad->GetListOfPrimitives()->Last()->SetUniqueID(kMinID + 1);
     indexMark[i] = gPad->GetListOfPrimitives()->LastIndex();
   }
@@ -200,8 +195,7 @@ void TStrelaDisplay::DisplayEvent(const TStrawTracker *tracker,
       line.SetLineStyle(1);
     }
     // line.SetBit(kCanDelete);
-    line.DrawLine(x1, x1*track->GetAz() + track->GetBz(),
-                  x2, x2*track->GetAz() + track->GetBz());
+    line.DrawLine(x1, x1*track->GetAz() + track->GetBz(), x2, x2*track->GetAz() + track->GetBz());
     gPad->GetListOfPrimitives()->Last()->SetUniqueID(kMinID + 2);
 
     // mark track hits
@@ -259,8 +253,7 @@ void TStrelaDisplay::ReDraw() const
   DisplayNextEvent(0);
 }
 //______________________________________________________________________________
-TVirtualPad *TStrelaDisplay::FindPad(const TObject *obj, Bool_t update,
-                                     TVirtualPad *pad) const
+TVirtualPad *TStrelaDisplay::FindPad(const TObject *obj, Bool_t update, TVirtualPad *pad) const
 {
   if (!pad) pad = fPad;
   TList *primitives = pad->GetListOfPrimitives();

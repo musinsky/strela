@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 10 Mar 2011
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    10 Mar 2011
 
 #ifndef STRELA_TStrawTube
 #define STRELA_TStrawTube

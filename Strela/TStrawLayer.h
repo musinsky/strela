@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 15 Jul 2010
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    15 Jul 2010
 
 #ifndef STRELA_TStrawLayer
 #define STRELA_TStrawLayer
@@ -30,10 +29,8 @@ public:
   virtual       ~TStrawLayer();
 
   TList         *Tubes() const { return fTubes; }
-  TStrawTube    *GetTube(Int_t it) const { return
-      (TStrawTube *)fTubes->At(it); }
-  TStrawTube    *FindTube(const char *name) const { return
-      (TStrawTube *)fTubes->FindObject(name); }
+  TStrawTube    *GetTube(Int_t it) const { return (TStrawTube *)fTubes->At(it); }
+  TStrawTube    *FindTube(const char *name) const { return (TStrawTube *)fTubes->FindObject(name); }
   void           SetZ(Double_t z) { fZ = z; }
   Double_t       GetZ() const { return fZ; }
   void           SetRange(Double_t r) { fRange = r; }

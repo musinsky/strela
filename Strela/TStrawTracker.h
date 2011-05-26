@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 09 Mar 2011
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    09 Mar 2011
 
 #ifndef STRELA_TStrawTracker
 #define STRELA_TStrawTracker
@@ -77,27 +76,22 @@ public:
   virtual      ~TStrawTracker();
 
   TList        *Layers() const { return fLayers; }
-  TStrawLayer  *GetLayer(Int_t il) const { return
-      (TStrawLayer *)fLayers->At(il); }
-  TStrawLayer  *FindLayer(const char *name) const { return
-      (TStrawLayer *)fLayers->FindObject(name); }
+  TStrawLayer  *GetLayer(Int_t il) const { return (TStrawLayer *)fLayers->At(il); }
+  TStrawLayer  *FindLayer(const char *name) const { return (TStrawLayer *)fLayers->FindObject(name); }
   TList        *Tubes() const { return fTubes; }
-  TStrawTube   *GetTube(Int_t it) const { return
-      (TStrawTube *)fTubes->At(it); }
-  TStrawTube   *FindTube(const char *name) const { return
-      (TStrawTube *)fTubes->FindObject(name); }
+  TStrawTube   *GetTube(Int_t it) const { return (TStrawTube *)fTubes->At(it); }
+  TStrawTube   *FindTube(const char *name) const { return (TStrawTube *)fTubes->FindObject(name); }
   Int_t         GetId() const { return fId; }
   Int_t         GetNHits() const { return fNHits; }
   void          ResetHits() { fNHits = 0; }
-  TStrawTube   *GetTubeHit(Int_t it) const { return
-      gStrela->StrawCham()->GetTube(fHit[it]); }
+  TStrawTube   *GetTubeHit(Int_t it) const { return gStrela->StrawCham()->GetTube(fHit[it]); }
   Double_t      Z(Int_t ih) const { return GetTubeHit(ih)->GetZ(); }
   Double_t      X(Int_t ih) const { return GetTubeHit(ih)->GetCenter(); }
   Double_t      D(Int_t ih) const { return GetTubeHit(ih)->GetRange(); }
   Double_t      R(Int_t ih) const { return fRadius[ih]; }
   Int_t         T(Int_t ih) const { return fTime[ih]; }
-  const char   *ChannelInfo(Int_t ih) const { return (ih < fNHits) ?
-      gVME->GetChannelInfo(GetTubeHit(ih)->GetNadc()) : ""; }
+  const char   *ChannelInfo(Int_t ih) const {
+    return (ih < fNHits) ? gVME->GetChannelInfo(GetTubeHit(ih)->GetNadc()) : ""; }
 
   void        SetMinNHits(Int_t n) { fMinNHits = n; }
   Int_t       GetMinNHits() const { return fMinNHits; }

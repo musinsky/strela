@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 18 Nov 2010
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    18 Nov 2010
 
 #ifndef STRELA_TStrawCham
 #define STRELA_TStrawCham
@@ -38,27 +37,22 @@ public:
   virtual      ~TStrawCham();
 
   TList         *Trackers() const { return fTrackers; }
-  TStrawTracker *FindTracker(const char *name) const { return
-      (TStrawTracker *)fTrackers->FindObject(name); }
+  TStrawTracker *FindTracker(const char *name) const { return (TStrawTracker *)fTrackers->FindObject(name); }
   TList         *Layers() const { return fLayers; }
-  TStrawLayer   *FindLayer(const char *name) const { return
-      (TStrawLayer *)fLayers->FindObject(name); }
+  TStrawLayer   *FindLayer(const char *name) const { return (TStrawLayer *)fLayers->FindObject(name); }
   TList         *Multies() const { return fMulties; }
-  TStrawMulti   *FindMulti(const char *name) const { return
-      (TStrawMulti *)fMulties->FindObject(name); }
+  TStrawMulti   *FindMulti(const char *name) const { return (TStrawMulti *)fMulties->FindObject(name); }
   TObjArray     *Tubes() const { return fTubes; }
-  TStrawTube    *GetTube(Int_t it) const { return
-      (TStrawTube *)fTubes->UncheckedAt(it); }
-  static void   TrigNadc(Int_t tn) { fgTrigNadc = tn; }
-  static Int_t  GetTrigNadc() { return fgTrigNadc; }
-  static void   ShiftAdc(Int_t sa) { fgShiftAdc = sa; }
-  static Int_t  GetShiftAdc() { return fgShiftAdc; }
-  static void   Tracking(Int_t mode = 1) { fgTracking = mode; }
-  static Int_t  GetTracking() { return fgTracking; }
-  static Int_t  GetIter() { return fgIter; }
-  Int_t         GetNumOfTracks() const { return GetNumOfContainers(); }
-  TStrawTrack  *GetStrawTrack(Int_t it) const { return
-      (TStrawTrack *)Container(it); }
+  TStrawTube    *GetTube(Int_t it) const { return (TStrawTube *)fTubes->UncheckedAt(it); }
+  static void    TrigNadc(Int_t tn) { fgTrigNadc = tn; }
+  static Int_t   GetTrigNadc() { return fgTrigNadc; }
+  static void    ShiftAdc(Int_t sa) { fgShiftAdc = sa; }
+  static Int_t   GetShiftAdc() { return fgShiftAdc; }
+  static void    Tracking(Int_t mode = 1) { fgTracking = mode; }
+  static Int_t   GetTracking() { return fgTracking; }
+  static Int_t   GetIter() { return fgIter; }
+  Int_t          GetNumOfTracks() const { return GetNumOfContainers(); }
+  TStrawTrack   *GetStrawTrack(Int_t it) const { return (TStrawTrack *)Container(it); }
 
   virtual void   Print(Option_t *option = "") const;
   virtual Bool_t ReadSQL(TSQLServer *ser);

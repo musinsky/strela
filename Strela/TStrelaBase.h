@@ -1,6 +1,5 @@
-// -*- mode: c++ -*-
-// Author: Jan Musinsky <mailto:musinsky@gmail.com>
-// @(#) 11 Nov 2010
+// @Author  Jan Musinsky <musinsky@gmail.com>
+// @Date    11 Nov 2010
 
 #ifndef STRELA_TStrelaBase
 #define STRELA_TStrelaBase
@@ -29,10 +28,8 @@ public:
   TObject      *Container() const { return fContainer; }
   const char   *GetBranchName() const { return fBranchName.Data(); }
   TClonesArray *Containers() const { return (TClonesArray *)fContainer; }
-  Int_t         GetNumOfContainers() const { return
-      Containers()->GetEntriesFast(); }
-  TObject      *Container(Int_t ic) const { return
-      Containers()->UncheckedAt(ic); }
+  Int_t         GetNumOfContainers() const { return Containers()->GetEntriesFast(); }
+  TObject      *Container(Int_t ic) const { return Containers()->UncheckedAt(ic); }
 
   virtual void   Browse(TBrowser *b);
   virtual Bool_t IsFolder() const { return kTRUE; }
