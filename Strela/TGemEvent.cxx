@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    25 Oct 2007
+// @Date    26 May 2011
 
 #include "TGemEvent.h"
 
@@ -23,6 +23,22 @@ TGemEvent::~TGemEvent()
   Info("~TGemEvent", "Destructor");
   if (fAdcHits) fAdcHits->Delete();
   delete fAdcHits;
+}
+//______________________________________________________________________________
+void TGemEvent::AddHit(UShort_t nadc, UShort_t adc)
+{
+  // need for Monte Carlo
+  // generated are only Nadc and Adc, i.e. TAdcHit
+  // Delta is unnecessary, i.e. not TAdcHit1
+
+  TClonesArray &hits = *fAdcHits;
+  new (hits[fNhits++]) TAdcHit(nadc, adc);
+}
+//______________________________________________________________________________
+void TGemEvent::Clear(Option_t *option)
+{
+  fNhits = 0;
+  fAdcHits->Clear(option);
 }
 //______________________________________________________________________________
 void TGemEvent::Print(Option_t *option) const

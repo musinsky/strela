@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    25 Oct 2007
+// @Date    26 May 2011
 
 #ifndef STRELA_TGemEvent
 #define STRELA_TGemEvent
@@ -40,7 +40,9 @@ public:
   TClonesArray *AdcHits1() const { return fAdcHits; }
   Int_t         GetNumOfAdcHits1() const { return fAdcHits->GetEntriesFast(); }
   TAdcHit1     *GetAdcHit1(Int_t ia) const { return (TAdcHit1 *)fAdcHits->UncheckedAt(ia); }
+  void          AddHit(UShort_t nadc, UShort_t adc);
 
+  virtual void  Clear(Option_t *option = "");
   virtual void  Print(Option_t *option = "") const;
 
   ClassDef(TGemEvent, 3) // GemEvent class (not original)

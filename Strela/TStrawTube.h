@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    10 Mar 2011
+// @Date    26 May 2011
 
 #ifndef STRELA_TStrawTube
 #define STRELA_TStrawTube
@@ -117,6 +117,7 @@ public:
   Int_t          TInT0(Int_t tex) const { return tex + (fgBaseT0 - fT0); }
   Int_t          TExT0(Int_t tin) const { return tin - (fgBaseT0 - fT0); }
   Double_t       T2R(Int_t time) const;
+  Int_t          R2T(Double_t radius) const;
   void           SetShowHistograms(Option_t *option = "") const; // *MENU*
   void           ShowHistograms(Option_t *option = "") const;
   void           AlignCenter(); // *MENU*

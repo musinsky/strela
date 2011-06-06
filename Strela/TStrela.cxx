@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    24 Nov 2010
+// @Date    31 May 2011
 
 #include <TROOT.h>
 #include <TSQLServer.h>
@@ -57,7 +57,8 @@ TStrela::TStrela(const char *name, const char *title) : TNamed(name, title)
 
   // order of detectors in list is not important (meanwhile)
   fDetectors  = new TList();
-  fWireCham   = new TWireCham("WireCham", "Find points in wire chambers");
+  //  fWireCham   = new TWireCham("WireCham", "Find points in wire chambers");
+  //  no more need WireCham (MWPC) detectors
   fStrawCham  = new TStrawCham("StrawCham", "Find tracks in straw chambers");
   fDisplay    = 0;
   fHistograms = new TList();

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    09 Mar 2011
+// @Date    01 Jun 2011
 
 #ifndef STRELA_TStrawTracker
 #define STRELA_TStrawTracker
@@ -147,6 +147,7 @@ public:
   void         FillHistoPerTrack() const;
   void         FillHistoPerEvent() const;
   void         TracingHits() const;
+  void         GenerateHits(Double_t a, Double_t b, Double_t sig = 0.01) const;
   void         ShowHistograms(Option_t *option = "") const;
   void         PureTrackHits() const;
 

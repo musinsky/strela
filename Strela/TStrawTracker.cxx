@@ -1,13 +1,15 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    10 Mar 2011
+// @Date    06 Jun 2011
 
 #include <TMath.h>
 #include <TH2.h>
 #include <TCanvas.h>
 #include <TROOT.h>
+#include <TRandom.h>
 
 #include "TStrawTracker.h"
 #include "TStrawTrack.h"
+#include "TGemEvent.h"
 
 const Int_t kMaxHits    = 50;
 const Int_t kMaxPairs   = 200; // sum(kMaxHits - 1)
@@ -835,12 +837,44 @@ void TStrawTracker::TracingHits() const
   }
 }
 //______________________________________________________________________________
+void TStrawTracker::GenerateHits(Double_t a, Double_t b, Double_t sig) const
+{
+  // need for Monte Carlo
+
+  TStrawLayer *layer;
+  TStrawTube *tube;
+  Double_t d, d0 = TMath::Sqrt(1.0 + a*a);
+
+  TIter nextl(fLayers);
+  while ((layer = (TStrawLayer *)nextl())) {
+    Bool_t found = kFALSE;
+    TIter nextt(layer->Tubes());
+    while ((tube = (TStrawTube *)nextt())) {
+      d  = (a*tube->GetZ() - tube->GetCenter() + b)/d0;
+      d += gRandom->Gaus(0, sig);
+      if (TMath::Abs(d) <= tube->GetRange()) {
+        found = kTRUE;
+        // TODO (before or after tube->GetRange())
+        // d += gRandom->Gaus(0, sig);
+        gStrela->GemEvent()->AddHit(tube->GetNadc(), tube->R2T(d));
+      }
+      else if (found) break; // hits in one layer go consecutive
+    }
+  }
+}
+//______________________________________________________________________________
 void TStrawTracker::ShowHistograms(Option_t *option) const
 {
   TVirtualPad *save = gPad;
   TCanvas *c = (TCanvas *)gROOT->GetListOfCanvases()->FindObject("c_tracker");
   if (!c) {
-    c = new TCanvas("c_tracker");
+    // draw tracker canvas left of tube canvas
+    Int_t wwTube, ww = 620;
+    TCanvas *cTube = (TCanvas *)gROOT->GetListOfCanvases()->FindObject("c_tube");
+    if (cTube) wwTube = cTube->GetWindowTopX() - 12;
+    else       wwTube = ww;
+
+    c = new TCanvas("c_tracker", "", wwTube - ww, 0, ww, ww*0.80);
     c->Divide(2, 4, 0.001, 0.001);
     c->GetPad(3)->SetGrid();
     c->GetPad(4)->SetGrid();

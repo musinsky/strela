@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    24 Oct 2007
+// @Date    26 May 2011
 
 #include "TPommeEvent.h"
 
@@ -9,6 +9,12 @@ ClassImp(TChWire)
 
 ClassImp(TAdcHit)
 
+//______________________________________________________________________________
+TAdcHit::TAdcHit(UShort_t nadc, UShort_t adc)
+{
+  fNadc = nadc;
+  fAdc  = adc;
+}
 //______________________________________________________________________________
 
 ClassImp(TPommeEvent)

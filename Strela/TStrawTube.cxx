@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    10 Mar 2011
+// @Date    06 Jun 2011
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -295,13 +295,25 @@ Double_t TStrawTube::T2R(Int_t time) const
   return radius;
 }
 //______________________________________________________________________________
+Int_t TStrawTube::R2T(Double_t radius) const
+{
+  // need for Monte Carlo
+
+  radius = TMath::Abs(radius);
+  // TODO
+  //  if      (radius < fgWireRadius) return 0;//(GetTMin());
+  //  else if (radius > GetRange())   return 4400;//(GetTMax());
+  //  else                            return (radius/fgDriftVel);
+  return (radius/fgDriftVel);
+}
+//______________________________________________________________________________
 void TStrawTube::SetShowHistograms(Option_t *option) const
 {
   if (fgShowHistograms) return;
 
   fgShowHistograms = 1;
   Int_t ww = 610;
-  TCanvas *c = new TCanvas("c_tube", "", gClient->GetDisplayWidth() - ww, 0, ww, (UInt_t)(ww*1.20));
+  TCanvas *c = new TCanvas("c_tube", "", gClient->GetDisplayWidth() - ww, 0, ww, ww*1.20);
   TString opt = option;
   if (opt.Contains("time", TString::kIgnoreCase))
     c->Divide(1, 2);

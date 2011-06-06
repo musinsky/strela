@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    17 Jun 2008
+// @Date    26 May 2011
 
 #ifndef STRELA_TPommeEvent
 #define STRELA_TPommeEvent
@@ -37,6 +37,7 @@ private:
 
 public:
   TAdcHit() {;}
+  TAdcHit(UShort_t nadc, UShort_t adc);
   virtual      ~TAdcHit() {;}
 
   Int_t         GetNadc() const { return (Int_t)fNadc; }
