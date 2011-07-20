@@ -49,14 +49,14 @@ TStrawCham::~TStrawCham()
   DeleteArrays();
 }
 //______________________________________________________________________________
-void TStrawCham::Print(Option_t* option) const
+void TStrawCham::Print(Option_t *option) const
 {
   if (!fLayers) return;
   TStrawTracker *tracker = 0;
   TStrawLayer *layer;
   TStrawTube *tube;
   TIter nextLayer(fLayers);
-  while((layer = (TStrawLayer *)nextLayer())) {
+  while ((layer = (TStrawLayer *)nextLayer())) {
     if (tracker != layer->GetTracker()) {
       tracker = layer->GetTracker();
       Printf("=======> %s <=======", tracker->GetName());

@@ -142,7 +142,7 @@ void TVME::DecodeFile(const char *fname, Int_t ne, Int_t imod) const
     return;
   }
 
-  while(read(fd, &word, sizeof(word)) == sizeof(word)) {
+  while (read(fd, &word, sizeof(word)) == sizeof(word)) {
 
     // 0xC Spill header
     if ((word >> 28) == 0xC) {

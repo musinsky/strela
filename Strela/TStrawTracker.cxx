@@ -299,25 +299,25 @@ void TStrawTracker::MarginalTubes(Int_t set, Bool_t onlyhalf) const
     if (tube->GetMargin() == TStrawTube::kNoMargin) continue;
     if (onlyhalf && (tube->GetMargin() == TStrawTube::kMargin)) continue;
     switch (set) {
-    case 0: // to default
-      tube->SetDisabled(kFALSE);
-      tube->SetNoMultiSum(kFALSE);
-      break;
-    case 1:
-      tube->SetNoMultiSum(kTRUE);
-      break;
-    case -1:
-      tube->SetNoMultiSum(kFALSE);
-      break;
-    case 2:
-      tube->SetDisabled(kTRUE);
-      break;
-    case -2:
-      tube->SetDisabled(kFALSE);
-      break;
-    default:
-      Warning("MarginalTubes", "%s without changing", tube->GetName());
-      break;
+      case 0: // to default
+        tube->SetDisabled(kFALSE);
+        tube->SetNoMultiSum(kFALSE);
+        break;
+      case 1:
+        tube->SetNoMultiSum(kTRUE);
+        break;
+      case -1:
+        tube->SetNoMultiSum(kFALSE);
+        break;
+      case 2:
+        tube->SetDisabled(kTRUE);
+        break;
+      case -2:
+        tube->SetDisabled(kFALSE);
+        break;
+      default:
+        Warning("MarginalTubes", "%s without changing", tube->GetName());
+        break;
     }
   }
 }
@@ -512,7 +512,7 @@ void TStrawTracker::TangentsPair(Int_t ia, Int_t ib, Bool_t aonly)
   if (sxdyd2 < rp2) fAzPair[2] = fAzPair[3] = -xd/yd; // intersect two circles
   if (aonly) return;
 
-  Int_t sign[4] ={-1, +1, +1, -1};
+  Int_t sign[4] = {-1, +1, +1, -1};
   for (Int_t it = 0; it < 4; it++)
     fBzPair[it] = -fAzPair[it]*x[1] + y[1];
 

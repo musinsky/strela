@@ -113,27 +113,27 @@ void TStrawTube::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 
   switch (event) {
 
-  case kMouseEnter:
-    ShowHistograms();
-    if (!fgShowHistograms) return; // canvas was closed
-    if (GetUniqueID() == 0) SetLineWidth(GetLineWidth() + 2);
-    SetUniqueID(10);
-    gPad->Modified();
-    gPad->Update();
-    return;
+    case kMouseEnter:
+      ShowHistograms();
+      if (!fgShowHistograms) return; // canvas was closed
+      if (GetUniqueID() == 0) SetLineWidth(GetLineWidth() + 2);
+      SetUniqueID(10);
+      gPad->Modified();
+      gPad->Update();
+      return;
 
-  case kMouseLeave:
-    if (GetUniqueID() == 10) SetLineWidth(GetLineWidth() - 2);
-    SetUniqueID(0); // default
-    gPad->Modified();
-    gPad->Update();
-    return;
+    case kMouseLeave:
+      if (GetUniqueID() == 10) SetLineWidth(GetLineWidth() - 2);
+      SetUniqueID(0); // default
+      gPad->Modified();
+      gPad->Update();
+      return;
 
-  case kButton1Double:
-    TCanvas *c = (TCanvas *)gROOT->GetListOfCanvases()->FindObject("c_tracker");
-    if (c) c->Close();
-    else GetTracker()->ShowHistograms();
-    return;
+    case kButton1Double:
+      TCanvas *c = (TCanvas *)gROOT->GetListOfCanvases()->FindObject("c_tracker");
+      if (c) c->Close();
+      else GetTracker()->ShowHistograms();
+      return;
   }
 }
 //______________________________________________________________________________

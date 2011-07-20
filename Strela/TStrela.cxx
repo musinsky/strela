@@ -265,7 +265,7 @@ void TStrela::AddFriend(Option_t *option, const char *dirname) const
   if (fChain->GetListOfFriends()) {
     TFriendElement *oldFriend = (TFriendElement *)fChain->GetListOfFriends()->FindObject(treeName.Data());
     if (oldFriend) {
-      if(onlyRead) {
+      if (onlyRead) {
         Error("AddFriend", "friend element %s already exists", treeName.Data());
         return;
       }

@@ -82,7 +82,7 @@ void TStrawMulti::Add(const TStrawTracker *tracker)
 
   TIter next(tracker->Layers());
   TStrawLayer *layer;
-  while((layer = (TStrawLayer *)next()))
+  while ((layer = (TStrawLayer *)next()))
     Add(layer);
 }
 //______________________________________________________________________________
@@ -95,7 +95,7 @@ void TStrawMulti::Add(const TStrawLayer *layer)
 
   TIter next(layer->Tubes());
   TStrawTube *tube;
-  while((tube = (TStrawTube *)next()))
+  while ((tube = (TStrawTube *)next()))
     Add(tube);
 }
 //______________________________________________________________________________

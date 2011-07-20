@@ -91,7 +91,8 @@ public:
   Double_t      R(Int_t ih) const { return fRadius[ih]; }
   Int_t         T(Int_t ih) const { return fTime[ih]; }
   const char   *ChannelInfo(Int_t ih) const {
-    return (ih < fNHits) ? gVME->GetChannelInfo(GetTubeHit(ih)->GetNadc()) : ""; }
+    return (ih < fNHits) ? gVME->GetChannelInfo(GetTubeHit(ih)->GetNadc()) : "";
+  }
 
   void        SetMinNHits(Int_t n) { fMinNHits = n; }
   Int_t       GetMinNHits() const { return fMinNHits; }

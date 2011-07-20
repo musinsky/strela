@@ -9,11 +9,11 @@ const Int_t kChipNChannels = 32;
 
 // from daq7300/decoder/decode_tdc96.c (by Ilja Slepnev)
 const Int_t kMap[kChipNChannels] = { // tdc_ch
-    0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
-    16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
+  16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
 };
 const Int_t kId2Num[16] = { // tdc_id
-    -1, 0, 1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+  -1, 0, 1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
 // connectors enumeration (front panel)
 //           2
@@ -46,9 +46,9 @@ TModuleTDC96::~TModuleTDC96()
 void TModuleTDC96::Print(Option_t *option) const
 {
   const Int_t firstch[kNChips] = {
-      kConnector[2] - kChipNChannels + 1,
-      kConnector[1] - kChipNChannels + 1,
-      kConnector[0] - kChipNChannels + 1
+    kConnector[2] - kChipNChannels + 1,
+    kConnector[1] - kChipNChannels + 1,
+    kConnector[0] - kChipNChannels + 1
   };
   Int_t del = 0, channelE, channelO, nadc, id, ch;
   if (gVME) {

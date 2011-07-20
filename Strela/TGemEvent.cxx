@@ -32,7 +32,7 @@ void TGemEvent::AddHit(UShort_t nadc, UShort_t adc)
   // Delta is unnecessary, i.e. not TAdcHit1
 
   TClonesArray &hits = *fAdcHits;
-  new (hits[fNhits++]) TAdcHit(nadc, adc);
+  new(hits[fNhits++]) TAdcHit(nadc, adc);
 }
 //______________________________________________________________________________
 void TGemEvent::Clear(Option_t *option)
