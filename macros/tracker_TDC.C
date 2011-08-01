@@ -9,6 +9,8 @@
   tracker_TDC(t2)
   tra->Draw("T(21)>>(700,0,7000)", "Ch(21)")
   tra->Draw("T(21)", "Ch(21)&&GetNHits()==4", "same")
+  tra->Draw("T(21)>>(700,0,7000)", "T(29)")
+  tra->Draw("T_M(21, 0)", "T_M(29, 0)", "same")
   tra->Draw("T_M(21, 0)>>(700,0,7000)", "Ch_M(21, 0)")
   tra->Draw("T_M(21, 0)", "Ch_M(21, 1)", "same")
   TCut cut1 = "Ch(18)&&Ch(26)&&Ch(21)"
