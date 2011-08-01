@@ -1,10 +1,7 @@
 // Author: Jan Musinsky
-// 07/12/2010
+// 01/08/2011
 
-#include <TFile.h>
-#include <TROOT.h>
-
-#include "TStrawTracker.h"
+#include <TClonesArray.h>
 
 #ifndef MNULL
 #define MNULL -9999
@@ -20,8 +17,8 @@ public:
   THit(const Int_t ch, const Int_t t);
   virtual      ~THit() {;}
 
-  Int_t      GetChannel() const { return fChannel; }
-  Int_t      GetTDC() const { return fTdc; }
+  Int_t         GetChannel() const { return fChannel; }
+  Int_t         GetTDC() const { return fTdc; }
 
   ClassDef(THit, 1) // THit class
 };
@@ -53,12 +50,11 @@ public:
   virtual void  Clear(Option_t *option = "");
   void          AddHit(const Int_t chh, const Int_t th);
 
+  Int_t         CountChannel(Int_t chan) const;
   Int_t         FindChannel(Int_t chan) const;
   Int_t         FindChannel_M(Int_t chan, Int_t multi) const;
-  Bool_t        Ch(Int_t ch) const { return
-      (FindChannel(ch) == -1) ? kFALSE : kTRUE; }
-  Bool_t        Ch_M(Int_t ch, Int_t m = 0) const { return
-      (FindChannel_M(ch, m) == -1) ? kFALSE : kTRUE; }
+  Bool_t        Ch(Int_t ch) const { return (FindChannel(ch) == -1) ? kFALSE : kTRUE; }
+  Bool_t        Ch_M(Int_t ch, Int_t m = 0) const { return (FindChannel_M(ch, m) == -1) ? kFALSE : kTRUE; }
   Int_t         T(Int_t ch) const;
   Int_t         T_M(Int_t ch, Int_t m = 0) const;
 
@@ -93,6 +89,17 @@ void TEvent::AddHit(const Int_t chh, const Int_t th)
 {
   TClonesArray &hits = *fHits;
   new(hits[fNhits++]) THit(chh, th);
+}
+
+Int_t TEvent::CountChannel(Int_t chan) const
+{
+  // count all hits per one channel
+  Int_t count = 0;
+  for (Int_t ich = 0; ich < fNhits; ich++)
+    if (Hit(ich)->GetChannel() == chan)
+      count++;
+
+  return count;
 }
 
 Int_t TEvent::FindChannel(Int_t chan) const
