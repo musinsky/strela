@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    06 Jun 2011
+// @Date    04 Aug 2011
 
 #include <TMath.h>
 #include <TH2.h>
@@ -389,12 +389,12 @@ void TStrawTracker::FindTracks()
     if (findTrack) {                       // exist track ?
       DeletePairs();                       // delete pairs with assigned hits
       if (fPrecision == 3) {               // both precision tracking method
-        PrecisionTrackA();
         PrecisionTrackB();
+        PrecisionTrackA();
       }
       else if (fPrecision == 1)            // only method A
         PrecisionTrackA();
-      else if (fPrecision == 2)            // only method B
+      else if (fPrecision == 2)            // only method B (no sense, same as default)
         PrecisionTrackB();
       AddTrack();                          // add track
       if (!fgOnlyOneTrack)
@@ -575,7 +575,8 @@ Bool_t TStrawTracker::CheckHits(Int_t it)
     }
 
     dabs = TMath::Abs(d);
-    if (dabs > D(i)) continue; // tangent must intersect tube
+    if (dabs > (D(i)*1.10)) continue; // tangent must intersect tube (plus/minus)
+    // FIXME
     res  = R(i) - dabs;
     if (!tangentHit) fhResTan->Fill(res);
     res  = TMath::Abs(res);
@@ -672,8 +673,7 @@ void TStrawTracker::LFit(Int_t np, const Double_t *x, const Double_t *y,
     sumxy += scartx*scarty;
   }
 
-  if (sumxx == 0.0) {
-    // FIXME
+  if (TMath::Abs(sumxx) < 1.E-12) {
     Warning("LFit", "something wrong with %s geometry", GetName());
     a = 0.0; b = 0.0; chi2 = 9999;
     return;
@@ -750,6 +750,7 @@ void TStrawTracker::PrecisionTrackA()
 void TStrawTracker::PrecisionTrackB()
 {
   // iterative method
+  // this method is practically identical to the default method
 
   Double_t z[kMaxChecked], x[kMaxChecked];
   Int_t ih, amb;
@@ -769,7 +770,7 @@ void TStrawTracker::PrecisionTrackB()
 
     az = fAz;
     LFit(fTrackNHits, z, x, fAz, fBz, fChi2);
-    if (TMath::Abs(fAz - az)*10e+06 < 10) break;
+    if (TMath::Abs(fAz - az) < 1.E-10) break; // ~ 2-3 iteration
   }
 }
 //______________________________________________________________________________
