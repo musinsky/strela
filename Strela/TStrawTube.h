@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 May 2011
+// @Date    04 Aug 2011
 
 #ifndef STRELA_TStrawTube
 #define STRELA_TStrawTube
@@ -33,13 +33,15 @@ private:
   Int_t           fT0;       //  zero time
   Int_t           fTMin;     //  minimum time
   Int_t           fTMax;     //  maximum time
-  static Int_t    fgBaseT0;     //! base zero time
-  static Double_t fgDriftVel;   //! velocity of drift
-  static Double_t fgWireRadius; //! radius of tungsten wire
+  static Int_t    fgBaseT0;         //! base zero time
+  static Double_t fgDriftVel;       //! velocity of drift
+  static Double_t fgWireRadius;     //! radius of tungsten wire
+  static Int_t    fgOnlyFirstNHits; //! analyze only first N hits of tube
   Int_t           fNadc;     //  unique number from SQL
   TStrawLayer    *fLayer;    //! pointer to parent layer
   TStrawMulti    *fMulti;    //! pointer to parent multi
   EMarginType     fMargin;   //  type of tube margin
+  Int_t           fNHits;    //  number of hits
 
   static Int_t  fgShowHistograms; //  on/off drawing histograms
   TH1F         *fhTime1;   //! raw time (all hits)
@@ -74,6 +76,8 @@ public:
   static void     DriftVel(Double_t dv) { fgDriftVel = dv; }
   static Double_t GetDriftVel() { return fgDriftVel; }
   static Double_t GetWireRadius() { return fgWireRadius; }
+  static void     OnlyFirstNHits(Int_t firstn) { fgOnlyFirstNHits = firstn; }
+  static Int_t    GetOnlyFirstNHits() { return fgOnlyFirstNHits; }
   void            SetNadc(Int_t nadc) { fNadc = nadc; }
   Int_t           GetNadc() const { return fNadc; }
   void            SetLayer(TStrawLayer *layer) { fLayer = layer; }
@@ -84,6 +88,9 @@ public:
   EMarginType     GetMargin() const { return fMargin; }
   Bool_t          IsDisabled() const { return TestBit(kIsDisabled); }
   Bool_t          IsNoMultiSum() const { return TestBit(kNoMultiSum); }
+  void            AddHit() { fNHits++; }
+  void            ResetHits() { fNHits = 0; }
+  Int_t           GetNHits() const { return fNHits; }
 
   TH1F         *HisTime1() const { return fhTime1; }
   TH1F         *HisTime2() const { return fhTime2; }

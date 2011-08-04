@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    06 Jun 2011
+// @Date    04 Aug 2011
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -19,6 +19,7 @@
 Int_t    TStrawTube::fgBaseT0         = 0;
 Double_t TStrawTube::fgDriftVel       = 2.1/4400;
 Double_t TStrawTube::fgWireRadius     = 0.0025/2;
+Int_t    TStrawTube::fgOnlyFirstNHits = 5;
 Int_t    TStrawTube::fgShowHistograms = 0;
 
 const Int_t kBaseT0 = TStrawTube::GetBaseT0();
@@ -37,6 +38,7 @@ TStrawTube::TStrawTube()
   fLayer    = 0;
   fMulti    = 0;
   fMargin   = kNoMargin;
+  fNHits    = 0;
   fhTime1   = 0;
   fhTime2   = 0;
   fhRad1    = 0;
@@ -61,6 +63,7 @@ TStrawTube::TStrawTube(Double_t center) : TEllipse()
   fLayer    = 0;
   fMulti    = 0;
   fMargin   = kNoMargin;
+  fNHits    = 0;
   fhTime1   = 0;
   fhTime2   = 0;
   fhRad1    = 0;
@@ -370,8 +373,8 @@ void TStrawTube::ShowHistoFull(TCanvas *can) const
   if ((Int_t) max != (Int_t) maxe) fhEffi->Scale(max/maxe);
   fhEffi->Draw("same");
   can->cd(6);
-  //  fhDisTime->Draw();
-  fhBzAz->Draw();
+  fhDisTime->Draw();
+  //  fhBzAz->Draw();
 
   // tracker
   if (!gROOT->GetListOfCanvases()->FindObject("c_tracker")) return;

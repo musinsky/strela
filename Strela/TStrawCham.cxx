@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    18 Nov 2010
+// @Date    04 Aug 2011
 
 #include <TSQLServer.h>
 #include <TSQLResult.h>
@@ -236,6 +236,8 @@ void TStrawCham::AnalyzeEntry()
   TStrawTracker *tracker;
   while ((tracker = (TStrawTracker *)next()))
     tracker->ResetHits();
+  for (Int_t it = 0; it < fTubes->GetEntriesFast(); it++)
+    GetTube(it)->ResetHits();
 
   TGemEvent *gemEvent = gStrela->GemEvent();
   TAdcHit1 *adcHit1;
@@ -265,12 +267,13 @@ void TStrawCham::AnalyzeEntry()
     adcHit1 = gemEvent->GetAdcHit1(ih);
     nadc    = adcHit1->GetNadc();
     adc     = adcHit1->GetAdc();
+    adc    -= trigAdc; // (only if exist trigAdc, otherwise adc without change)
     pos     = TMath::BinarySearch(fTubes->GetEntriesFast(), fTubesI, nadc);
     if (pos < 0) continue;
     tube    = GetTube(pos);
     if (nadc != tube->GetNadc()) continue;
-    // substract trigAdc (only if exist, otherwise adc without change)
-    adc    -= trigAdc;
+    tube->AddHit();
+    if (tube->GetNHits() > TStrawTube::GetOnlyFirstNHits()) continue; // only first N hits of tube
     tube->HisTime1()->Fill(adc);
     if (tube->IsDisabled()) continue;
     if ((adc < tube->GetTMin()) || (adc > tube->GetTMax())) continue;
