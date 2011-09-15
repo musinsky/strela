@@ -1,11 +1,13 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    04 Aug 2011
+// @Date    15 Sep 2011
 
 #include <TSQLServer.h>
 #include <TSQLResult.h>
 #include <TSQLRow.h>
 #include <TMath.h>
 #include <TH1.h>
+#include <TROOT.h>
+#include <TCanvas.h>
 
 #include "TStrawCham.h"
 #include "TStrawTracker.h"
@@ -293,6 +295,19 @@ void TStrawCham::AnalyzeEntry()
 void TStrawCham::AnalyzeTerminate()
 {
   EfficiencyTubes();
+
+  TCanvas *c;
+  c = (TCanvas *)gROOT->GetListOfCanvases()->FindObject("c_tracker");
+  if (c) FindTracker(c->GetTitle())->ShowHistograms();
+  c = (TCanvas *)gROOT->GetListOfCanvases()->FindObject("c_tube");
+  if (c) {
+    TString title = c->GetTitle();
+    if (title.IsNull()) return;
+    // see TStrawTube::GetTitle and TVME::GetChannelInfo
+    title.Remove(0, 6);
+    title.Remove(4, 99);
+    SearchTube(title.Atoi())->ShowHistograms();
+  }
 }
 //______________________________________________________________________________
 void TStrawCham::IterNext(Int_t ne)

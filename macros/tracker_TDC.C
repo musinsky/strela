@@ -1,9 +1,10 @@
 // Author: Jan Musinsky
-// 01/08/2011
+// 15/09/2011
 
 /*
   .x Strela.C
   .L macros/tracker_TDC.C
+  TStrawTube::OnlyFirstNHits(9)
   TStrawCham::Tracking(0)
   gStrela->StrawCham()->SetTubesTimes(0, 0, 9000)
   tracker_TDC(t2)

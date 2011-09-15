@@ -1,10 +1,10 @@
 // Author: Jan Musinsky
-// 01/08/2011
+// 15/09/2011
 
 #include <TClonesArray.h>
 
 #ifndef MNULL
-#define MNULL -9999
+#define MNULL 99999
 #endif
 
 class THit : public TObject {
