@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    24 Oct 2007
+// @Date    12 Oct 2011
 
 #ifndef STRELA_TWirePoint
 #define STRELA_TWirePoint
@@ -15,7 +15,7 @@ private:
   Double32_t    fPoint; //  Point
 
 public:
-  TWirePoint() {;}
+  TWirePoint() : fPlane(0), fPoint(0) {;}
   TWirePoint(Int_t plane, Double32_t point);
   virtual      ~TWirePoint() {;}
 

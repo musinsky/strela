@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 May 2011
+// @Date    12 Oct 2011
 
 #ifndef STRELA_TPommeEvent
 #define STRELA_TPommeEvent
@@ -18,7 +18,7 @@ private:
   UShort_t      fWidth; //  Width
 
 public:
-  TChWire() {;}
+  TChWire() : fWire(0), fWidth(0) {;}
   virtual      ~TChWire() {;}
 
   Int_t         GetWire() const { return (Int_t)fWire; }
@@ -36,7 +36,7 @@ private:
   UShort_t      fAdc;  //  Adc
 
 public:
-  TAdcHit() {;}
+  TAdcHit() : fNadc(0), fAdc(0) {;}
   TAdcHit(UShort_t nadc, UShort_t adc);
   virtual      ~TAdcHit() {;}
 

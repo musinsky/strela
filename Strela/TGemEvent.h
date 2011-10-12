@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 May 2011
+// @Date    12 Oct 2011
 
 #ifndef STRELA_TGemEvent
 #define STRELA_TGemEvent
@@ -14,7 +14,7 @@ private:
   UShort_t      fDelta; //  Delta
 
 public:
-  TAdcHit1() {;}
+  TAdcHit1() : fDelta(0) {;}
   virtual      ~TAdcHit1() {;}
 
   Int_t         GetDelta() const { return (Int_t)fDelta; }

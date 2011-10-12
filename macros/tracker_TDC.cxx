@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 15/09/2011
+// 12/10/2011
 
 #include <TClonesArray.h>
 
@@ -13,7 +13,7 @@ private:
   Int_t         fTdc;     //  TDC
 
 public:
-  THit() {;}
+  THit() : fChannel(0), fTdc(0) {;}
   THit(const Int_t ch, const Int_t t);
   virtual      ~THit() {;}
 

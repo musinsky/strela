@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 15/09/2011
+// 12/10/2011
 
 {
   if (gStrela) return;
@@ -33,13 +33,25 @@
   t11->SetMinNHitsAdvanced(4);
 
   gROOT->LoadMacro("macros/DisplayTracker.C");
-  DisplayTracker();
+  DisplayTracker(1, 2, t2, t1);
+  gStrela->GetDisplay()->GetCanvas()->SetWindowSize(250, 600);
   t1->GetTube(0)->SetShowHistograms();
+  TStrawTube::OnlyFirstNHits(1);
+  gStrela->StrawCham()->SetTubesTimes(3, 880, 0);
+  gStrela->StrawCham()->SetTubesTimes(0, 880-100, 880+4520+500);
+  TStrawTube::DriftVel(2.1/4520);
+  gStrela->StrawCham()->Trackers()->RemoveAll();
+  gStrela->StrawCham()->Trackers()->Add(t1);
+  gStrela->StrawCham()->Trackers()->Add(t2);
+  m1  = new TStrawMulti("m1");
+  m2  = new TStrawMulti("m2");
+  m1->Add(t1);
+  m2->Add(t2);
+
+  break;
   gStrela->StrawCham()->SetTubesTimes(3, 880, 0);
   gStrela->StrawCham()->SetTubesTimes(0, 880, 880+4490+250);
-//  gStrela->StrawCham()->SetTubesTimes(2, 0, 4490);
   TStrawTube::DriftVel(2.075/4490);
-
 
   break;
   gStrela->StrawCham()->SetTubesTimes(0, 800, 7000);

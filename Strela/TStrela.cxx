@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    31 May 2011
+// @Date    12 Oct 2011
 
 #include <TROOT.h>
 #include <TSQLServer.h>
@@ -57,6 +57,7 @@ TStrela::TStrela(const char *name, const char *title) : TNamed(name, title)
 
   // order of detectors in list is not important (meanwhile)
   fDetectors  = new TList();
+  fWireCham   = 0;
   //  fWireCham   = new TWireCham("WireCham", "Find points in wire chambers");
   //  no more need WireCham (MWPC) detectors
   fStrawCham  = new TStrawCham("StrawCham", "Find tracks in straw chambers");
@@ -187,7 +188,7 @@ void TStrela::AnalyzeEntries(Int_t ne, Option_t *option, Bool_t timer) const
 
   TString opt = option;
   opt.ToLower();
-  if (opt == "hreset") HistoManager("*", "reset");
+  if (opt != "hnoreset") HistoManager("*", "reset");
 
   static TStopwatch watch;
   if ((ne == 0) || (ne > GetEntries())) ne = GetEntries();

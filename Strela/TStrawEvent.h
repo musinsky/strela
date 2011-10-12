@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    24 Oct 2007
+// @Date    12 Oct 2011
 
 #ifndef STRELA_TStrawEvent
 #define STRELA_TStrawEvent
@@ -16,7 +16,7 @@ private:
   UShort_t      fDelta; //  Delta
 
 public:
-  TStrawHit() {;}
+  TStrawHit() : fNtdc(0), fTdc(0), fDelta(0) {;}
   virtual      ~TStrawHit() {;}
 
   Int_t         GetNtdc() const { return (Int_t)fNtdc; }

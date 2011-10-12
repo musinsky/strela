@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    24 Oct 2007
+// @Date    12 Oct 2011
 
 #ifndef STRELA_TStrawTrack
 #define STRELA_TStrawTrack
@@ -22,7 +22,7 @@ private:
   Int_t         fHit[kMAXHIT]; //! Hit
 
 public:
-  TStrawTrack() {;}
+  TStrawTrack() : fId(0), fAz(0), fBz(0), fChi2(0), fNHits(0) {;}
   TStrawTrack(Int_t id, Double32_t a, Double32_t b, Double32_t chi2);
   virtual      ~TStrawTrack() {;}
 
