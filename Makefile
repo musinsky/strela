@@ -1,9 +1,9 @@
-# @(#) 19 Nov 2010
+# @(#) 09 Mar 2012
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
 
-include $(ROOTSYS)/test/Makefile.arch
+include $(ROOTSYS)/etc/Makefile.arch
 HdrSuf		= h
 ifeq ($(MAKECMDGOALS),debug)
 CXXFLAGS	+= -DDEBUG
