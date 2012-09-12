@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    11 Nov 2010
+// @Date    12 Sep 2012
 
 #include <TBrowser.h>
 
@@ -63,7 +63,7 @@ void TStrelaBase::Init()
     Info("Init", "remove from analyze");
 }
 //______________________________________________________________________________
-Bool_t TStrelaBase::ReadSQL(TSQLServer *ser)
+Bool_t TStrelaBase::ReadSQL(TSQLServer * /*ser*/)
 {
   // override this function
   return kTRUE;

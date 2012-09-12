@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    11 Nov 2010
+// @Date    12 Sep 2012
 
 #include <TCanvas.h>
 #include <TButton.h>
@@ -161,7 +161,7 @@ void TStrelaDisplay::DisplayEvent(Option_t *option) const
   }
 }
 //______________________________________________________________________________
-void TStrelaDisplay::DisplayEvent(const TStrawTracker *tracker, Option_t *option) const
+void TStrelaDisplay::DisplayEvent(const TStrawTracker *tracker, Option_t * /*option*/) const
 {
   if (!gPad) return;
 

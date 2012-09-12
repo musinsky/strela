@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 Oct 2010
+// @Date    12 Sep 2012
 
 #include "TModulePhTDC.h"
 #include "TVME.h"
@@ -136,7 +136,7 @@ Bool_t TModulePhTDC::GetChannelIdCh(Int_t ch, Int_t &tdcid, Int_t &tdcch) const
   return kFALSE;
 }
 //______________________________________________________________________________
-void TModulePhTDC::ConnectorChannels(Int_t con, Int_t *pins, Option_t *option) const
+void TModulePhTDC::ConnectorChannels(Int_t con, Int_t *pins, Option_t * /*option*/) const
 {
   TVirtualModule::ConnectorChannels(con, pins); // only checks
   Int_t del = gVME->FirstChannelOfModule(this);

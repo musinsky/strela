@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    11 Nov 2010
+// @Date    12 Sep 2012
 
 #include "TVirtualModule.h"
 #include "TVME.h"
@@ -28,19 +28,19 @@ TVirtualModule::~TVirtualModule()
   if (gVME) gVME->Modules()->Remove(this);
 }
 //______________________________________________________________________________
-Int_t TVirtualModule::MapChannel(Int_t tdcid, Int_t tdcch) const
+Int_t TVirtualModule::MapChannel(Int_t /*tdcid*/, Int_t /*tdcch*/) const
 {
   // override this function
   return -1;
 }
 //______________________________________________________________________________
-Bool_t TVirtualModule::GetChannelIdCh(Int_t ch, Int_t &tdcid, Int_t &tdcch) const
+Bool_t TVirtualModule::GetChannelIdCh(Int_t /*ch*/, Int_t & /*tdcid*/, Int_t & /*tdcch*/) const
 {
   // override this function
   return kFALSE;
 }
 //______________________________________________________________________________
-void TVirtualModule::ConnectorChannels(Int_t con, Int_t *pins, Option_t *option) const
+void TVirtualModule::ConnectorChannels(Int_t con, Int_t * /*pins*/, Option_t * /*option*/) const
 {
   if (gVME->GetNChannels() != gVME->GetNChannelsFast())
     Error("ConnectorChannels", "must ReDecode all channels");

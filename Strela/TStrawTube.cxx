@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    04 Aug 2011
+// @Date    12 Sep 2012
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -110,7 +110,7 @@ void TStrawTube::Draw(Option_t *option)
   AppendPad(option);
 }
 //______________________________________________________________________________
-void TStrawTube::ExecuteEvent(Int_t event, Int_t px, Int_t py)
+void TStrawTube::ExecuteEvent(Int_t event, Int_t /*px*/, Int_t /*py*/)
 {
   if (!fgShowHistograms) return;
 
@@ -153,7 +153,7 @@ char *TStrawTube::GetObjectInfo(Int_t px, Int_t py) const
   return info;
 }
 //______________________________________________________________________________
-void TStrawTube::Print(Option_t *option) const
+void TStrawTube::Print(Option_t * /*option*/) const
 {
   Printf("%s: %s; T0 = %4d, tdc <%4d, %4d>", GetName(), GetTitle(), fT0, fTMin, fTMax);
 }
@@ -327,7 +327,7 @@ void TStrawTube::SetShowHistograms(Option_t *option) const
   }
 }
 //______________________________________________________________________________
-void TStrawTube::ShowHistograms(Option_t *option) const
+void TStrawTube::ShowHistograms(Option_t * /*option*/) const
 {
   TVirtualPad *save = gPad;
   TCanvas *c = (TCanvas *)gROOT->GetListOfCanvases()->FindObject("c_tube");

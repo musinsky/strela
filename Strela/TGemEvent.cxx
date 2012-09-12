@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 May 2011
+// @Date    12 Sep 2012
 
 #include "TGemEvent.h"
 
@@ -41,7 +41,7 @@ void TGemEvent::Clear(Option_t *option)
   fAdcHits->Clear(option);
 }
 //______________________________________________________________________________
-void TGemEvent::Print(Option_t *option) const
+void TGemEvent::Print(Option_t * /*option*/) const
 {
   Printf("event = %d, nhits = %d", GetNEvent(), GetNHits());
   TAdcHit1 *hit1;

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    04 Aug 2011
+// @Date    12 Sep 2012
 
 #include <TMath.h>
 #include <TH2.h>
@@ -864,7 +864,7 @@ void TStrawTracker::GenerateHits(Double_t a, Double_t b, Double_t sig) const
   }
 }
 //______________________________________________________________________________
-void TStrawTracker::ShowHistograms(Option_t *option) const
+void TStrawTracker::ShowHistograms(Option_t * /*option*/) const
 {
   TVirtualPad *save = gPad;
   TCanvas *c = (TCanvas *)gROOT->GetListOfCanvases()->FindObject("c_tracker");
