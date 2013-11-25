@@ -1,6 +1,13 @@
 // Author: Jan Musinsky
-// 15/09/2011
+// 25/11/2013
 
+#ifndef __CINT__
+#include <TROOT.h>
+#include <TSystem.h>
+#include <TStyle.h>
+
+void rootlogon()
+#endif
 {
   if (gROOT->GetClass("TStrela")) {
     Printf("Strela libraries was already loaded");
@@ -8,7 +15,7 @@
   }
 
   gSystem->AddIncludePath("-Iinclude");
-  gSystem->SetBuildDir("tmp", kTRUE);
+  gSystem->SetBuildDir("build", kTRUE);
 
   gSystem->Load("libGpad");
   gSystem->Load("libSQLIO");
@@ -16,9 +23,5 @@
   gSystem->Load("lib/libStrela.so");
 
   gStyle->SetHistLineColor(kBlack);
-  gStyle->SetGridColor(kGray+2);
-  gStyle->SetOptDate(21);
-  gStyle->SetDateX(0.005);
-  gStyle->SetDateY(0.005);
-  gStyle->GetAttDate()->SetTextSize(0.015);
+  gStyle->SetGridColor(kGray);
 }

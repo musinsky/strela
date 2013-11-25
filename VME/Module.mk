@@ -1,4 +1,4 @@
-# @(#) 09 Jun 2008
+# @(#) 25 Nov 2013
 # module for VME
 
 # Author: Jan Musinsky
@@ -10,22 +10,22 @@ FILES	= TVME TVirtualModule TModulePhTDC TModuleTDC96
 LNKDEF	= $(MODDIR)/$(LNKFILE).$(HdrSuf)
 SRCS	= $(patsubst %,$(MODDIR)/%.$(SrcSuf),$(FILES))
 HDRS	= $(SRCS:.$(SrcSuf)=.$(HdrSuf))
-DICT	= $(TMPDIR)/$(MODDIR)/$(DICTPREFIX)$(MODULE).$(SrcSuf)
+DICT	= $(OBJDIR)/$(MODDIR)/$(DICTPREFIX)$(MODULE).$(SrcSuf)
 DICTH	= $(DICT:.$(SrcSuf)=.$(HdrSuf))
 DICTO	= $(DICT:.$(SrcSuf)=.$(ObjSuf))
-OBJS	= $(patsubst %.$(SrcSuf),$(TMPDIR)/%.$(ObjSuf),$(SRCS))
+OBJS	= $(patsubst %.$(SrcSuf),$(OBJDIR)/%.$(ObjSuf),$(SRCS))
 MODLIB	= $(LIBDIR)/$(LIBPREFIX)$(MODULE).$(DllSuf)
 
-VMECLEAN := $(OBJS) $(DICTO)
-ifeq (distclean,$(findstring distclean,$(MAKECMDGOALS)))
-VMECLEAN += $(DICT) $(DICTH) $(MODLIB)
+VMECLEAN	:= $(OBJS) $(DICT) $(DICTH) $(DICTO)
+ifeq ($(MAKECMDGOALS),distclean)
+VMECLEAN	+= $(MODLIB) $(subst $(MODDIR)/,$(INCDIR)/,$(HDRS)) # '/' important
 endif
 
 # used in the main Makefile
-ALLLIBS	+= $(MODLIB)
-ALLHDRS	+= $(HDRS)
-ALLDIST	+= $(SRCS) $(HDRS) $(LNKDEF) $(MODDIR)/$(MODMAKEFILE)
-ALLDEPEND += $(SRCS)
+ALLLIBS		+= $(MODLIB)
+ALLHDRS		+= $(HDRS)
+ALLDIST		+= $(SRCS) $(HDRS) $(LNKDEF) $(MODDIR)/$(MODMAKEFILE)
+ALLDEPEND	+= $(SRCS)
 
 $(MODDIR):	$(MODLIB)
 

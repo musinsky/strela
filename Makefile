@@ -1,4 +1,4 @@
-# @(#) 12 Sep 2012
+# @(#) 25 Nov 2013
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
@@ -16,17 +16,18 @@ MODMAKEFILE	= Module.mk
 LNKFILE		= LinkDef
 DICTPREFIX	= G__
 INCDIR		= include
-TMPDIR		= tmp
+OBJDIR		= build
 LIBDIR		= lib
 LIBPREFIX	= lib
-DISTSRCNAME	= strela_$(shell date +%F).source
+DISTSRCNAME	= strela.$(shell date +%F).git$(shell git describe --always).source
 MAKEDEPEND	= rmkdepend
-DEPENDFILE	= $(TMPDIR)/Make-depend
+DEPENDFILE	= $(OBJDIR)/Make-depend
+NODEPEND	= clean distclean distsrc showbuild
 
 # all
 ALLHDRS		:=
 ALLLIBS		:=
-ALLDIST		:=
+ALLDIST		:= Makefile
 ALLDEPEND	:=
 
 # verbatim variables
@@ -43,7 +44,7 @@ endef
 .SUFFIXES: # delete the default suffixes
 .PRECIOUS: $(INCDIR)/%.$(HdrSuf) # preserve intermediate files
 
-$(TMPDIR)/%.$(ObjSuf) : %.$(SrcSuf)
+$(OBJDIR)/%.$(ObjSuf) : %.$(SrcSuf)
 			$(checkdir)
 			@$(CXX) $(CXXFLAGS) -I$(INCDIR) -c $< -o $@
 			@echo -e "$@ done"
@@ -51,7 +52,7 @@ $(TMPDIR)/%.$(ObjSuf) : %.$(SrcSuf)
 $(DICTPREFIX)%.$(SrcSuf) :
 			@echo "Generating dictionary $@ ..."
 			$(checkdir)
-			@rootcint -f $@ -c -I$(INCDIR) $^
+			@$(ROOTCINT) -f $@ -c -I$(INCDIR) $^
 
 $(DICTPREFIX)%.$(ObjSuf) : $(DICTPREFIX)%.$(SrcSuf)
 			$(checkdir)
@@ -78,20 +79,50 @@ updateinc:	$(ALLHDRS) # only for linux
 debug:		all
 
 clean:
-		@rm -fv $(TMPDIR)/*.so $(TMPDIR)/*.d
+		@rm -fv $(DEPENDFILE) $(DEPENDFILE).bak \
+		  $(OBJDIR)/*.so $(OBJDIR)/*.d # foreign build files
 
 distclean:	clean
 
 distsrc:
-		@rm -f $(DISTSRCNAME).tar.gz;
-		@tar --ignore-failed-read -czvf $(DISTSRCNAME).tar.gz \
-		  $(ALLDIST) Makefile *.C macros/*.C macros/*.cxx sql;
-		@echo -e "\n$(DISTSRCNAME).tar.gz done\n"
+		@rm -f $(DISTSRCNAME).tar.xz;
+		@tar --ignore-failed-read -cJvf $(DISTSRCNAME).tar.xz \
+		  $(ALLDIST) *.C macros/*.C macros/*.cxx sql README.md;
+		echo -e "\n$(DISTSRCNAME).tar.xz done\n"
+
+showbuild:
+		@echo "ROOTSYS        = $(ROOTSYS)"
+		@echo "PLATFORM       = $(PLATFORM)"
+		@echo "ARCH           = $(ARCH)"
+		@echo ""
+		@echo "CXX            = $(CXX)"
+		@echo "CXXFLAGS       = $(CXXFLAGS)"
+		@echo ""
+		@echo "LD             = $(LD)"
+		@echo "SOFLAGS        = $(SOFLAGS)"
+		@echo "LDFLAGS        = $(LDFLAGS)"
+		@echo ""
+		@echo "INCDIR         = $(INCDIR)"
+		@echo "ROOTCINT       = $(ROOTCINT)"
+		@echo "MAKEDEPEND     = $(MAKEDEPEND)"
+		@echo ""
+		@echo "The list of what to be built"
+		@echo "============================"
+		@echo "Modules:"
+		@echo " $(word 1,$(MODULES))"
+		@$(foreach mod,$(filter-out $(word 1,$(MODULES)),$(MODULES)), \
+		  echo " $(mod)";)
+		@echo "Libraries:"
+		@echo " $(word 1,$(ALLLIBS))"
+		@$(foreach lib,$(filter-out $(word 1,$(ALLLIBS)),$(ALLLIBS)), \
+		  echo " $(lib)";)
 
 $(DEPENDFILE):	$(ALLDEPEND)
 		$(emptyfile)
 		@$(MAKEDEPEND) -Y -f$@ -p$(dir $@) \
-		-- $(CXXFLAGS) -- $^ 2>/dev/null
+		  -- $(CXXFLAGS) -- $^ 2>/dev/null
 		@echo "$@ done"
 
+ifeq ($(findstring $(MAKECMDGOALS),$(NODEPEND)),)
 -include $(DEPENDFILE)
+endif

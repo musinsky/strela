@@ -1,0 +1,6 @@
+build/
+include/
+lib/
+/.settings
+.cproject
+.project
