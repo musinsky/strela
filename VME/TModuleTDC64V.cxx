@@ -124,7 +124,7 @@ Bool_t TModuleTDC64V::GetChannelIdCh(Int_t ch, Int_t &tdcid, Int_t &tdcch) const
 //______________________________________________________________________________
 void TModuleTDC64V::ConnectorChannels(Int_t con, Int_t *pins, Option_t * /*option*/) const
 {
-  TVirtualModule::ConnectorChannels(con, pins); // only checks
+  TVirtualModule::ConnectorChannels(con/2, pins); // only checks
   Int_t del = gVME->FirstChannelOfModule(this);
 
   // order of channels: first, ..., last, GND
