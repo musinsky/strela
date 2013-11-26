@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 Oct 2010
+// @Date    26 Nov 2013
 
 #include "TModuleTDC96.h"
 #include "TVME.h"
@@ -130,6 +130,8 @@ void TModuleTDC96::ConnectorChannels(Int_t con, Int_t *pins, Option_t *option) c
     shift = 0;
     step  = 2;
   }
+  else
+    Warning("ConnectorChannels", "double connect on module %s", GetName());
 
   // order of channels: first, ..., last, GND
   for (Int_t i = 0; i < kChipNChannels; i+=step)
