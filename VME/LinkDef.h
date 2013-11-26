@@ -10,5 +10,6 @@
 #pragma link C++ class TVirtualModule+;
 #pragma link C++ class TModulePhTDC+;
 #pragma link C++ class TModuleTDC96+;
+#pragma link C++ class TModuleTDC64V+;
 
 #endif
