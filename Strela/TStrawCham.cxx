@@ -260,7 +260,7 @@ void TStrawCham::AnalyzeEntry()
     }
     if (!findTrig) {
       Warning("AnalyzeEntry", "not found trigger hit");
-      Printf(gStrela->GetEventInfo());
+      Printf("%s", gStrela->GetEventInfo());
       return;
     }
   }

@@ -362,7 +362,7 @@ void TStrawTracker::AddHit(Int_t itube, Int_t tdc)
   if (fNHits >= kMaxHits) {
     if (gDebug > 0) {
       Info("AddHit", "to many hits in %s, limit is %d", GetName(), kMaxHits);
-      Printf(gStrela->GetEventInfo());
+      Printf("%s", gStrela->GetEventInfo());
     }
     return;
   }
@@ -431,7 +431,7 @@ void TStrawTracker::FindPairs()
           fNPairs = 0;
           if (gDebug > 0) {
             Error("FindPairs", "to many pairs, limit is %d", kMaxPairs);
-            Printf(gStrela->GetEventInfo());
+            Printf("%s", gStrela->GetEventInfo());
           }
           return;
         }
@@ -519,7 +519,7 @@ void TStrawTracker::TangentsPair(Int_t ia, Int_t ib, Bool_t aonly)
   if (xd == 0) { // neighbors hits
     Info("TangentsPair", "%s, (xd == 0) of %s and %s", GetName(),
          GetTubeHit(i0)->GetName(), GetTubeHit(i1)->GetName());
-    Printf(gStrela->GetEventInfo());
+    Printf("%s", gStrela->GetEventInfo());
 
     if (y[0] < y[1]) {
       sign[2] = -sign[2];
@@ -535,7 +535,7 @@ void TStrawTracker::TangentsPair(Int_t ia, Int_t ib, Bool_t aonly)
   else if (xd2 < rp2) { // neighbors hits
     Info("TangentsPair", "%s, (xd2 < rp2) of %s and %s", GetName(),
          GetTubeHit(i0)->GetName(), GetTubeHit(i1)->GetName());
-    Printf(gStrela->GetEventInfo());
+    Printf("%s", gStrela->GetEventInfo());
 
     if (y[0]  < y[1]) sign[2] = -sign[2];
     else              sign[3] = -sign[3];
@@ -600,7 +600,7 @@ Bool_t TStrawTracker::CheckHits(Int_t it)
     if (fNChecked >= kMaxChecked) {
       if (gDebug > 0) {
         Error("CheckHits", "to many checked hits, limit is %d", kMaxChecked);
-        Printf(gStrela->GetEventInfo());
+        Printf("%s", gStrela->GetEventInfo());
       }
       return kFALSE;
     }
@@ -707,7 +707,7 @@ void TStrawTracker::PrecisionTrackA()
 
   if (2*(fTrackNHits - 1) >= kMaxChecked) {
     Error("PrecisionTrack", "to many track hits, limit is %d", kMaxChecked);
-    Printf(gStrela->GetEventInfo());
+    Printf("%s", gStrela->GetEventInfo());
     return;
   }
 
