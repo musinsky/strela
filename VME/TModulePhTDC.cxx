@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    12 Sep 2012
+// @Date    30 Nov 2013
 
 #include "TModulePhTDC.h"
 #include "TVME.h"
@@ -45,13 +45,15 @@ ClassImp(TModulePhTDC)
 TModulePhTDC::TModulePhTDC()
 {
   //  Info("TModulePhTDC", "Default constructor");
+  fId            = 0x04;
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
 }
 //______________________________________________________________________________
-TModulePhTDC::TModulePhTDC(const char *name, const char *title) : TVirtualModule(name, title)
+TModulePhTDC::TModulePhTDC(Int_t slot) : TVirtualModule(slot)
 {
   //  Info("TModulePhTDC", "Normal constructor");
+  fId            = 0x04;
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
 }
@@ -72,7 +74,7 @@ void TModulePhTDC::Print(Option_t *option) const
     del = gVME->FirstChannelOfModule(this);
     if (del < 0) {
       del = 0;
-      Warning("Print", "module %s is not in list of modules", GetName());
+      Warning("Print", "module %s is not in list of modules", GetTitle());
     }
   }
 
@@ -111,11 +113,11 @@ Int_t TModulePhTDC::MapChannel(Int_t tdcid, Int_t tdcch) const
 {
   Int_t num = kId2Num[tdcid]; // & 0xF => always < 16;   1, 2, 4, 8
   if (num == -1) {
-    Error("MapChannel", "module %s with impossible id: %d", GetName(), tdcid);
+    Error("MapChannel", "module %s with impossible id: %d", GetTitle(), tdcid);
     return -1;
   }
   if ((tdcch%2) == 1) {
-    Error("MapChannel", "module %s with impossible ch: %d", GetName(), tdcch);
+    Error("MapChannel", "module %s with impossible ch: %d", GetTitle(), tdcch);
     return -1;
   }
   Int_t ch = tdcch/2; // & 0x1F => always < 32;   0, 2, 4, ..., 30

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    17 Jun 2008
+// @Date    30 Nov 2013
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -10,6 +10,9 @@
 
 #include "TVME.h"
 #include "TVirtualModule.h"
+#include "TModulePhTDC.h"
+#include "TModuleTDC96.h"
+#include "TModuleTDC64V.h"
 
 TVME *gVME = 0;
 
@@ -30,7 +33,7 @@ TVME::TVME(const char *name, const char *title) : TNamed(name, title)
 {
   //  Info("TVME", "Normal constructor");
   gVME       = this;
-  fModules   = new TObjArray(8);
+  fModules   = new TObjArray(16); // max slots (gates) in VME
   fNChannels = 0;
   fChannel   = 0;
   fIndexCha  = 0;
@@ -67,20 +70,25 @@ Int_t TVME::GetNumOfModules() const
 //______________________________________________________________________________
 Int_t TVME::GetNChannels() const
 {
+  TVirtualModule *module;
   Int_t sum = 0;
-  for (Int_t im = 0; im < GetNumOfModules(); im++)
-    sum += ((TVirtualModule *)fModules->At(im))->GetModuleNChannels();
+  for (Int_t im = 0; im < fModules->GetSize(); im++) {
+    module = (TVirtualModule *)fModules->UncheckedAt(im);
+    if (!module) continue;
+    sum += module->GetModuleNChannels();
+  }
   return sum;
 }
 //______________________________________________________________________________
 Int_t TVME::FirstChannelOfModule(const TVirtualModule *mod) const
 {
+  TVirtualModule *module;
   Int_t first = 0;
-  TVirtualModule *imodule;
-  for (Int_t im = 0; im < GetNumOfModules(); im++) {
-    imodule = (TVirtualModule *)fModules->At(im);
-    if (mod == imodule) return first;
-    first += imodule->GetModuleNChannels();
+  for (Int_t im = 0; im < fModules->GetSize(); im++) {
+    module = (TVirtualModule *)fModules->UncheckedAt(im);
+    if (mod == module) return first;
+    if (!module) continue;
+    first += module->GetModuleNChannels();
   }
   return -1;
 }
@@ -212,4 +220,9 @@ void TVME::DecodeFile(const char *fname, Int_t ne, Int_t imod) const
     }
   }
   close(fd);
+}
+//______________________________________________________________________________
+void TVME::RawParser(const char *fname) const
+{
+  TVirtualModule *module;
 }

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 Nov 2013
+// @Date    30 Nov 2013
 
 #ifndef STRELA_TModuleTDC64V
 #define STRELA_TModuleTDC64V
@@ -12,7 +12,7 @@ class TModuleTDC64V : public TVirtualModule {
 
 public:
   TModuleTDC64V();
-  TModuleTDC64V(const char *name, const char *title = "TDC64V-V1.1");
+  TModuleTDC64V(Int_t slot);
   virtual       ~TModuleTDC64V();
 
   virtual void   Print(Option_t *option = "") const;

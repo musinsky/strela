@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    17 Jun 2008
+// @Date    30 Nov 2013
 
 #ifndef STRELA_TVME
 #define STRELA_TVME
@@ -42,6 +42,7 @@ public:
   const char  *GetChannelInfo(Int_t nadc) const;
 
   void         DecodeFile(const char *fname, Int_t ne = 0, Int_t imod = -1) const;
+  void         RawParser(const char *fname) const;
 
   ClassDef(TVME, 1) // VME class
 };

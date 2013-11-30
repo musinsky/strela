@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    17 Jun 2008
+// @Date    30 Nov 2013
 
 #ifndef STRELA_TModulePhTDC
 #define STRELA_TModulePhTDC
@@ -12,7 +12,7 @@ class TModulePhTDC : public TVirtualModule {
 
 public:
   TModulePhTDC();
-  TModulePhTDC(const char *name, const char *title = "PhTDC - V1.1");
+  TModulePhTDC(Int_t slot);
   virtual       ~TModulePhTDC();
 
   virtual void   Print(Option_t *option = "") const;

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    12 Sep 2012
+// @Date    30 Nov 2013
 
 #include "TVirtualModule.h"
 #include "TVME.h"
@@ -10,22 +10,37 @@ ClassImp(TVirtualModule)
 TVirtualModule::TVirtualModule()
 {
   //  Info("TVirtualModule", "Default constructor");
+  fId            = -1;
+  fSlot          = -1;
   fNChips        = 0;
   fChipNChannels = 0;
 }
 //______________________________________________________________________________
-TVirtualModule::TVirtualModule(const char *name, const char *title) : TNamed(name, title)
+TVirtualModule::TVirtualModule(Int_t slot) : TObject()
 {
   //  Info("TVirtualModule", "Normal constructor");
+  fId            = -1;   // http://afi.jinr.ru/VmeModuleId
+  fSlot          = slot;
   fNChips        = 0;
   fChipNChannels = 0;
-  if (gVME) gVME->Modules()->Add(this);
+  if (!gVME) return;
+
+  if (gVME->Modules()->At(slot)) {
+    Error("TVirtualModule", "slot %d is already occupied", slot);
+    fSlot = -1;
+  }
+  else gVME->Modules()->AddAt(this, slot);
 }
 //______________________________________________________________________________
 TVirtualModule::~TVirtualModule()
 {
   Info("~TVirtualModule", "Destructor");
   if (gVME) gVME->Modules()->Remove(this);
+}
+//______________________________________________________________________________
+const char *TVirtualModule::GetTitle() const
+{
+  return Form("%s (Id: %02d) in slot: %02d", GetName(), fId, fSlot);
 }
 //______________________________________________________________________________
 Int_t TVirtualModule::MapChannel(Int_t /*tdcid*/, Int_t /*tdcch*/) const

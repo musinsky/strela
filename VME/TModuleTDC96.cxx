@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 Nov 2013
+// @Date    30 Nov 2013
 
 #include "TModuleTDC96.h"
 #include "TVME.h"
@@ -27,13 +27,15 @@ ClassImp(TModuleTDC96)
 TModuleTDC96::TModuleTDC96()
 {
   //  Info("TModuleTDC96", "Default constructor");
+  fId            = 0x05;
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
 }
 //______________________________________________________________________________
-TModuleTDC96::TModuleTDC96(const char *name, const char *title) : TVirtualModule(name, title)
+TModuleTDC96::TModuleTDC96(Int_t slot) : TVirtualModule(slot)
 {
   //  Info("TModuleTDC96", "Normal constructor");
+  fId            = 0x05;
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
 }
@@ -55,7 +57,7 @@ void TModuleTDC96::Print(Option_t *option) const
     del = gVME->FirstChannelOfModule(this);
     if (del < 0) {
       del = 0;
-      Warning("Print", "module %s is not in list of modules", GetName());
+      Warning("Print", "module %s is not in list of modules", GetTitle());
     }
   }
 
@@ -94,7 +96,7 @@ Int_t TModuleTDC96::MapChannel(Int_t tdcid, Int_t tdcch) const
 {
   Int_t num = kId2Num[tdcid]; // & 0xF => always < 16;   1, 2, 4
   if (num == -1) {
-    Error("MapChannel", "module %s with impossible id: %d", GetName(), tdcid);
+    Error("MapChannel", "module %s with impossible id: %d", GetTitle(), tdcid);
     return -1;
   }
   Int_t ch = tdcch; // & 0x1F => always < 32;   0, 1, 2, ..., 31
@@ -131,7 +133,7 @@ void TModuleTDC96::ConnectorChannels(Int_t con, Int_t *pins, Option_t *option) c
     step  = 2;
   }
   else
-    Warning("ConnectorChannels", "double connect on module %s", GetName());
+    Warning("ConnectorChannels", "double connect on module %s", GetTitle());
 
   // order of channels: first, ..., last, GND
   for (Int_t i = 0; i < kChipNChannels; i+=step)

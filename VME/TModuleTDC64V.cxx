@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 Nov 2013
+// @Date    30 Nov 2013
 
 #include "TModuleTDC64V.h"
 #include "TVME.h"
@@ -35,13 +35,15 @@ ClassImp(TModuleTDC64V)
 TModuleTDC64V::TModuleTDC64V()
 {
   //  Info("TModuleTDC64V", "Default constructor");
+  fId            = 0x10;
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
 }
 //______________________________________________________________________________
-TModuleTDC64V::TModuleTDC64V(const char *name, const char *title) : TVirtualModule(name, title)
+TModuleTDC64V::TModuleTDC64V(Int_t slot) : TVirtualModule(slot)
 {
   //  Info("TModuleTDC64V", "Normal constructor");
+  fId            = 0x10; // 16 in DEC
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
 }
@@ -62,7 +64,7 @@ void TModuleTDC64V::Print(Option_t *option) const
     del = gVME->FirstChannelOfModule(this);
     if (del < 0) {
       del = 0;
-      Warning("Print", "module %s is not in list of modules", GetName());
+      Warning("Print", "module %s is not in list of modules", GetTitle());
     }
   }
 
@@ -101,7 +103,7 @@ Int_t TModuleTDC64V::MapChannel(Int_t tdcid, Int_t tdcch) const
 {
   Int_t num = kId2Num[tdcid]; // & 0xF => always < 16;   1, 2
   if (num == -1) {
-    Error("MapChannel", "module %s with impossible id: %d", GetName(), tdcid);
+    Error("MapChannel", "module %s with impossible id: %d", GetTitle(), tdcid);
     return -1;
   }
   Int_t ch = tdcch; // & 0x1F => always < 32;   31, 15, 30, ..., 0
