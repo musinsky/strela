@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    30 Nov 2013
+// @Date    01 Dec 2013
 
 #include "TModuleTDC96.h"
 #include "TVME.h"
@@ -27,7 +27,7 @@ ClassImp(TModuleTDC96)
 TModuleTDC96::TModuleTDC96()
 {
   //  Info("TModuleTDC96", "Default constructor");
-  fId            = 0x05;
+  fId            = 0x05; // 5 in DEC
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
 }
@@ -35,7 +35,7 @@ TModuleTDC96::TModuleTDC96()
 TModuleTDC96::TModuleTDC96(Int_t slot) : TVirtualModule(slot)
 {
   //  Info("TModuleTDC96", "Normal constructor");
-  fId            = 0x05;
+  fId            = 0x05; // 5 in DEC
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
 }

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    30 Nov 2013
+// @Date    01 Dec 2013
 
 #include "TModulePhTDC.h"
 #include "TVME.h"
@@ -45,7 +45,7 @@ ClassImp(TModulePhTDC)
 TModulePhTDC::TModulePhTDC()
 {
   //  Info("TModulePhTDC", "Default constructor");
-  fId            = 0x04;
+  fId            = 0x04; // 4 in DEC
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
 }
@@ -53,7 +53,7 @@ TModulePhTDC::TModulePhTDC()
 TModulePhTDC::TModulePhTDC(Int_t slot) : TVirtualModule(slot)
 {
   //  Info("TModulePhTDC", "Normal constructor");
-  fId            = 0x04;
+  fId            = 0x04; // 4 in DEC
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
 }

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    30 Nov 2013
+// @Date    01 Dec 2013
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -58,22 +58,12 @@ void TVME::DeleteChannels()
   delete [] fSortCha;
 }
 //______________________________________________________________________________
-Int_t TVME::GetNumOfModules() const
-{
-  if (fModules->GetEntries() != fModules->GetEntriesFast()) {
-    Warning("GetNumOfModules", "order of modules changed");
-    fModules->ls();
-    fModules->Compress(); // remove empty slots from array
-  }
-  return fModules->GetEntriesFast();
-}
-//______________________________________________________________________________
 Int_t TVME::GetNChannels() const
 {
   TVirtualModule *module;
   Int_t sum = 0;
   for (Int_t im = 0; im < fModules->GetSize(); im++) {
-    module = (TVirtualModule *)fModules->UncheckedAt(im);
+    module = GetModule(im);
     if (!module) continue;
     sum += module->GetModuleNChannels();
   }
@@ -85,9 +75,9 @@ Int_t TVME::FirstChannelOfModule(const TVirtualModule *mod) const
   TVirtualModule *module;
   Int_t first = 0;
   for (Int_t im = 0; im < fModules->GetSize(); im++) {
-    module = (TVirtualModule *)fModules->UncheckedAt(im);
-    if (mod == module) return first;
+    module = GetModule(im);
     if (!module) continue;
+    if (mod == module) return first;
     first += module->GetModuleNChannels();
   }
   return -1;
@@ -97,7 +87,7 @@ void TVME::ReDecodeChannels()
 {
   // see in pomme.cxx
   // 2007_03, 2008_06
-  Int_t module = 100 - 512, moduleDelta = 512, idMulti = 32;
+  Int_t moduleShift = 100 - 512, moduleDelta = 512, idMulti = 32;
 
   DeleteChannels();
   fNChannels = GetNChannels();
@@ -105,16 +95,17 @@ void TVME::ReDecodeChannels()
   fIndexCha = new Int_t[fNChannels];
   fSortCha  = new Int_t[fNChannels];
 
-  TVirtualModule *imodule;
+  TVirtualModule *module;
   Int_t first, tdcId, tdcCh, inadc, nadc;
-  for (Int_t im = 0; im < GetNumOfModules(); im++) {
-    module += moduleDelta;
-    imodule = (TVirtualModule *)fModules->At(im);
-    first = FirstChannelOfModule(imodule);
-    for (Int_t ich = 0; ich < imodule->GetModuleNChannels(); ich++) {
+  for (Int_t im = 0; im < fModules->GetSize(); im++) {
+    module = GetModule(im);
+    if (!module) continue;
+    moduleShift += moduleDelta;
+    first = FirstChannelOfModule(module);
+    for (Int_t ich = 0; ich < module->GetModuleNChannels(); ich++) {
       inadc = first + ich;
-      imodule->GetChannelIdCh(ich, tdcId, tdcCh);
-      nadc = module + (tdcCh + tdcId*idMulti);
+      module->GetChannelIdCh(ich, tdcId, tdcCh);
+      nadc = moduleShift + (tdcCh + tdcId*idMulti);
       fChannel[inadc] = nadc;
       if (gDebug > 0) Printf("[%3d] %4d", inadc, nadc);
     }

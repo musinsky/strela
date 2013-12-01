@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    30 Nov 2013
+// @Date    01 Dec 2013
 
 #include "TModuleTDC64V.h"
 #include "TVME.h"
@@ -35,7 +35,7 @@ ClassImp(TModuleTDC64V)
 TModuleTDC64V::TModuleTDC64V()
 {
   //  Info("TModuleTDC64V", "Default constructor");
-  fId            = 0x10;
+  fId            = 0x10; // 16 in DEC
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
 }

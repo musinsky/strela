@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    30 Nov 2013
+// @Date    01 Dec 2013
 
 #include "TVirtualModule.h"
 #include "TVME.h"
@@ -65,8 +65,9 @@ void TVirtualModule::ConnectorChannels(Int_t con, Int_t * /*pins*/, Option_t * /
 //______________________________________________________________________________
 Int_t TVirtualModule::DecodeChannel(UInt_t word) const
 {
-  if ((word >> 28) != 0x4) {
-    Warning("DecodeChannel", "decode only DATA(0x4), not: 0x%X", word >> 28);
+  UInt_t word28 = word >> 28;
+  if ((word28 != 0x4) && (word28 != 0x5)) {
+    Warning("DecodeChannel", "decode only DATA (0x4 or 0x5), not: 0x%X", word28);
     return -1;
   }
   // tdc_id = bits 24 - 27, tdc_ch = bits 19 - 23
