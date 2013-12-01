@@ -1,11 +1,11 @@
-# @(#) 26 Nov 2013
+# @(#) 02 Dec 2013
 # module for VME
 
 # Author: Jan Musinsky
 
 MODULE	= VME
 MODDIR	= VME
-FILES	= TVME TVirtualModule TModulePhTDC TModuleTDC96 TModuleTDC64V
+FILES	= TVME TVirtualModule TModulePhTDC TModuleTDC96 TModuleTDC64V TRawData
 
 LNKDEF	= $(MODDIR)/$(LNKFILE).$(HdrSuf)
 SRCS	= $(patsubst %,$(MODDIR)/%.$(SrcSuf),$(FILES))

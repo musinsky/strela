@@ -1,18 +1,11 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    01 Dec 2013
+// @Date    02 Dec 2013
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
-
 #include <TMath.h>
 
 #include "TVME.h"
 #include "TVirtualModule.h"
-#include "TModulePhTDC.h"
-#include "TModuleTDC96.h"
-#include "TModuleTDC64V.h"
 
 TVME *gVME = 0;
 
@@ -33,7 +26,7 @@ TVME::TVME(const char *name, const char *title) : TNamed(name, title)
 {
   //  Info("TVME", "Normal constructor");
   gVME       = this;
-  fModules   = new TObjArray(16); // max slots (gates) in VME
+  fModules   = new TObjArray(20); // max slots (gates) in VME
   fNChannels = 0;
   fChannel   = 0;
   fIndexCha  = 0;
@@ -76,7 +69,7 @@ Int_t TVME::FirstChannelOfModule(const TVirtualModule *mod) const
   Int_t first = 0;
   for (Int_t im = 0; im < fModules->GetSize(); im++) {
     module = GetModule(im);
-    if (!module) continue;
+    if (!module) continue; // must be before check on mod, or check if mod == 0
     if (mod == module) return first;
     first += module->GetModuleNChannels();
   }
@@ -211,9 +204,4 @@ void TVME::DecodeFile(const char *fname, Int_t ne, Int_t imod) const
     }
   }
   close(fd);
-}
-//______________________________________________________________________________
-void TVME::RawParser(const char *fname) const
-{
-  TVirtualModule *module;
 }

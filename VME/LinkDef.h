@@ -11,5 +11,6 @@
 #pragma link C++ class TModulePhTDC+;
 #pragma link C++ class TModuleTDC96+;
 #pragma link C++ class TModuleTDC64V+;
+#pragma link C++ class TRawData+;
 
 #endif
