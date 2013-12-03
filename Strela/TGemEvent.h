@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    03 Dec 2013
+// @Date    04 Dec 2013
 
 #ifndef STRELA_TGemEvent
 #define STRELA_TGemEvent
@@ -36,6 +36,7 @@ public:
   TGemEvent();
   virtual      ~TGemEvent();
 
+  void          SetEvent(Int_t e) { fNevent = e; }
   Int_t         GetNEvent() const { return (Int_t)fNevent; }
   Int_t         GetNHits() const { return (Int_t)fNhits; }
   TClonesArray *AdcHits1() const { return fAdcHits; }
