@@ -12,5 +12,7 @@
 #pragma link C++ class TModuleTDC96+;
 #pragma link C++ class TModuleTDC64V+;
 #pragma link C++ class TRawData+;
+#pragma link C++ class TMHit+;
+#pragma link C++ class TMultiHit+;
 
 #endif
