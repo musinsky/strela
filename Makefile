@@ -1,4 +1,4 @@
-# @(#) 29 Nov 2013
+# @(#) 03 Dec 2013
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
@@ -88,7 +88,7 @@ distsrc:
 		@rm -f $(DISTSRCNAME).tar.xz;
 		@tar --ignore-failed-read -cJvf $(DISTSRCNAME).tar.xz \
 		  $(ALLDIST) *.C macros/*.C macros/*.cxx sql README.md;
-		echo -e "\n$(DISTSRCNAME).tar.xz done\n"
+		@echo -e "\n$(DISTSRCNAME).tar.xz done\n"
 
 showbuild:
 		@echo "ROOTSYS        = $(ROOTSYS)"
