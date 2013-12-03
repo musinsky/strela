@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    12 Oct 2011
+// @Date    03 Dec 2013
 
 #ifndef STRELA_TGemEvent
 #define STRELA_TGemEvent
@@ -15,6 +15,7 @@ private:
 
 public:
   TAdcHit1() : fDelta(0) {;}
+  TAdcHit1(UShort_t nadc, UShort_t adc, UShort_t delta);
   virtual      ~TAdcHit1() {;}
 
   Int_t         GetDelta() const { return (Int_t)fDelta; }
@@ -41,6 +42,7 @@ public:
   Int_t         GetNumOfAdcHits1() const { return fAdcHits->GetEntriesFast(); }
   TAdcHit1     *GetAdcHit1(Int_t ia) const { return (TAdcHit1 *)fAdcHits->UncheckedAt(ia); }
   void          AddHit(UShort_t nadc, UShort_t adc);
+  void          AddHit1(UShort_t nadc, UShort_t adc, UShort_t delta);
 
   virtual void  Clear(Option_t *option = "");
   virtual void  Print(Option_t *option = "") const;
