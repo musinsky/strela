@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    30 Nov 2013
+// @Date    05 Dec 2013
 
 #ifndef STRELA_TModuleTDC96
 #define STRELA_TModuleTDC96
@@ -13,7 +13,7 @@ class TModuleTDC96 : public TVirtualModule {
 public:
   TModuleTDC96();
   TModuleTDC96(Int_t slot);
-  virtual       ~TModuleTDC96();
+  virtual ~TModuleTDC96();
 
   virtual void   Print(Option_t *option = "") const;
   virtual Int_t  MapChannel(Int_t tdcid, Int_t tdcch) const;

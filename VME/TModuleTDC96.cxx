@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    01 Dec 2013
+// @Date    05 Dec 2013
 
 #include "TModuleTDC96.h"
 #include "TVME.h"
@@ -7,7 +7,7 @@
 const Int_t kNChips = 3;
 const Int_t kChipNChannels = 32;
 
-// from daq7300/decoder/decode_tdc96.c (by Ilja Slepnev)
+// from daqlib/modules/tdc96_types.h (by Ilja Slepnev)
 const Int_t kMap[kChipNChannels] = { // tdc_ch
   0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
   16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
@@ -25,6 +25,7 @@ ClassImp(TModuleTDC96)
 
 //______________________________________________________________________________
 TModuleTDC96::TModuleTDC96()
+: TVirtualModule()
 {
   //  Info("TModuleTDC96", "Default constructor");
   fId            = 0x05; // 5 in DEC
@@ -32,12 +33,14 @@ TModuleTDC96::TModuleTDC96()
   fChipNChannels = kChipNChannels;
 }
 //______________________________________________________________________________
-TModuleTDC96::TModuleTDC96(Int_t slot) : TVirtualModule(slot)
+TModuleTDC96::TModuleTDC96(Int_t slot)
+: TVirtualModule()
 {
   //  Info("TModuleTDC96", "Normal constructor");
   fId            = 0x05; // 5 in DEC
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
+  VMEModule(slot);
 }
 //______________________________________________________________________________
 TModuleTDC96::~TModuleTDC96()
@@ -53,13 +56,9 @@ void TModuleTDC96::Print(Option_t *option) const
     kConnector[0] - kChipNChannels + 1
   };
   Int_t del = 0, channelE, channelO, nadc, id, ch;
-  if (gVME) {
-    del = gVME->FirstChannelOfModule(this);
-    if (del < 0) {
-      del = 0;
-      Warning("Print", "module %s is not in list of modules", GetTitle());
-    }
-  }
+  if (fFirstChannel < 0)
+    Warning("Print", "module %s is not in list of modules", GetTitle());
+  else del = fFirstChannel;
 
   for (Int_t i = 0; i < kNChips; i++) {
     Printf("\tGND\n\t GND");
@@ -71,8 +70,8 @@ void TModuleTDC96::Print(Option_t *option) const
         Printf("\t%3d\n\t %3d", channelE, channelO);
 
       else if (!strcmp(option, "nadc")) {
-        if (!gVME || !gVME->GetChannel()) {
-          Info("Print", "only after ReDecodeChannels");
+        if (fSlot < 0) {
+          Info("Print", "only for VME module");
           return;
         }
         nadc = gVME->GetChannel()[channelE];
@@ -120,7 +119,7 @@ Bool_t TModuleTDC96::GetChannelIdCh(Int_t ch, Int_t &tdcid, Int_t &tdcch) const
 void TModuleTDC96::ConnectorChannels(Int_t con, Int_t *pins, Option_t *option) const
 {
   TVirtualModule::ConnectorChannels(con, pins); // only checks
-  Int_t count = 0, del = gVME->FirstChannelOfModule(this);
+  Int_t count = 0;
   Int_t shift = 0, step = 1;        // all 32 channels
   TString opt = option;
   opt.ToLower();
@@ -137,5 +136,5 @@ void TModuleTDC96::ConnectorChannels(Int_t con, Int_t *pins, Option_t *option) c
 
   // order of channels: first, ..., last, GND
   for (Int_t i = 0; i < kChipNChannels; i+=step)
-    pins[count++] = gVME->GetChannel()[del + kConnector[con] - shift - i];
+    pins[count++] = gVME->GetChannel()[fFirstChannel + kConnector[con] - shift - i];
 }

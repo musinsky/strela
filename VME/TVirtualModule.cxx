@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    04 Dec 2013
+// @Date    06 Dec 2013
 
 #include "TVirtualModule.h"
 #include "TVME.h"
@@ -10,30 +10,15 @@ ClassImp(TVirtualModule)
 
 //______________________________________________________________________________
 TVirtualModule::TVirtualModule()
+: TObject(),
+  fId(-1),
+  fSlot(-1),
+  fNChips(0),
+  fChipNChannels(0),
+  fFirstChannel(-1),
+  fMultiHits(0)
 {
   // Default constructor
-  fId            = -1;
-  fSlot          = -1;
-  fNChips        = 0;
-  fChipNChannels = 0;
-  fMultiHits     = 0;
-}
-//______________________________________________________________________________
-TVirtualModule::TVirtualModule(Int_t slot) : TObject()
-{
-  // Normal constructor
-  fId            = -1;
-  fSlot          = slot;
-  fNChips        = 0;
-  fChipNChannels = 0;
-  fMultiHits     = 0;
-  if (!gVME) return;
-
-  if (gVME->Modules()->At(slot)) {
-    Error("TVirtualModule", "slot %d is already occupied", slot);
-    fSlot = -1;
-  }
-  else gVME->Modules()->AddAt(this, slot);
 }
 //______________________________________________________________________________
 TVirtualModule::~TVirtualModule()
@@ -47,6 +32,26 @@ TVirtualModule::~TVirtualModule()
 const char *TVirtualModule::GetTitle() const
 {
   return Form("%s (Id: %02d) in slot: %02d", GetName(), fId, fSlot);
+}
+//______________________________________________________________________________
+void TVirtualModule::VMEModule(Int_t slot)
+{
+  if (!gVME) {
+    Error("VMEModule", "gVME not initialized");
+    return;
+  }
+  if (gVME->Modules()->At(slot)) {
+    Error("VMEModule", "slot %d is already occupied", slot);
+    return;
+  }
+
+  fSlot = slot;
+  gVME->Modules()->AddAt(this, fSlot);
+  gVME->ReDecodeChannels(); // and SetFirstChannel for ! each ! modules
+
+  fMultiHits = new TObjArray(GetModuleNChannels());
+  for (Int_t i = 0; i < fMultiHits->GetSize(); i++)
+    fMultiHits->AddAt(new TMultiHit(), i);
 }
 //______________________________________________________________________________
 Int_t TVirtualModule::MapChannel(Int_t /*tdcid*/, Int_t /*tdcch*/) const
@@ -63,10 +68,10 @@ Bool_t TVirtualModule::GetChannelIdCh(Int_t /*ch*/, Int_t & /*tdcid*/, Int_t & /
 //______________________________________________________________________________
 void TVirtualModule::ConnectorChannels(Int_t con, Int_t * /*pins*/, Option_t * /*option*/) const
 {
-  if (gVME->GetNChannels() != gVME->GetNChannelsFast())
-    Error("ConnectorChannels", "must ReDecode all channels");
-  if ((gVME->FirstChannelOfModule(this) < 0) || (con >= fNChips))
-    Error("ConnectorChannels", "problem with module %s", GetName());
+  if ((fFirstChannel < 0) || (fSlot < 0))
+    Error("ConnectorChannels", "module %s is not in list of modules", GetTitle());
+  if (con >= fNChips)
+    Error("ConnectorChannels", "module %s has only %d chips", GetTitle(), fNChips);
 }
 //______________________________________________________________________________
 Int_t TVirtualModule::DecodeChannel(UInt_t word) const
@@ -82,11 +87,7 @@ Int_t TVirtualModule::DecodeChannel(UInt_t word) const
 //______________________________________________________________________________
 void TVirtualModule::MultiHitAdd(Int_t nadc, Int_t time, Bool_t lead)
 {
-  if (!fMultiHits) {
-    fMultiHits = new TObjArray(GetModuleNChannels());
-    for (Int_t i = 0; i < fMultiHits->GetSize(); i++)
-      fMultiHits->AddAt(new TMultiHit(), i);
-  }
+  if (!fMultiHits) return;
 
   if (nadc != -1) GetMultiHit(nadc)->AddHit(time, lead);
 }
@@ -111,7 +112,7 @@ void TVirtualModule::MultiHitIdentify(TGemEvent *event) const
   TMHit *hit1, *hit2;
   Int_t nhits;
 
-  Int_t first = gVME->FirstChannelOfModule(this); // check vme
+  // check on first !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   for (Int_t i = 0; i < fMultiHits->GetSize(); i++) {
     mh = GetMultiHit(i);
@@ -125,7 +126,7 @@ void TVirtualModule::MultiHitIdentify(TGemEvent *event) const
         // time = hit1->GetTime();
         // delta = 0;
         // Printf("type A: %6d", hit1->GetTime());
-        event->AddHit1(first+i, hit1->GetTime(), 0);
+        event->AddHit1(fFirstChannel+i, hit1->GetTime(), 0);
       }
       continue;
     }
@@ -139,21 +140,21 @@ void TVirtualModule::MultiHitIdentify(TGemEvent *event) const
         // time = hit1->GetTime();
         // delta = hit2->GetTime() - hit1->GetTime();
         // Printf("type B: %6d, %6d", hit1->GetTime(), hit2->GetTime());
-        event->AddHit1(first+i, hit1->GetTime(), hit2->GetTime()-hit1->GetTime()); // check on minus, sort
+        event->AddHit1(fFirstChannel+i, hit1->GetTime(), hit2->GetTime()-hit1->GetTime()); //!!!!!!!!!! check on minus, sort
       }
       else if (hit1->GetLead()) {
         // leading before leading
         // time = hit1->GetTime();
         // delta = 0;
         // Printf("type C: %6d", hit1->GetTime());
-        event->AddHit1(first+i, hit1->GetTime(), 0);
+        event->AddHit1(fFirstChannel+i, hit1->GetTime(), 0);
       }
       if ((j == (nhits-1)) && hit2->GetLead()) { // dont use else if
         // last leading hit
         // time = hit2->GetTime();
         // delta = 0;
         // Printf("type D: %6d", hit2->GetTime());
-        event->AddHit1(first+i, hit2->GetTime(), 0);
+        event->AddHit1(fFirstChannel+i, hit2->GetTime(), 0);
       }
     }
   }

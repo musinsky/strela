@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    04 Dec 2013
+// @Date    06 Dec 2013
 
 #ifndef STRELA_TVirtualModule
 #define STRELA_TVirtualModule
@@ -16,11 +16,13 @@ protected:
   Int_t          fSlot;          // unique slot (gate) number in VME
   Int_t          fNChips;        // number of chips
   Int_t          fChipNChannels; // number of channels in chip
+  Int_t          fFirstChannel;  // first channel of module
   TObjArray     *fMultiHits;     //->array of multihit
+
+  virtual void   VMEModule(Int_t slot);
 
 public:
   TVirtualModule();
-  TVirtualModule(Int_t slot);
   virtual ~TVirtualModule();
 
   Int_t          GetId() const { return fId; }
@@ -28,6 +30,8 @@ public:
   Int_t          GetNChips() const { return fNChips; }
   Int_t          GetChipNChannels() const { return fChipNChannels; }
   Int_t          GetModuleNChannels() const { return fNChips*fChipNChannels; }
+  void           SetFirstChannel(Int_t first) { fFirstChannel = first; }
+  Int_t          GetFirstChannel() const { return fFirstChannel; }
   TObjArray     *MultiHits() const { return fMultiHits; }
   TMultiHit     *GetMultiHit(Int_t i) const { return (TMultiHit *)fMultiHits->UncheckedAt(i); }
 

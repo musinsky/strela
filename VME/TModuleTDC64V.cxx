@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    01 Dec 2013
+// @Date    05 Dec 2013
 
 #include "TModuleTDC64V.h"
 #include "TVME.h"
@@ -33,6 +33,7 @@ ClassImp(TModuleTDC64V)
 
 //______________________________________________________________________________
 TModuleTDC64V::TModuleTDC64V()
+: TVirtualModule()
 {
   //  Info("TModuleTDC64V", "Default constructor");
   fId            = 0x10; // 16 in DEC
@@ -40,12 +41,14 @@ TModuleTDC64V::TModuleTDC64V()
   fChipNChannels = kChipNChannels;
 }
 //______________________________________________________________________________
-TModuleTDC64V::TModuleTDC64V(Int_t slot) : TVirtualModule(slot)
+TModuleTDC64V::TModuleTDC64V(Int_t slot)
+: TVirtualModule()
 {
   //  Info("TModuleTDC64V", "Normal constructor");
   fId            = 0x10; // 16 in DEC
   fNChips        = kNChips;
   fChipNChannels = kChipNChannels;
+  VMEModule(slot);
 }
 //______________________________________________________________________________
 TModuleTDC64V::~TModuleTDC64V()
@@ -60,13 +63,9 @@ void TModuleTDC64V::Print(Option_t *option) const
     kConnector[1] + kChipNChannels/2 - 1, kConnector[0] + kChipNChannels/2 - 1
   };
   Int_t del = 0, channelL, channelR, nadc, id, ch;
-  if (gVME) {
-    del = gVME->FirstChannelOfModule(this);
-    if (del < 0) {
-      del = 0;
-      Warning("Print", "module %s is not in list of modules", GetTitle());
-    }
-  }
+  if (fFirstChannel < 0)
+    Warning("Print", "module %s is not in list of modules", GetTitle());
+  else del = fFirstChannel;
 
   for (Int_t i = 0; i < (kNChips*2); i+=2) {
     Printf("GND\t\tGND");
@@ -78,8 +77,8 @@ void TModuleTDC64V::Print(Option_t *option) const
         Printf("%3d\t\t%3d", channelL, channelR);
 
       else if (!strcmp(option, "nadc")) {
-        if (!gVME || !gVME->GetChannel()) {
-          Info("Print", "only after ReDecodeChannels");
+        if (fSlot < 0) {
+          Info("Print", "only for VME module");
           return;
         }
         nadc = gVME->GetChannel()[channelL];
@@ -127,9 +126,8 @@ Bool_t TModuleTDC64V::GetChannelIdCh(Int_t ch, Int_t &tdcid, Int_t &tdcch) const
 void TModuleTDC64V::ConnectorChannels(Int_t con, Int_t *pins, Option_t * /*option*/) const
 {
   TVirtualModule::ConnectorChannels(con/2, pins); // only checks
-  Int_t del = gVME->FirstChannelOfModule(this);
 
   // order of channels: first, ..., last, GND
   for (Int_t i = 0; i < (kChipNChannels/2); i++)
-    pins[i] = gVME->GetChannel()[del + kConnector[con] + i];
+    pins[i] = gVME->GetChannel()[fFirstChannel + kConnector[con] + i];
 }

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    02 Dec 2013
+// @Date    06 Dec 2013
 
 #include <fcntl.h>
 #include <TMath.h>
@@ -8,29 +8,33 @@
 #include "TVirtualModule.h"
 
 TVME *gVME = 0;
+Bool_t TVME::fgReDecode = kFALSE;
 
 ClassImp(TVME)
 
 //______________________________________________________________________________
 TVME::TVME()
+: TNamed(),
+  fModules(0),
+  fNChannels(0),
+  fChannel(0),
+  fIndexCha(0),
+  fSortCha(0)
 {
-  //  Info("TVME", "Default constructor");
-  fModules   = 0;
-  fNChannels = 0;
-  fChannel   = 0;
-  fIndexCha  = 0;
-  fSortCha   = 0;
+  // Default constructor
 }
 //______________________________________________________________________________
-TVME::TVME(const char *name, const char *title) : TNamed(name, title)
+TVME::TVME(const char *name, const char *title)
+: TNamed(name, title),
+  fModules(0),
+  fNChannels(0),
+  fChannel(0),
+  fIndexCha(0),
+  fSortCha(0)
 {
-  //  Info("TVME", "Normal constructor");
-  gVME       = this;
-  fModules   = new TObjArray(20); // max slots (gates) in VME
-  fNChannels = 0;
-  fChannel   = 0;
-  fIndexCha  = 0;
-  fSortCha   = 0;
+  // Normal constructor
+  gVME     = this;
+  fModules = new TObjArray(20); // max slots (gates) in VME
 }
 //______________________________________________________________________________
 TVME::~TVME()
@@ -53,6 +57,8 @@ void TVME::DeleteChannels()
 //______________________________________________________________________________
 Int_t TVME::GetNChannels() const
 {
+  if (!fModules) return 0;
+
   TVirtualModule *module;
   Int_t sum = 0;
   for (Int_t im = 0; im < fModules->GetSize(); im++) {
@@ -63,25 +69,30 @@ Int_t TVME::GetNChannels() const
   return sum;
 }
 //______________________________________________________________________________
-Int_t TVME::FirstChannelOfModule(const TVirtualModule *mod) const
+void TVME::FirstChannelOfModules() const
 {
+  if (!fModules) return;
+
   TVirtualModule *module;
   Int_t first = 0;
   for (Int_t im = 0; im < fModules->GetSize(); im++) {
     module = GetModule(im);
-    if (!module) continue; // must be before check on mod, or check if mod == 0
-    if (mod == module) return first;
+    if (!module) continue;
+    module->SetFirstChannel(first);
     first += module->GetModuleNChannels();
   }
-  return -1;
 }
 //______________________________________________________________________________
 void TVME::ReDecodeChannels()
 {
-  // see in pomme.cxx
-  // 2007_03, 2008_06
+  if (!fModules) return;
+
+  // from 2013_12 is no longer needed, but leaving feedback over fgReDecode
+  //
+  // for 2007_03, 2008_06, 2009_12, 2011_03 see in pomme.cxx
   Int_t moduleShift = 100 - 512, moduleDelta = 512, idMulti = 32;
 
+  FirstChannelOfModules();
   DeleteChannels();
   fNChannels = GetNChannels();
   fChannel  = new Int_t[fNChannels];
@@ -94,12 +105,13 @@ void TVME::ReDecodeChannels()
     module = GetModule(im);
     if (!module) continue;
     moduleShift += moduleDelta;
-    first = FirstChannelOfModule(module);
+    first = module->GetFirstChannel();
     for (Int_t ich = 0; ich < module->GetModuleNChannels(); ich++) {
       inadc = first + ich;
       module->GetChannelIdCh(ich, tdcId, tdcCh);
       nadc = moduleShift + (tdcCh + tdcId*idMulti);
-      fChannel[inadc] = nadc;
+      if (fgReDecode) fChannel[inadc] = nadc;  // original
+      else            fChannel[inadc] = inadc; // new
       if (gDebug > 0) Printf("[%3d] %4d", inadc, nadc);
     }
   }
