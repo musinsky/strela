@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 11/11/2010
+// 06/12/2013
 
 #include <TList.h>
 #include <TSystem.h>
@@ -25,7 +25,7 @@ private:
 
 public:
   TLayer(const char *name, const char *title = "");
-  virtual     ~TLayer() {;}
+  virtual ~TLayer() {;}
   virtual void Print(Option_t *option = "") const;
 
   Int_t        GetId() const { return fId; }
@@ -47,7 +47,7 @@ public:
 Int_t TLayer::fCounter = 1; // Numb start from 1
 
 TLayer::TLayer(const char *name, const char *title)
-  : TNamed(name, title)
+: TNamed(name, title)
 {
   fId   = fCounter++;
   fLast = -1; // must be -1
@@ -115,33 +115,33 @@ protected:
   Int_t        fNLayers;
   TLayer     **fLayers;
   Int_t        fPins[kMaxPins];
-  void         Connect(Int_t mod, Int_t con, Option_t *option = "");
+  virtual void Connect(Int_t mod, Int_t con, Option_t *option = "");
 
-  void         Pattern430430() const;
-  void         Pattern443300() const;
-  void         Pattern33003300() const;
-  void         Pattern430_3300(Int_t firstl) const;
+  virtual void Pattern430430() const;
+  virtual void Pattern443300() const;
+  virtual void Pattern33003300() const;
+  virtual void Pattern430_3300(Int_t firstl) const;
 
 public:
   TVirtualChamber(const TString *names);
-  virtual     ~TVirtualChamber() { delete [] fLayers; }
+  virtual ~TVirtualChamber() { delete [] fLayers; }
   virtual void Print(Option_t *option = "") const;
 
   Int_t        GetNLayers() const { return fNLayers; }
   TLayer      *GetLayer(Int_t l) const { return (l < fNLayers) ?
       fLayers[l] : 0 ; }
   void         SetTracker(Int_t t) const { for (Int_t i = 0; i < fNLayers; i++)
-      fLayers[i]->SetTracker(t); }
+    fLayers[i]->SetTracker(t); }
   void         SetTracker2(Int_t t1, Int_t t2) const {
     fLayers[0]->SetTracker(t1); fLayers[1]->SetTracker(t1);
     fLayers[2]->SetTracker(t2); fLayers[3]->SetTracker(t2); }
   void         SetZ(Double_t z) const { for (Int_t i = 0; i < fNLayers; i++)
-      fLayers[i]->SetZ(z + i*kDelZ); }
+    fLayers[i]->SetZ(z + i*kDelZ); }
   void         SetZ2(Double_t z1, Double_t z2) const {
     fLayers[0]->SetZ(z1 + 0.0); fLayers[1]->SetZ(z1 + kDelZ);
     fLayers[2]->SetZ(z2 + 0.0); fLayers[3]->SetZ(z2 + kDelZ); }
   void         SetDirect(Int_t d) const { for (Int_t i = 0; i < fNLayers; i++)
-      fLayers[i]->SetDirect(d); }
+    fLayers[i]->SetDirect(d); }
   void         SetDirect2(Int_t d1, Int_t d2) const {
     fLayers[0]->SetDirect(d1); fLayers[1]->SetDirect(d1);
     fLayers[2]->SetDirect(d2); fLayers[3]->SetDirect(d2); }
@@ -150,6 +150,7 @@ public:
 };
 
 TVirtualChamber::TVirtualChamber(const TString *names)
+: TObject()
 {
   if (list->IsEmpty()) TLayer::ResetCounter();
   list->Add(this);
@@ -257,8 +258,10 @@ void TSmall::SetConnect(Int_t module, Int_t connector, Option_t *option)
 //______________________________________________________________________________
 
 class TBig : public TVirtualChamber {
+private:
+  Bool_t      fConnect1;
 public:
-  TBig(const TString *lnames) : TVirtualChamber(lnames) {;}
+  TBig(const TString *lnames) : TVirtualChamber(lnames), fConnect1(kFALSE) {;}
   virtual ~TBig() {;}
   void        SetConnect1(Int_t module, Int_t connector, Option_t *option = "");
   void        SetConnect2(Int_t module, Int_t connector, Option_t *option = "");
@@ -268,6 +271,7 @@ public:
 
 void TBig::SetConnect1(Int_t module, Int_t connector, Option_t *option)
 {
+  fConnect1 = kTRUE;
   Connect(module, connector, option);
 
   TString opt = option;
@@ -278,6 +282,10 @@ void TBig::SetConnect1(Int_t module, Int_t connector, Option_t *option)
 
 void TBig::SetConnect2(Int_t module, Int_t connector, Option_t *option)
 {
+  if (!fConnect1) {
+    Error("SetConnect2", "first must call SetConnect1");
+    return;
+  }
   Connect(module, connector, option);
 
   TString opt = option;
