@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 02/12/2013
+// 06/12/2013
 
 {
   if (gVME) {
@@ -8,10 +8,9 @@
   }
 
   new TVME("seance 2013_12");
+
   new TModuleTDC64V(7);
   new TModuleTDC64V(9);
   new TModuleTDC64V(11);
   new TModuleTDC64V(13);
-
-  //  gVME->ReDecodeChannels();
 }

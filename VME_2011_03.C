@@ -8,7 +8,8 @@
   }
 
   new TVME("seance 2011_03");
+  TVME::ReDecode(kTRUE);
+
   new TModulePhTDC(0); // 1y, 2y, trig, 0
   new TModuleTDC96(1); // 3,4; 1,2; 5,6
-  gVME->ReDecodeChannels();
 }
