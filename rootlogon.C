@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 25/11/2013
+// 04/12/2013
 
 #ifndef __CINT__
 #include <TROOT.h>
@@ -19,6 +19,7 @@ void rootlogon()
 
   gSystem->Load("libGpad");
   gSystem->Load("libSQLIO");
+  gSystem->Load("libTree");
   gSystem->Load("lib/libVME.so");
   gSystem->Load("lib/libStrela.so");
 
