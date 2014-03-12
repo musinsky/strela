@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 04/03/2014
+// 12/03/2014
 
 /*
   .x macros/sql_2014_03.C
@@ -67,12 +67,15 @@ void sql_2014_03(Bool_t print = kTRUE)
   cham3->SetConnect(13, 2, "onlyx");    // cable 3y (module 13, connector 2)
 
   if (!print) return;
+  TString fn0 = gSystem->BaseName(gInterpreter->GetCurrentMacroName());
+  fn0.ReplaceAll("sql_", "");
+  fn0.ReplaceAll(".C", "");
   TString fn;
   const char *what[2]={"layers", "channels"};
   Printf(gVME->GetName());
   TROOT::DecreaseDirLevel();
   for (Int_t i = 0; i < 2; i++) {
-    fn = Form("2014_03_%s.sql", what[i]); // !!!
+    fn = Form("%s_%s.sql", fn0.Data(), what[i]);
     gROOT->ProcessLine(Form("list->Print(\"%s\"); > %s", what[i], fn.Data()));
     gSystem->Exec(Form("sed -i -e '1d' %s", fn.Data())); // remove first line
     Printf("wrote file '%s'", fn.Data());
