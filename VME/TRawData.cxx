@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    04 Dec 2013
+// @Date    05 Mar 2014
 
 #include <fcntl.h>
 #include <TError.h>
@@ -21,8 +21,11 @@
 #include <unistd.h>
 #include <inttypes.h>
 
+// ROZDELIT 0-7 zavisdai od moula !!!!
+// 8-F univerzalne !!!!!!!!!!!!!!!!
 
 
+// toto je ine pre TDC TQDC a pod.
 const UInt_t kTHDR = 0x2; // TDC event header
 const UInt_t kTTRL = 0x3; // TDC event trailer
 const UInt_t kTLD  = 0x4; // TDC leading
@@ -64,46 +67,96 @@ TRawData::~TRawData()
 //______________________________________________________________________________
 void TRawData::ParseFile(const char *fname)
 {
-//
-//  // echo 3 > /proc/sys/vm/drop_caches
-//  // echo 3 | sudo tee /proc/sys/vm/drop_caches
-//  // sync; echo 3 > /proc/sys/vm/drop_caches      !!!!!!!!!!!!
-//
-//
-//  const Int_t BUFLEN = 4096*1;  // 4096 is blocksize in bytes (blockdev --getbsz /dev/sda1)
-//  UInt_t buf[BUFLEN];
-//  FILE *f = fopen(fname, "rb");
-//  size_t nread = 1;
-//  Int_t count = 0;
-//  fseek(f , 0 , SEEK_END);
-//  UInt_t fsize = ftell(f)/4;
-//  rewind(f);
-//  UInt_t position = 0;
-//  UInt_t position2 = 0;
-//
-//  while (position < fsize) {
-////    nread = fread(&buf, sizeof(UInt_t), BUFLEN, f);
-//    //nread = fread(&fWord, sizeof(fWord), 1, f);
-//    nread = fread(&buf, BUFLEN, 1, f);
-//    Int_t max = BUFLEN;
-//    if (BUFLEN > (fsize-position)) max = fsize-position;
-//
-//    for (size_t i=0; i<max; i++) {
-////      uint32_t d = buf[i];
-////      uint32_t code = d >> 28;
-//      Printf("%6d   0x%08X", position, buf[i]);
-////      if (position >= fsize) break;
-//      position++;
-//    }
-//////    Printf("%ld", nread);
-////    position2 += position;
-//    Printf("%6d   0x%08X", max-1, buf[max-1]);
-//  }
-//  Printf("%", position);
-//  return;
+  //  http://tecadmin.net/flush-memory-cache-on-linux-server
+  //  // echo 3 > /proc/sys/vm/drop_caches
+  //  // echo 3 | sudo tee /proc/sys/vm/drop_caches
+  //  // sync; echo 3 > /proc/sys/vm/drop_caches      !!!!!!!!!!!!
+  //
+  //
+  //  const Int_t BUFLEN = 4096*1;  // 4096 is blocksize in bytes (blockdev --getbsz /dev/sda1)
+  //  UInt_t buf[BUFLEN];
+  //  FILE *f = fopen(fname, "rb");
+  //  size_t nread = 1;
+  //  Int_t count = 0;
+  //  fseek(f , 0 , SEEK_END);
+  //  UInt_t fsize = ftell(f)/4;
+  //  rewind(f);
+  //  UInt_t position = 0;
+  //  UInt_t position2 = 0;
+  //
+  //  while (position < fsize) {
+  ////    nread = fread(&buf, sizeof(UInt_t), BUFLEN, f);
+  //    //nread = fread(&fWord, sizeof(fWord), 1, f);
+  //    nread = fread(&buf, BUFLEN, 1, f);
+  //    Int_t max = BUFLEN;
+  //    if (BUFLEN > (fsize-position)) max = fsize-position;
+  //
+  //    for (size_t i=0; i<max; i++) {
+  ////      uint32_t d = buf[i];
+  ////      uint32_t code = d >> 28;
+  //      Printf("%6d   0x%08X", position, buf[i]);
+  ////      if (position >= fsize) break;
+  //      position++;
+  //    }
+  //////    Printf("%ld", nread);
+  ////    position2 += position;
+  //    Printf("%6d   0x%08X", max-1, buf[max-1]);
+  //  }
+  //  Printf("%", position);
+  //  return;
+
+  const UInt_t kBufSize = 4096*1; // 4096 is blocksize in bytes (blockdev --getbsz /dev/sda1)
+  UInt_t dataWord[kBufSize];      // data is 4 bytes (32 bits). Intel byte order is used
+  // asi lepsie dataWord na buffer
+  // a potom data = buffer[i];
+  fFile = fopen(fname, "rb");
+  if (!fFile) {
+    Error("ParseFile", "file %s can not be opened", fname);
+    return;
+  }
 
 
+  fseek(fFile , 0 , SEEK_END);
+  UInt_t fsize = ftell(fFile)/4;
+  Printf("size = %d", fsize);
+  rewind(fFile);
 
+  struct stat file_stats;
+  // TUnixSystem.cxx; rootx.cxx -> static int ReadUtmp()
+  stat(fname, &file_stats);
+  size_t nread, size;   // je unsigned size_t is 8 bytes (ULong_t)
+  size = file_stats.st_size;
+  printf("b  %9jd \n", size);
+  Printf("size = %zu", size/4);
+
+  // vector<int> numbers(512);
+  // numbers.size() = 512
+  // if(fread(&numbers[0], sizeof(int),numbers.size(),fd)!=numbers.size())
+
+  //  TUnixSystem::CopyFile
+  //  const int bufsize = 1024;
+  //  char buf[bufsize];
+  //  int ret = 0;
+  //  while (!ret && !feof(from)) {
+  //     size_t numread    = fread (buf, sizeof(char), bufsize, from);
+  //     size_t numwritten = fwrite(buf, sizeof(char), numread, to);
+  //     if (numread != numwritten)
+  //        ret = -3;
+  //  }
+
+  /* OKOKOK
+  const size_t bufSize = 4096; // 4096 is blocksize in bytes (blockdev --getbsz /dev/sda1)
+  UInt_t buffer[bufSize];      // data in buffer is 4 bytes (32 bits)
+
+  do {
+    nread = fread(buffer, sizeof(UInt_t), bufSize, fFile);
+    for (size_t i = 0; i < nread; i++) {
+      Printf("%03zu) %d", i, buffer[i]>>28);
+      fWord = buffer[i]; // fWord na fData
+    }
+  } while (nread == bufSize);
+   */
+  // size_t to unsigned long
 
   fFile = fopen(fname, "rb");
   if (!fFile) {
@@ -111,25 +164,55 @@ void TRawData::ParseFile(const char *fname)
     return;
   }
 
-  TFile *file = new TFile("run100.root", "RECREATE");
-  fTree = new TTree("pp", "nove");
-  fTree->SetAutoSave(1000000000); // autosave when 1 Gbyte written
-  fGemEvent = new TGemEvent();
-  TObject *address = fGemEvent;
-  //fTree->Branch("event", fGemEvent->ClassName(), &fGemEvent);
-  fTree->Branch("event", fGemEvent->ClassName(), &address);
+
+
+
+  do {
+    nread = fread(dataWord, sizeof(UInt_t), kBufSize, fFile);
+
+    //nread = fread(dataWord, sizeof(UInt_t), kBufSize, fFile);
+
+    //nread = fread(&dataWord[0], sizeof(UInt_t), kBufSize, fFile);
+    //nread = fread(&dataWord, sizeof(UInt_t), kBufSize, fFile);
+    for (size_t i=0;i<nread;i++)
+      ;
+//      Printf("%03zu) %d", i, dataWord[i]>>28); /// ale size_t je fiyr menise ako kBufSize ktore ke int
+//    Printf("== %zu", nread);
+  } while (nread==kBufSize);
+
+  //nread = fread(&fWord, sizeof(fWord), 1, f);
+  //nread = fread(&buf, BUFLEN, 1, f);
+
+  //  UInt_t position = 0;
+  //  UInt_t position2 = 0;
+  //
+  nread = fread(&fWord, sizeof(fWord), 1, fFile);
+  Printf("%zu", nread);
+  nread = fread(&fWord, sizeof(fWord), 10, fFile);
+  Printf("%zu", nread);
+
+
+  return;
+  //  TFile *file = new TFile("run100.root", "RECREATE");
+  //  fTree = new TTree("pp", "nove");
+  //  fTree->SetAutoSave(1000000000); // autosave when 1 Gbyte written
+  //  fGemEvent = new TGemEvent();
+  //  TObject *address = fGemEvent;
+  //  //fTree->Branch("event", fGemEvent->ClassName(), &fGemEvent);
+  //  fTree->Branch("event", fGemEvent->ClassName(), &address);
 
   fNWords  = 0;
   fNSpills = 0;
   fNEvent  = 0;
   while (fread(&fWord, sizeof(fWord), 1, fFile) == 1) {
-    FindType2();
+    FindType();
     fNWords++;
+    if (fNWords>100) break;
   }
   fclose(fFile);
 
-  fTree->Write();
-  delete file;
+  //  fTree->Write();
+  //  delete file;
 }
 //______________________________________________________________________________
 void TRawData::FindType2()
@@ -137,7 +220,7 @@ void TRawData::FindType2()
   UInt_t type = fWord >> 28; // (bits 28 - 31)
   switch (type) {
     case kEHDR:
-      DecodeEHDR();
+      DecodeEHDR();    // pozor nie ehdr ak je spill s ENDOM !!!!!!!!!
       return;
 
     case kETRL:
@@ -252,8 +335,8 @@ void TRawData::DecodeTTRL()
 void TRawData::DecodeTLD()
 {
   if (!fModule) {
-//    PrintWord(4);
-//    printf("noTDC\n");
+    //    PrintWord(4);
+    //    printf("noTDC\n");
     return;
   }
 
@@ -264,16 +347,16 @@ void TRawData::DecodeTLD()
 
   //if (id != fTdcId) Error("DecodeTLD", "tdc_id mismatch %d != %d", id, fTdcId);
 
-//  PrintWord(4);
-//  printf("TLD tdc: %4d, ch: %2d, id: %2d (nadc: %02d)\n", tdc, ch, id, fModule->MapChannel(id, ch));
+  //  PrintWord(4);
+  //  printf("TLD tdc: %4d, ch: %2d, id: %2d (nadc: %02d)\n", tdc, ch, id, fModule->MapChannel(id, ch));
   fModule->MultiHitAdd(fModule->MapChannel(id, ch), tdc, kTRUE);
 }
 //______________________________________________________________________________
 void TRawData::DecodeTTR()
 {
   if (!fModule) {
-//    PrintWord(4);
-//    printf("noTDC\n");
+    //    PrintWord(4);
+    //    printf("noTDC\n");
     return;
   }
 
@@ -284,8 +367,8 @@ void TRawData::DecodeTTR()
 
   //if (id != fTdcId) Error("DecodeTTR", "tdc_id mismatch %d != %d", id, fTdcId);
 
-//  PrintWord(4);
-//  printf("TTR tdc: %4d, ch: %2d, id: %2d (nadc: %02d)\n", tdc, ch, id, fModule->MapChannel(id, ch));
+  //  PrintWord(4);
+  //  printf("TTR tdc: %4d, ch: %2d, id: %2d (nadc: %02d)\n", tdc, ch, id, fModule->MapChannel(id, ch));
   fModule->MultiHitAdd(fModule->MapChannel(id, ch), tdc, kFALSE);
 }
 //______________________________________________________________________________
@@ -306,6 +389,15 @@ void TRawData::DecodeMHDR()
   Int_t id = (fWord >> 16) & 0x7F; // (bits 16 - 22)
   Int_t ga = (fWord >> 23) & 0x1F; // (bits 23 - 27)
 
+
+
+  // viem dekodovat len TDC moduly. t.j. id == 0x10 (16), 0x04, 0x05;
+  // rozlsovci smDaboooooooooooooo TQQDC
+
+  // nastavit fModule=0 pre zly pripad, nech nedokoduje nieco ine
+  // alebo fModule na VirtualModule, potom nepotrebujem nikdy checkovat fMoudule
+
+
   if (ev != fEvent) Error("DecodeMHDR", "event mismatch %d != %d", ev, fEvent);
   if (gVME) {
     if (ga < gVME->Modules()->GetSize())
@@ -316,25 +408,25 @@ void TRawData::DecodeMHDR()
   if (fModule && (fModule->GetId() != id))
     Error("DecodeMHDR", "moduleID mismatch %d != %d", id, fModule->GetId());
 
-//  PrintWord(2);
-//  printf("MHDR ev: %d, id: %2d, ga: %2d\n", ev, id, ga);
+  //  PrintWord(2);
+  //  printf("MHDR ev: %d, id: %2d, ga: %2d\n", ev, id, ga);
 }
 //______________________________________________________________________________
 void TRawData::DecodeMTRL()
 {
   // 0x9 Module trailer
-//  Int_t wc  = fWord & 0xFFFF;       // (bits 0  - 15)
+  //  Int_t wc  = fWord & 0xFFFF;       // (bits 0  - 15)
   Int_t er  = (fWord >> 16) & 0xF;  // (bits 16 - 19)
-//  Int_t crc = (fWord >> 20) & 0xFF; // (bits 20 - 27)
+  //  Int_t crc = (fWord >> 20) & 0xFF; // (bits 20 - 27)
 
   if (er != 0xF) Error("DecodeMTRL", "module error 0x%X", er);
 
-//  PrintWord(2);
-//  printf("MTRL wc: %d, er: 0x%X, crc: 0x%X\n", wc, er, crc);
+  //  PrintWord(2);
+  //  printf("MTRL wc: %d, er: 0x%X, crc: 0x%X\n", wc, er, crc);
 
   if (!gVME) return;
   if (fModule) {
-    fModule->MultiHitIdentify(fGemEvent);
+    //    fModule->MultiHitIdentify(fGemEvent);
     fModule->MultiHitClear();
   }
 }
@@ -344,24 +436,24 @@ void TRawData::DecodeEHDR()
   // 0xA Event header
   fEvent = fWord & 0xFFFFF; // (bits 0 - 19)
 
-//  PrintWord(1);
-//  printf("EHDR ev: %d\n", fEvent);
+  //  PrintWord(1);
+  //  printf("EHDR ev: %d\n", fEvent);
 
 
-  fGemEvent->Clear();
+  //  fGemEvent->Clear();
 
 }
 //______________________________________________________________________________
 void TRawData::DecodeETRL()
 {
   // 0xB Event trailer
-//  Int_t wc = fWord & 0xFFFFFF; // (bits 0 - 23)
+  //  Int_t wc = fWord & 0xFFFFFF; // (bits 0 - 23)
 
-//  PrintWord(1);
-//  printf("ETRL wc: %d\n", wc);
+  //  PrintWord(1);
+  //  printf("ETRL wc: %d\n", wc);
 
-  fGemEvent->SetEvent(fEvent);
-  fTree->Fill();
+  //  fGemEvent->SetEvent(fEvent);
+  //  fTree->Fill();
 }
 //______________________________________________________________________________
 void TRawData::DecodeSHDR()

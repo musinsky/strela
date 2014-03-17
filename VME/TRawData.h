@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    04 Dec 2013
+// @Date    05 Mar 2014
 
 #ifndef STRELA_TRawData
 #define STRELA_TRawData
@@ -37,7 +37,9 @@ public:
 
   FILE        *GetFile() const { return fFile; }
 
+  // redafile
   void         ParseFile(const char *fname); // static ?!
+  //           decode()
   void         FindType();
   void         FindType2();
 
