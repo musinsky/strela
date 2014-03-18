@@ -85,21 +85,21 @@ void TVMERawData::DecodeDataWord()
     case kRESE:
       DecodeRESE();
       return;
-      //    case kTHDR:
-      //      DecodeTHDR();
-      //      return;
-      //    case kTTRL:
-      //      DecodeTTRL();
-      //      return;
-      //    case kTLD:
-      //      DecodeTLD();
-      //      return;
-      //    case kTTR:
-      //      DecodeTTR();
-      //      return;
-      //    case kTERR:
-      //      DecodeTERR();
-      //      return;
+    case kTHDR:
+      DecodeTHDR();
+      return;
+    case kTTRL:
+      DecodeTTRL();
+      return;
+    case kTLD:
+      DecodeTLD();
+      return;
+    case kTTR:
+      DecodeTTR();
+      return;
+    case kTERR:
+      DecodeTERR();
+      return;
     default:
       DecodeOther();
       return;
@@ -201,9 +201,6 @@ void TVMERawData::DecodeMTRL()
   if (!PrintDataWord(2)) return;
   printf("MTRL wc: %d, er: 0x%X, crc: 0x%X\n", wc, er, crc);
 }
-
-
-
 //______________________________________________________________________________
 void TVMERawData::DecodeSTAT()
 {
@@ -225,6 +222,62 @@ void TVMERawData::DecodeOther()
 {
   if (!PrintDataWord(0)) return;
   printf("other\n");
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeTHDR()
+{
+  // 0x2 TDC header
+  Int_t ts = fDataWord & 0xFFF;         // (bits 0  - 11)
+  Int_t ev = (fDataWord >> 12) & 0xFFF; // (bits 12 - 23)
+  Int_t id = (fDataWord >> 24) & 0xF;   // (bits 24 - 27)
+
+  // obsolete (it will not be stored)
+
+  if (!PrintDataWord(3)) return;
+  printf("THDR ts: %d, ev: %d, id: %2d\n", ts, ev, id);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeTTRL()
+{
+  // 0x3 TDC trailer
+  Int_t wc = fDataWord & 0xFFF;         // (bits 0  - 11)
+  Int_t ev = (fDataWord >> 12) & 0xFFF; // (bits 12 - 23)
+  Int_t id = (fDataWord >> 24) & 0xF;   // (bits 24 - 27)
+
+  // obsolete (it will not be stored)
+
+  if (!PrintDataWord(3)) return;
+  printf("TTRL wc: %d, ev: %d, id: %2d\n", wc, ev, id);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeTLD()
+{
+  // 0x4 TDC leading (Single edge measurements)
+  Int_t tm = fDataWord & 0x7FFFF;      // (bits 0  - 18)
+  Int_t ch = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
+  Int_t id = (fDataWord >> 24) & 0xF;  // (bits 24 - 27)
+
+  if (!PrintDataWord(4)) return;
+  printf("TLD tm: %6d, ch: %2d, id: %2d\n", tm, ch, id);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeTTR()
+{
+  // 0x5 TDC trailing (Single edge measurements)
+  Int_t tm = fDataWord & 0x7FFFF;      // (bits 0  - 18)
+  Int_t ch = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
+  Int_t id = (fDataWord >> 24) & 0xF;  // (bits 24 - 27)
+
+  if (!PrintDataWord(4)) return;
+  printf("TTR tm: %6d, ch: %2d, id: %2d\n", tm, ch, id);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeTERR()
+{
+  // 0x6 TDC error
+  Int_t flag = fDataWord & 0x7FFF; // (bits 0  - 14)
+
+  Warning("DecodeTERR", "TDC error flags: 0x%X", flag);
 }
 //______________________________________________________________________________
 void TVMERawData::CheckIntegrity(ETypeStatus type, Bool_t status, const char *where)

@@ -58,6 +58,11 @@ public:
   void          DecodeSTAT();
   void          DecodeRESE();
   void          DecodeOther();
+  void          DecodeTHDR();
+  void          DecodeTTRL();
+  void          DecodeTLD();
+  void          DecodeTTR();
+  void          DecodeTERR();
 
   void          CheckIntegrity(ETypeStatus type, Bool_t status, const char *where);
   void          CheckIntegrity2(ETypeStatus type, const char *where);
