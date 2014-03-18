@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    17 Mar 2014
+// @Date    18 Mar 2014
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -9,20 +9,18 @@
 class TVMERawData : public TObject {
 
 private:
-  UInt_t        fDataWord;
-  ULong_t       fNDataWords;
-  Int_t         fNSpills;
-  Int_t         fNEvents;   // !!!!!!all events += event from ehdr
-  Int_t         fEventEHDR;
-  Int_t         fEventMHDR;
-  Bool_t        fFirstModule;
-  Int_t         fAllEvents; // !!!!!!potom nepotrebne
+  UInt_t        fDataWord;   // one word of data
+  ULong_t       fNDataWords; // all words
+  Int_t         fNSpills;    // all spills
+  Int_t         fNEvents;    // all events
+  Int_t         fEventEHDR;  // event number in EHDR
+  Int_t         fEventMHDR;  // event number in MHDR
 
 public:
   // Data type status bits
   enum ETypeStatus {
     kSpill    = BIT(14), // Spill header/trailer
-    kSpillEnd = BIT(15), // End of spill header/trailer
+    kSpillEnd = BIT(15), // Spill (end of data)
     kEvent    = BIT(16), // Event header/trailer
     kModule   = BIT(17)  // Module header/trailer
   };
@@ -57,13 +55,14 @@ public:
   void          DecodeETRL();
   void          DecodeMHDR();
   void          DecodeMTRL();
-  //  void          DecodeSTAT();
-  //  void          DecodeRESE();
+  void          DecodeSTAT();
+  void          DecodeRESE();
   void          DecodeOther();
-  Bool_t        PrintDataWord(Int_t nlevel) const;
 
-  void CheckIntegrity(ETypeStatus type, Bool_t status, const char *where);
-  void CheckIntegrity2(ETypeStatus type, const char *where);
+  void          CheckIntegrity(ETypeStatus type, Bool_t status, const char *where);
+  void          CheckIntegrity2(ETypeStatus type, const char *where);
+
+  Bool_t        PrintDataWord(Int_t nlevel) const;
 
   ClassDef(TVMERawData, 1) // VMERawData class
 };

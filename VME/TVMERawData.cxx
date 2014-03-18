@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    17 Mar 2014
+// @Date    18 Mar 2014
 
 //#include <TFile.h>
 
@@ -16,9 +16,7 @@ TVMERawData::TVMERawData()
   fNSpills(0),
   fNEvents(0),
   fEventEHDR(0),
-  fEventMHDR(0),
-  fFirstModule(kFALSE),
-  fAllEvents(0)
+  fEventMHDR(0)
 {
   // Default constructor
 }
@@ -51,10 +49,11 @@ void TVMERawData::ReadFile(const char *fname)
 
   fclose(file);
 
-  Printf("total size = %lu bytes", fNDataWords*sizeof(UInt_t));
-  Printf("total words = %lu", fNDataWords);
-  Printf("total spills = %d", fNSpills);
-  Printf("total events = %d", fAllEvents);
+  Printf("\nfile: %s", fname);
+  Printf("size   = %lu bytes", fNDataWords*sizeof(UInt_t));
+  Printf("words  = %lu", fNDataWords);
+  Printf("spills = %d", fNSpills);
+  Printf("events = %d", fNEvents);
 }
 //______________________________________________________________________________
 void TVMERawData::DecodeDataWord()
@@ -80,15 +79,12 @@ void TVMERawData::DecodeDataWord()
     case kMTRL:
       DecodeMTRL();
       return;
-
-      //    case kSTAT:
-      //      DecodeSTAT();
-      //      return;
-      //    case kRESE:
-      //      DecodeRESE();
-      //      return;
-
-
+    case kSTAT:
+      DecodeSTAT();
+      return;
+    case kRESE:
+      DecodeRESE();
+      return;
       //    case kTHDR:
       //      DecodeTHDR();
       //      return;
@@ -104,16 +100,11 @@ void TVMERawData::DecodeDataWord()
       //    case kTERR:
       //      DecodeTERR();
       //      return;
-
-
     default:
       DecodeOther();
       return;
   }
 }
-
-
-
 //______________________________________________________________________________
 void TVMERawData::DecodeSHDR()
 {
@@ -122,22 +113,21 @@ void TVMERawData::DecodeSHDR()
 
   if (end) {
     if (TestBit(kSpill)) Warning("DecodeSHDR", "SHDR_END after previous SHDR");
-    if (TestBit(kSpillEnd)) Warning("DecodeSHDR", "SHDR_END after previous SHDR_END");
     CheckIntegrity(kSpillEnd, kTRUE, "SHDR_END");
-    //SetBit(kSpillEnd, kTRUE);
+
+    // exclude spill (and event) from end of spill data
+    fNSpills++;
+    // don't sum in DecodeSTRL, need correct count also in the case SHDR without STRL
+    fNEvents += (fEventEHDR + 1);
   }
   else {
     if (TestBit(kSpillEnd)) Warning("DecodeSHDR", "SHDR after previous SHDR_END");
-    if (TestBit(kSpill)) Warning("DecodeSHDR", "SHDR after previous SHDR");
     CheckIntegrity(kSpill, kTRUE, "SHDR");
-    //SetBit(kSpill, kTRUE);
   }
 
-  // need correct work even in the case SHDR without STRL
-  fAllEvents += fNEvents;
-  fNEvents = 0;
+  fEventEHDR = -1; // reset
 
-  //  if (!PrintDataWord(0)) return;
+  //if (!PrintDataWord(0)) return;
   if (end) printf("SHDR_END\n");
   else     printf("SHDR ns= %d\n", fNSpills);
 }
@@ -147,21 +137,12 @@ void TVMERawData::DecodeSTRL()
   // 0xD Spill trailer
   Bool_t end = (fDataWord >> 27) & 0x1; // (bit 27)
 
-  if (end) {
-    if (!TestBit(kSpillEnd)) Warning("DecodeSTRL", "STRL_END after previous STRL_END");
-    CheckIntegrity(kSpillEnd, kFALSE, "STRL_END");
-    //SetBit(kSpillEnd, kFALSE);
-  }
-  else {
-    if (!TestBit(kSpill)) Warning("DecodeSTRL", "STRL after previous STRL");
-    CheckIntegrity(kSpill, kFALSE, "STRL");
-    //SetBit(kSpill, kFALSE);
-    fNSpills++; // don't count spill_END
-  }
+  if (end) CheckIntegrity(kSpillEnd, kFALSE, "STRL_END");
+  else CheckIntegrity(kSpill, kFALSE, "STRL");
 
-  //  if (!PrintDataWord(0)) return;
+  //if (!PrintDataWord(0)) return;
   if (end) printf("STRL_END\n");
-  else     printf("STRL ns= %d\n", fNSpills-1);
+  else     printf("STRL ns= %d\n", fNSpills);
 }
 //______________________________________________________________________________
 void TVMERawData::DecodeEHDR()
@@ -169,18 +150,12 @@ void TVMERawData::DecodeEHDR()
   // 0xA Event header
   Int_t ev = fDataWord & 0xFFFFF; // (bits 0 - 19)
 
-  if (!(TestBit(kSpill) || TestBit(kSpillEnd))) Warning("DecodeEHDR", "EHDR out of SHDR");
-  if (TestBit(kEvent)) Warning("DecodeEHDR", "EHDR after previous EHDR");
-  // TestOutType(kEvent, "EHDR");
   CheckIntegrity(kEvent, kTRUE, "EHDR");
-  // TestEvent(1,   kTRUE, "EHDR");
-  //SetBit(kEvent, kTRUE);
-  if (fNEvents != ev) Warning("DecodeEHDR", "Event number mismatch %d != %d", fNEvents, ev);
+  if ((ev - fEventEHDR) != 1) Warning("DecodeEHDR", "discontiguous event number %d after %d", ev, fEventEHDR);
+  fEventEHDR = ev;
 
+  fEventMHDR = -1; // reset
 
-  fFirstModule = kTRUE;
-
-  //return;
   if (!PrintDataWord(1)) return;
   printf("EHDR ev: %d\n", ev);
 }
@@ -190,15 +165,8 @@ void TVMERawData::DecodeETRL()
   // 0xB Event trailer
   Int_t wc = fDataWord & 0xFFFFFF; // (bits 0 - 23)
 
-  if (!(TestBit(kSpill) || TestBit(kSpillEnd))) Warning("DecodeETRL", "ETRL out of SHDR");
-  if (!TestBit(kEvent)) Warning("DecodeETRL", "ETRL after previous ETRL");
-  // TestOutType(kEvent, "ETRL");
   CheckIntegrity(kEvent, kFALSE, "ETRL");
-  // TestEvent(1,    kFALSE, "ETRL");
-  //SetBit(kEvent, kFALSE);
-  fNEvents++;
 
-  //return;
   if (!PrintDataWord(1)) return;
   printf("ETRL wc: %d\n", wc);
 }
@@ -210,25 +178,12 @@ void TVMERawData::DecodeMHDR()
   Int_t id = (fDataWord >> 16) & 0x7F; // (bits 16 - 22)
   Int_t ga = (fDataWord >> 23) & 0x1F; // (bits 23 - 27)
 
-  if (fFirstModule) fFirstModule = kFALSE;
-  else if (ev != fEventMHDR) Printf("!!!!!!!!!!!!!!!!!!!!!!!!!");
+  CheckIntegrity(kModule, kTRUE, "MHDR");
+  // in some cases fEventMHDR != fEventEHDR and not starting from 0
+  if (fEventMHDR == -1) fEventMHDR = ev;
+  else if (ev != fEventMHDR) Warning("DecodeMHDR", "event number mismatch %d != %d", ev, fEventMHDR);
   fEventMHDR = ev;
 
-  if (!(TestBit(kSpill) || TestBit(kSpillEnd))) Warning("DecodeMHDR", "MHDR out of SHDR");
-  if (!TestBit(kEvent)) Warning("DecodeMHDR", "MHDR out of EHDR");
-  ///////  TestEvent(0,   kFALSE, "MHDR");
-  if (TestBit(kModule)) Warning("DecodeMHDR", "MHDR after previous MHDR");
-  // TestOutType(kModule, "MHDR");
-  CheckIntegrity(kModule, kTRUE, "MHDR");
-  // TestModule(1,   kTRUE, "MHDR");
-  //SetBit(kModule, kTRUE);
-  if (fNEvents < (1 << 16)) { // max. event number for MHDR is 65536 (bits 0  - 15)
-    if (fNEvents != ev) Warning("DecodeMHDR", "Event number mismatch %d != %d", fNEvents, ev);
-    //    if (fNEvents != ev) Printf("Event number mismatch %d != %d", fNEvents, ev);
-    //    else                Printf("Event number OK = %d", fNEvents);
-  }
-
-  //  return;
   if (!PrintDataWord(2)) return;
   printf("MHDR ev: %d, id: %2d, ga: %2d\n", ev, id, ga);
 }
@@ -240,14 +195,7 @@ void TVMERawData::DecodeMTRL()
   Int_t er  = (fDataWord >> 16) & 0xF;  // (bits 16 - 19)
   Int_t crc = (fDataWord >> 20) & 0xFF; // (bits 20 - 27)
 
-  if (!(TestBit(kSpill) || TestBit(kSpillEnd))) Warning("DecodeMTRL", "MTRL out of SHDR");
-  if (!TestBit(kEvent)) Warning("DecodeMTRL", "MTRL out of EHDR");
-  ////////////  TestModule(0,   kFALSE, "MTRL");
-  if (!TestBit(kModule)) Warning("DecodeMTRL", "MTRL after previous MTRL");
-  // TestOutType(kModule, "MTRL");
   CheckIntegrity(kModule, kFALSE, "MTRL");
-  // TestModule(1,   kFALSE, "MTRL");
-  //SetBit(kModule, kFALSE);
   if (er != 0xF) Warning("DecodeMTRL", "module error 0x%X", er);
 
   if (!PrintDataWord(2)) return;
@@ -255,6 +203,29 @@ void TVMERawData::DecodeMTRL()
 }
 
 
+
+//______________________________________________________________________________
+void TVMERawData::DecodeSTAT()
+{
+  // 0xE Status
+
+  if (!PrintDataWord(0)) return;
+  printf("STAT\n");
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeRESE()
+{
+  // 0xF Reserved
+
+  if (!PrintDataWord(0)) return;
+  printf("RESE\n");
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeOther()
+{
+  if (!PrintDataWord(0)) return;
+  printf("other\n");
+}
 //______________________________________________________________________________
 void TVMERawData::CheckIntegrity(ETypeStatus type, Bool_t status, const char *where)
 {
@@ -262,7 +233,6 @@ void TVMERawData::CheckIntegrity(ETypeStatus type, Bool_t status, const char *wh
 
   if (TestBit(type) == status) Warning("CheckIntegrity", "%s after previous %s", where, where);
   SetBit(type, status);
-  //if (type != kEvent && status != 0) SetBit(type, status);
 
   CheckIntegrity2(type, where);
 }
@@ -274,19 +244,12 @@ void TVMERawData::CheckIntegrity2(ETypeStatus type, const char *where)
   if (type == kModule) {            // module inside event
     if (TestBit(kEvent) == kFALSE)
       Warning("CheckIntegrity", "%s out of EHDR", where);
-    CheckIntegrity2(kEvent, where); // and simultaneously event inside spill
+    CheckIntegrity2(kEvent, where); // and simultaneously check event inside spill
   }
   else if (type == kEvent) {        // event inside spill
     if ((TestBit(kSpill) == kFALSE) && (TestBit(kSpillEnd) == kFALSE))
       Warning("CheckIntegrity", "%s out of SHDR", where);
   }
-}
-//______________________________________________________________________________
-void TVMERawData::DecodeOther()
-{
-  return;
-  if (!PrintDataWord(0)) return;
-  printf("other\n");
 }
 //______________________________________________________________________________
 Bool_t TVMERawData::PrintDataWord(Int_t nlevel) const
@@ -297,8 +260,3 @@ Bool_t TVMERawData::PrintDataWord(Int_t nlevel) const
   printf("%12lu: [0x%08X]%s", fNDataWords, fDataWord, level.Data());
   return kTRUE;
 }
-
-
-
-
-
