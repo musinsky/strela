@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    18 Mar 2014
+// @Date    19 Mar 2014
 
 //#include <TFile.h>
 
@@ -257,6 +257,8 @@ void TVMERawData::DecodeTLD()
   Int_t ch = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;  // (bits 24 - 27)
 
+  CheckIntegrity2(kData, "TLD");
+
   if (!PrintDataWord(4)) return;
   printf("TLD tm: %6d, ch: %2d, id: %2d\n", tm, ch, id);
 }
@@ -268,6 +270,8 @@ void TVMERawData::DecodeTTR()
   Int_t ch = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;  // (bits 24 - 27)
 
+  CheckIntegrity2(kData, "TTR");
+
   if (!PrintDataWord(4)) return;
   printf("TTR tm: %6d, ch: %2d, id: %2d\n", tm, ch, id);
 }
@@ -277,12 +281,15 @@ void TVMERawData::DecodeTERR()
   // 0x6 TDC error
   Int_t flag = fDataWord & 0x7FFF; // (bits 0  - 14)
 
+  CheckIntegrity2(kData, "TERR");
+
   Warning("DecodeTERR", "TDC error flags: 0x%X", flag);
 }
 //______________________________________________________________________________
 void TVMERawData::CheckIntegrity(ETypeStatus type, Bool_t status, const char *where)
 {
-  // first check: header after trailer or trailer after header
+  // sequencing of data
+  // header after trailer or trailer after header
 
   if (TestBit(type) == status) Warning("CheckIntegrity", "%s after previous %s", where, where);
   SetBit(type, status);
@@ -292,14 +299,21 @@ void TVMERawData::CheckIntegrity(ETypeStatus type, Bool_t status, const char *wh
 //______________________________________________________________________________
 void TVMERawData::CheckIntegrity2(ETypeStatus type, const char *where)
 {
-  // second check: module inside event and simultaneously event inside spill
+  // embedding of data
+  // data inside module and simultaneously module inside event and event inside spill
+  // recursive calling (simultaneously checking) probably is not necessary
 
-  if (type == kModule) {            // module inside event
+  if (type == kData) {               // data inside module
+    if (TestBit(kModule) == kFALSE)
+      Warning("CheckIntegrity", "%s out of MHDR", where);
+    CheckIntegrity2(kModule, where); // recursive check module (and event)
+  }
+  else if (type == kModule) {        // module inside event
     if (TestBit(kEvent) == kFALSE)
       Warning("CheckIntegrity", "%s out of EHDR", where);
-    CheckIntegrity2(kEvent, where); // and simultaneously check event inside spill
+    CheckIntegrity2(kEvent, where);  // recursive check event
   }
-  else if (type == kEvent) {        // event inside spill
+  else if (type == kEvent) {         // event inside spill
     if ((TestBit(kSpill) == kFALSE) && (TestBit(kSpillEnd) == kFALSE))
       Warning("CheckIntegrity", "%s out of SHDR", where);
   }

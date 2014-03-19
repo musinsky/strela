@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    18 Mar 2014
+// @Date    19 Mar 2014
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -22,10 +22,15 @@ public:
     kSpill    = BIT(14), // Spill header/trailer
     kSpillEnd = BIT(15), // Spill (end of data)
     kEvent    = BIT(16), // Event header/trailer
-    kModule   = BIT(17)  // Module header/trailer
+    kModule   = BIT(17), // Module header/trailer
+    kData     = BIT(18)  // Data (module specific, TDC or other)
   };
-  // Data type
-  enum EDataType {
+  // Data options
+  enum {
+    kBadEvent = BIT(23)  // Bad event
+  };
+  // Common data type
+  enum ECommonType {
     kMHDR = 0x8, // Module header
     kMTRL = 0x9, // Module trailer
     kEHDR = 0xA, // Event header
