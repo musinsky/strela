@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    19 Mar 2014
+// @Date    24 Mar 2014
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -23,11 +23,17 @@ public:
     kSpillEnd = BIT(15), // Spill (end of data)
     kEvent    = BIT(16), // Event header/trailer
     kModule   = BIT(17), // Module header/trailer
-    kData     = BIT(18)  // Data (module specific, TDC or other)
+    kData     = BIT(18)  // Data specifying by module
   };
   // Data options
   enum {
-    kBadEvent = BIT(23)  // Bad event
+    kSkipEvent = BIT(23) // Skip wrong event
+  };
+  // Data format
+  enum EDataFormat {
+    kTDC,  // TDC64V, TDC96, PHTDC
+    kTQDC, // TQDC (not used)
+    kTTCM  // TRIG, PHLOM (not used)
   };
   // Common data type
   enum ECommonType {
@@ -62,7 +68,8 @@ public:
   void          DecodeMTRL();
   void          DecodeSTAT();
   void          DecodeRESE();
-  void          DecodeOther();
+  void          DecodeData();
+
   void          DecodeTHDR();
   void          DecodeTTRL();
   void          DecodeTLD();

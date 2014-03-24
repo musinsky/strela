@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    19 Mar 2014
+// @Date    24 Mar 2014
 
 //#include <TFile.h>
 
@@ -50,8 +50,7 @@ void TVMERawData::ReadFile(const char *fname)
   fclose(file);
 
   Printf("\nfile: %s", fname);
-  Printf("size   = %lu bytes", fNDataWords*sizeof(UInt_t));
-  Printf("words  = %lu", fNDataWords);
+  Printf("size   = %lu bytes (%lu words)", fNDataWords*sizeof(UInt_t), fNDataWords);
   Printf("spills = %d", fNSpills);
   Printf("events = %d", fNEvents);
 }
@@ -85,24 +84,27 @@ void TVMERawData::DecodeDataWord()
     case kRESE:
       DecodeRESE();
       return;
-    case kTHDR:
-      DecodeTHDR();
-      return;
-    case kTTRL:
-      DecodeTTRL();
-      return;
-    case kTLD:
-      DecodeTLD();
-      return;
-    case kTTR:
-      DecodeTTR();
-      return;
-    case kTERR:
-      DecodeTERR();
-      return;
     default:
-      DecodeOther();
+      DecodeData();
       return;
+      //    case kTHDR:
+      //      DecodeTHDR();
+      //      return;
+      //    case kTTRL:
+      //      DecodeTTRL();
+      //      return;
+      //    case kTLD:
+      //      DecodeTLD();
+      //      return;
+      //    case kTTR:
+      //      DecodeTTR();
+      //      return;
+      //    case kTERR:
+      //      DecodeTERR();
+      //      return;
+      //    default:
+      //      DecodeOther();
+      //      return;
   }
 }
 //______________________________________________________________________________
@@ -154,7 +156,9 @@ void TVMERawData::DecodeEHDR()
   if ((ev - fEventEHDR) != 1) Warning("DecodeEHDR", "discontiguous event number %d after %d", ev, fEventEHDR);
   fEventEHDR = ev;
 
-  fEventMHDR = -1; // reset
+  // reset
+  fEventMHDR = -1;
+  SetBit(kSkipEvent, kFALSE);
 
   if (!PrintDataWord(1)) return;
   printf("EHDR ev: %d\n", ev);
@@ -207,7 +211,7 @@ void TVMERawData::DecodeSTAT()
   // 0xE Status
 
   if (!PrintDataWord(0)) return;
-  printf("STAT\n");
+  printf("Status\n");
 }
 //______________________________________________________________________________
 void TVMERawData::DecodeRESE()
@@ -215,13 +219,16 @@ void TVMERawData::DecodeRESE()
   // 0xF Reserved
 
   if (!PrintDataWord(0)) return;
-  printf("RESE\n");
+  printf("Reserved\n");
 }
 //______________________________________________________________________________
-void TVMERawData::DecodeOther()
+void TVMERawData::DecodeData()
 {
-  if (!PrintDataWord(0)) return;
-  printf("other\n");
+  // 0x0 - 0x7 Data specifying by module ID
+  CheckIntegrity2(kData, "Data");
+
+  if (!PrintDataWord(3)) return;
+  printf("DATA not specified\n");
 }
 //______________________________________________________________________________
 void TVMERawData::DecodeTHDR()
@@ -231,7 +238,7 @@ void TVMERawData::DecodeTHDR()
   Int_t ev = (fDataWord >> 12) & 0xFFF; // (bits 12 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;   // (bits 24 - 27)
 
-  // obsolete (it will not be stored)
+  // it will not be used, stored
 
   if (!PrintDataWord(3)) return;
   printf("THDR ts: %d, ev: %d, id: %2d\n", ts, ev, id);
@@ -244,7 +251,7 @@ void TVMERawData::DecodeTTRL()
   Int_t ev = (fDataWord >> 12) & 0xFFF; // (bits 12 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;   // (bits 24 - 27)
 
-  // obsolete (it will not be stored)
+  // it will not be used, stored
 
   if (!PrintDataWord(3)) return;
   printf("TTRL wc: %d, ev: %d, id: %2d\n", wc, ev, id);
@@ -304,13 +311,17 @@ void TVMERawData::CheckIntegrity2(ETypeStatus type, const char *where)
   // recursive calling (simultaneously checking) probably is not necessary
 
   if (type == kData) {               // data inside module
-    if (TestBit(kModule) == kFALSE)
+    if (TestBit(kModule) == kFALSE) {
       Warning("CheckIntegrity", "%s out of MHDR", where);
+      SetBit(kSkipEvent, kTRUE);
+    }
     CheckIntegrity2(kModule, where); // recursive check module (and event)
   }
   else if (type == kModule) {        // module inside event
-    if (TestBit(kEvent) == kFALSE)
+    if (TestBit(kEvent) == kFALSE) {
       Warning("CheckIntegrity", "%s out of EHDR", where);
+      // ?! skip spill ?!
+    }
     CheckIntegrity2(kEvent, where);  // recursive check event
   }
   else if (type == kEvent) {         // event inside spill
