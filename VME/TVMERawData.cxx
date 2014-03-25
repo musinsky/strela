@@ -1,10 +1,9 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    24 Mar 2014
+// @Date    25 Mar 2014
 
-//#include <TFile.h>
+#include <TString.h>
 
 #include "TVMERawData.h"
-#include "TVME.h"
 
 ClassImp(TVMERawData)
 
@@ -16,7 +15,8 @@ TVMERawData::TVMERawData()
   fNSpills(0),
   fNEvents(0),
   fEventEHDR(0),
-  fEventMHDR(0)
+  fEventMHDR(0),
+  fDataFormat(kOther)
 {
   // Default constructor
 }
@@ -85,26 +85,8 @@ void TVMERawData::DecodeDataWord()
       DecodeRESE();
       return;
     default:
-      DecodeData();
+      DecodeData(dataType);
       return;
-      //    case kTHDR:
-      //      DecodeTHDR();
-      //      return;
-      //    case kTTRL:
-      //      DecodeTTRL();
-      //      return;
-      //    case kTLD:
-      //      DecodeTLD();
-      //      return;
-      //    case kTTR:
-      //      DecodeTTR();
-      //      return;
-      //    case kTERR:
-      //      DecodeTERR();
-      //      return;
-      //    default:
-      //      DecodeOther();
-      //      return;
   }
 }
 //______________________________________________________________________________
@@ -129,7 +111,7 @@ void TVMERawData::DecodeSHDR()
 
   fEventEHDR = -1; // reset
 
-  //if (!PrintDataWord(0)) return;
+  if (!PrintDataWord(0)) return;
   if (end) printf("SHDR_END\n");
   else     printf("SHDR ns= %d\n", fNSpills);
 }
@@ -142,7 +124,7 @@ void TVMERawData::DecodeSTRL()
   if (end) CheckIntegrity(kSpillEnd, kFALSE, "STRL_END");
   else CheckIntegrity(kSpill, kFALSE, "STRL");
 
-  //if (!PrintDataWord(0)) return;
+  if (!PrintDataWord(0)) return;
   if (end) printf("STRL_END\n");
   else     printf("STRL ns= %d\n", fNSpills);
 }
@@ -188,6 +170,27 @@ void TVMERawData::DecodeMHDR()
   else if (ev != fEventMHDR) Warning("DecodeMHDR", "event number mismatch %d != %d", ev, fEventMHDR);
   fEventMHDR = ev;
 
+  switch (id) {
+    case 0x10: // TDC64V
+      fDataFormat = kTDC;
+      break;
+      //    case 0x05: // TDC96
+      //      fDataFormat = kTDC;
+      //      break;
+      //    case 0x04: // PhTDC
+      //      fDataFormat = kTDC;
+      //      break;
+      //    case 0x09: // TQDC
+      //      fDataFormat = kTQDC;
+      //      break;
+      //    case 0x0A: // TRIG
+      //      fDataFormat = kTTCM;
+      //      break;
+    default:
+      fDataFormat = kOther;
+      break;
+  }
+
   if (!PrintDataWord(2)) return;
   printf("MHDR ev: %d, id: %2d, ga: %2d\n", ev, id, ga);
 }
@@ -222,23 +225,64 @@ void TVMERawData::DecodeRESE()
   printf("Reserved\n");
 }
 //______________________________________________________________________________
-void TVMERawData::DecodeData()
+void TVMERawData::DecodeData(UInt_t dt)
 {
   // 0x0 - 0x7 Data specifying by module ID
+
   CheckIntegrity2(kData, "Data");
+
+  switch (fDataFormat) {
+    case kTDC:
+      DecodeDataTDC(dt);
+      return;
+      //    case kTQDC:
+      //      DecodeDataTQDC(dt);
+      //      return;
+      //    case kTTCM:
+      //      DecodeDataTTCM(dt);
+      //      return;
+    default:
+      break;
+  }
 
   if (!PrintDataWord(3)) return;
   printf("DATA not specified\n");
 }
 //______________________________________________________________________________
+void TVMERawData::DecodeDataTDC(UInt_t dt)
+{
+  // 0x2 - 0x6 only for TDC Data format
+
+  switch (dt) {
+    case kTHDR:
+      DecodeTHDR();
+      return;
+    case kTTRL:
+      DecodeTTRL();
+      return;
+    case kTLD:
+      DecodeTLD();
+      return;
+    case kTTR:
+      DecodeTTR();
+      return;
+    case kTERR:
+      DecodeTERR();
+      return;
+    default:
+      break;
+  }
+
+  if (!PrintDataWord(3)) return;
+  printf("DATA TDC not specified\n");
+}
+//______________________________________________________________________________
 void TVMERawData::DecodeTHDR()
 {
-  // 0x2 TDC header
+  // 0x2 TDC header (it will not be stored anymore)
   Int_t ts = fDataWord & 0xFFF;         // (bits 0  - 11)
   Int_t ev = (fDataWord >> 12) & 0xFFF; // (bits 12 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;   // (bits 24 - 27)
-
-  // it will not be used, stored
 
   if (!PrintDataWord(3)) return;
   printf("THDR ts: %d, ev: %d, id: %2d\n", ts, ev, id);
@@ -246,12 +290,10 @@ void TVMERawData::DecodeTHDR()
 //______________________________________________________________________________
 void TVMERawData::DecodeTTRL()
 {
-  // 0x3 TDC trailer
+  // 0x3 TDC trailer (it will not be stored anymore)
   Int_t wc = fDataWord & 0xFFF;         // (bits 0  - 11)
   Int_t ev = (fDataWord >> 12) & 0xFFF; // (bits 12 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;   // (bits 24 - 27)
-
-  // it will not be used, stored
 
   if (!PrintDataWord(3)) return;
   printf("TTRL wc: %d, ev: %d, id: %2d\n", wc, ev, id);
@@ -264,9 +306,7 @@ void TVMERawData::DecodeTLD()
   Int_t ch = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;  // (bits 24 - 27)
 
-  CheckIntegrity2(kData, "TLD");
-
-  if (!PrintDataWord(4)) return;
+  if (!PrintDataWord(3)) return;
   printf("TLD tm: %6d, ch: %2d, id: %2d\n", tm, ch, id);
 }
 //______________________________________________________________________________
@@ -277,9 +317,7 @@ void TVMERawData::DecodeTTR()
   Int_t ch = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;  // (bits 24 - 27)
 
-  CheckIntegrity2(kData, "TTR");
-
-  if (!PrintDataWord(4)) return;
+  if (!PrintDataWord(3)) return;
   printf("TTR tm: %6d, ch: %2d, id: %2d\n", tm, ch, id);
 }
 //______________________________________________________________________________
@@ -287,8 +325,6 @@ void TVMERawData::DecodeTERR()
 {
   // 0x6 TDC error
   Int_t flag = fDataWord & 0x7FFF; // (bits 0  - 14)
-
-  CheckIntegrity2(kData, "TERR");
 
   Warning("DecodeTERR", "TDC error flags: 0x%X", flag);
 }
@@ -320,7 +356,7 @@ void TVMERawData::CheckIntegrity2(ETypeStatus type, const char *where)
   else if (type == kModule) {        // module inside event
     if (TestBit(kEvent) == kFALSE) {
       Warning("CheckIntegrity", "%s out of EHDR", where);
-      // ?! skip spill ?!
+      SetBit(kSkipEvent, kTRUE);
     }
     CheckIntegrity2(kEvent, where);  // recursive check event
   }
@@ -332,7 +368,7 @@ void TVMERawData::CheckIntegrity2(ETypeStatus type, const char *where)
 //______________________________________________________________________________
 Bool_t TVMERawData::PrintDataWord(Int_t nlevel) const
 {
-  return kFALSE;
+  //  return kFALSE;
   TString level = " ";
   for (Int_t i = 0; i < nlevel; i++) level += "    ";
   printf("%12lu: [0x%08X]%s", fNDataWords, fDataWord, level.Data());

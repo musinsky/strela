@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    24 Mar 2014
+// @Date    25 Mar 2014
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -8,14 +8,6 @@
 
 class TVMERawData : public TObject {
 
-private:
-  UInt_t        fDataWord;   // one word of data
-  ULong_t       fNDataWords; // all words
-  Int_t         fNSpills;    // all spills
-  Int_t         fNEvents;    // all events
-  Int_t         fEventEHDR;  // event number in EHDR
-  Int_t         fEventMHDR;  // event number in MHDR
-
 public:
   // Data type status bits
   enum ETypeStatus {
@@ -23,7 +15,7 @@ public:
     kSpillEnd = BIT(15), // Spill (end of data)
     kEvent    = BIT(16), // Event header/trailer
     kModule   = BIT(17), // Module header/trailer
-    kData     = BIT(18)  // Data specifying by module
+    kData     = BIT(18)  // Data (specifying by module)
   };
   // Data options
   enum {
@@ -31,9 +23,10 @@ public:
   };
   // Data format
   enum EDataFormat {
-    kTDC,  // TDC64V, TDC96, PHTDC
+    kTDC,  // TDC64V, TDC96, PhTDC
     kTQDC, // TQDC (not used)
-    kTTCM  // TRIG, PHLOM (not used)
+    kTTCM, // TRIG (not used)
+    kOther // not specified
   };
   // Common data type
   enum ECommonType {
@@ -68,8 +61,12 @@ public:
   void          DecodeMTRL();
   void          DecodeSTAT();
   void          DecodeRESE();
-  void          DecodeData();
+  void          DecodeData(UInt_t dt);
+  void          DecodeDataTDC(UInt_t dt);
+  //  void          DecodeDataTQDC(UInt_t dt);
+  //  void          DecodeDataTTCM(UInt_t dt);
 
+  // TDC decoding
   void          DecodeTHDR();
   void          DecodeTTRL();
   void          DecodeTLD();
@@ -80,6 +77,15 @@ public:
   void          CheckIntegrity2(ETypeStatus type, const char *where);
 
   Bool_t        PrintDataWord(Int_t nlevel) const;
+
+private:
+  UInt_t        fDataWord;   // one word of data
+  ULong_t       fNDataWords; // all words
+  Int_t         fNSpills;    // all spills
+  Int_t         fNEvents;    // all events
+  Int_t         fEventEHDR;  // event number in EHDR
+  Int_t         fEventMHDR;  // event number in MHDR
+  EDataFormat   fDataFormat; // data format
 
   ClassDef(TVMERawData, 1) // VMERawData class
 };
