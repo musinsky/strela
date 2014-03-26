@@ -1,10 +1,10 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    25 Mar 2014
+// @Date    26 Mar 2014
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
 
-#include <TObject.h>
+#include <TBits.h>
 
 class TVMERawData : public TObject {
 
@@ -51,6 +51,7 @@ public:
   TVMERawData();
   virtual ~TVMERawData();
 
+  void          Reset();
   void          ReadFile(const char *fname);
   void          DecodeDataWord();
   void          DecodeSHDR();
@@ -61,10 +62,10 @@ public:
   void          DecodeMTRL();
   void          DecodeSTAT();
   void          DecodeRESE();
-  void          DecodeData(UInt_t dt);
-  void          DecodeDataTDC(UInt_t dt);
-  //  void          DecodeDataTQDC(UInt_t dt);
-  //  void          DecodeDataTTCM(UInt_t dt);
+  void          DecodeData();
+  void          DecodeDataTDC();
+  //  void          DecodeDataTQDC();
+  //  void          DecodeDataTTCM();
 
   // TDC decoding
   void          DecodeTHDR();
@@ -76,16 +77,19 @@ public:
   void          CheckIntegrity(ETypeStatus type, Bool_t status, const char *where);
   void          CheckIntegrity2(ETypeStatus type, const char *where);
 
-  Bool_t        PrintDataWord(Int_t nlevel) const;
+  TBits        *GetPrintType() const { return fPrintType; }
+  Bool_t        PrintDataType(Int_t nlevel) const;
 
 private:
   UInt_t        fDataWord;   // one word of data
+  UInt_t        fDataType;   // type of data
   ULong_t       fNDataWords; // all words
   Int_t         fNSpills;    // all spills
   Int_t         fNEvents;    // all events
   Int_t         fEventEHDR;  // event number in EHDR
   Int_t         fEventMHDR;  // event number in MHDR
   EDataFormat   fDataFormat; // data format
+  TBits        *fPrintType;  // table of bits to print type of data
 
   ClassDef(TVMERawData, 1) // VMERawData class
 };
