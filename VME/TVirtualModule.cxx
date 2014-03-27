@@ -49,6 +49,7 @@ void TVirtualModule::VMEModule(Int_t slot)
   gVME->Modules()->AddAt(this, fSlot);
   gVME->ReDecodeChannels(); // and SetFirstChannel for ! each ! modules
 
+  // temporary, !!! memory leak !!!
   fMultiHits = new TObjArray(GetModuleNChannels());
   for (Int_t i = 0; i < fMultiHits->GetSize(); i++)
     fMultiHits->AddAt(new TMultiHit(), i);

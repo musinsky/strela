@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    06 Dec 2013
+// @Date    27 Mar 2014
 
 #ifndef STRELA_TVME
 #define STRELA_TVME
@@ -11,19 +11,9 @@ class TVirtualModule;
 
 class TVME : public TNamed {
 
-private:
-  TObjArray      *fModules;   //->list of all modules
-  Int_t           fNChannels; //  number of channels
-  Int_t          *fChannel;   //[fNChannels] array of all channels/nadc
-  Int_t          *fIndexCha;  //[fNChannels] sorted index of channels
-  Int_t          *fSortCha;   //[fNChannels] sorted array of channels
-  static Bool_t   fgReDecode; // switch ReDecode
-
-  void            DeleteChannels();
-
 public:
   TVME();
-  TVME(const char *name, const char *title = "VME Crate");
+  TVME(const char *name, const char *title = "VME DAQ");
   virtual ~TVME();
 
   TObjArray      *Modules() const { return fModules; }
@@ -40,7 +30,15 @@ public:
   Int_t           SearchChannel(Int_t nadc) const;
   const char     *GetChannelInfo(Int_t nadc) const;
 
-  void            DecodeFile(const char *fname, Int_t ne = 0, Int_t imod = -1) const;
+private:
+  TObjArray      *fModules;   //->list of all modules
+  Int_t           fNChannels; //  number of channels
+  Int_t          *fChannel;   //[fNChannels] array of all channels/nadc
+  Int_t          *fIndexCha;  //[fNChannels] sorted index of channels
+  Int_t          *fSortCha;   //[fNChannels] sorted array of channels
+  static Bool_t   fgReDecode; // switch ReDecode
+
+  void            DeleteChannels();
 
   ClassDef(TVME, 1) // VME class
 };
