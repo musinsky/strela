@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 Mar 2014
+// @Date    27 Mar 2014
 
 #include <TString.h>
 
@@ -37,11 +37,11 @@ void TVMERawData::Reset()
   ResetBit(kSpillEnd);
 }
 //______________________________________________________________________________
-void TVMERawData::ReadFile(const char *fname)
+void TVMERawData::DecodeFile(const char *fname)
 {
   FILE *file = fopen(fname, "rb");
   if (!file) {
-    Error("ReadFile", "file %s can not be opened", fname);
+    Error("DecodeFile", "file %s can not be opened", fname);
     return;
   }
 

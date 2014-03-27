@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 Mar 2014
+// @Date    27 Mar 2014
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -52,7 +52,7 @@ public:
   virtual ~TVMERawData();
 
   void          Reset();
-  void          ReadFile(const char *fname);
+  void          DecodeFile(const char *fname);
   void          DecodeDataWord();
   void          DecodeSHDR();
   void          DecodeSTRL();
