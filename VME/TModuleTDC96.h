@@ -4,9 +4,7 @@
 #ifndef STRELA_TModuleTDC96
 #define STRELA_TModuleTDC96
 
-#ifndef STRELA_TVirtualModule
-#include <TVirtualModule.h>
-#endif
+#include "TVirtualModule.h"
 
 class TModuleTDC96 : public TVirtualModule {
 

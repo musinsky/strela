@@ -4,9 +4,7 @@
 #ifndef STRELA_TModulePhTDC
 #define STRELA_TModulePhTDC
 
-#ifndef STRELA_TVirtualModule
-#include <TVirtualModule.h>
-#endif
+#include "TVirtualModule.h"
 
 class TModulePhTDC : public TVirtualModule {
 
