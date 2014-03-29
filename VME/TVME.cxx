@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    27 Mar 2014
+// @Date    29 Mar 2014
 
 #include <TMath.h>
 
@@ -32,6 +32,11 @@ TVME::TVME(const char *name, const char *title)
   fSortCha(0)
 {
   // Normal constructor
+  if (gVME) {
+    Error("TVME", "only one instance of TVME allowed");
+    return;
+  }
+
   gVME     = this;
   fModules = new TObjArray(20); // max slots (gates) in VME
 }
@@ -43,7 +48,7 @@ TVME::~TVME()
   delete fModules;
   fModules = 0;
   DeleteChannels();
-  gVME = 0;
+  if (gVME == this) gVME = 0;
 }
 //______________________________________________________________________________
 void TVME::DeleteChannels()
