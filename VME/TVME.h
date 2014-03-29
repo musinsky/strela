@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    27 Mar 2014
+// @Date    29 Mar 2014
 
 #ifndef STRELA_TVME
 #define STRELA_TVME
@@ -17,7 +17,7 @@ public:
   virtual ~TVME();
 
   TObjArray      *Modules() const { return fModules; }
-  TVirtualModule *GetModule(Int_t im) const { return (TVirtualModule *)fModules->UncheckedAt(im); }
+  TVirtualModule *GetModule(Int_t slot) const { return (TVirtualModule *)fModules->UncheckedAt(slot); }
   Int_t           GetNumOfEnabledModules() const { return fModules->GetEntries(); }
   Int_t           GetNChannelsFast() const { return fNChannels; }
   Int_t          *GetChannel() const { return fChannel; }
