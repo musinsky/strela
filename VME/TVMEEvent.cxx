@@ -1,7 +1,8 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    28 Mar 2014
+// @Date    09 Apr 2014
 
 #include "TVMEEvent.h"
+#include "TVME.h"
 
 ClassImp(TTDCHit)
 
@@ -15,14 +16,10 @@ TTDCHit::TTDCHit(Int_t ch, Int_t tld)
   // Normal constructor
 }
 //______________________________________________________________________________
-void TTDCHit::AddDelta(Int_t ttr)
+void TTDCHit::SetDelta(Int_t ttr)
 {
-  if (ttr < fTime) {
-    Warning("AddDelta", "TLD > TTR (%6d > %6d)", fTime, ttr);
-    return;
-  }
-
-  fDelta = ttr - fTime; // trailing - leading
+  if (fTime > ttr) Warning("SetDelta", "TLD > TTR");
+  else fDelta = ttr - fTime; // trailing - leading
 }
 
 //______________________________________________________________________________
@@ -35,11 +32,11 @@ TVMEEvent::TVMEEvent()
   fEvent(0),
   fNTDCHits(0),
   fTDCHits(0),
-  fPosTDCHitChan(0)
+  fIdxTDCHitChan()
 {
   // Default constructor
-  fTDCHits = new TClonesArray("TTDCHit", 1000);
-  fPosTDCHitChan = new Int_t[999]; // gVME->GetNChannels();
+  fTDCHits = new TClonesArray(TTDCHit::Class(), 2000);
+  if (gVME) fIdxTDCHitChan.Set(gVME->GetNChannelsFast());
 }
 //______________________________________________________________________________
 TVMEEvent::~TVMEEvent()
@@ -47,14 +44,13 @@ TVMEEvent::~TVMEEvent()
   Info("~TVMEEvent", "Destructor");
   if (fTDCHits) fTDCHits->Delete();
   SafeDelete(fTDCHits);
-  delete [] fPosTDCHitChan;
 }
 //______________________________________________________________________________
 void TVMEEvent::Clear(Option_t *option)
 {
   fNTDCHits = 0;
   fTDCHits->Clear(option);
-  memset(fPosTDCHitChan, 0, sizeof(Int_t)*999); // gVME->GetNChannels();
+  fIdxTDCHitChan.Reset(); // also OK with no (zero) elements
 }
 //______________________________________________________________________________
 void TVMEEvent::Print(Option_t * /*option*/) const
@@ -62,22 +58,53 @@ void TVMEEvent::Print(Option_t * /*option*/) const
   TTDCHit *hit;
   for (Int_t i = 0; i < GetNumOfTDCHits(); i++) {
     hit = GetTDCHit(i);
-    Printf(" %2d) time = %6d, delta = %6d", i, hit->GetTime(), hit->GetDelta());
+    Printf(" %2d) channel = %3d, time = %6d, delta = %4d",
+           i, hit->GetChannel(), hit->GetTime(), hit->GetDelta());
   }
 }
 //______________________________________________________________________________
-void TVMEEvent::AddTDCHit(Int_t ch, Int_t tdc, Bool_t lead)
+void TVMEEvent::AddTDCHit(Int_t ch, Int_t tld)
 {
-  // fast variant pre only leading
-
-  // 1) preverovat je dalsi TLD vacsi ako predchadzajuci ?
-  // 2) preverovat je dalsi TRL vacsi ako predchdzajuci TRL a zaroven ako TLD
-  // potial OK
-
-  // 3) pre kazdy kanal extra !!! velmi neefektivne !!! bude lepsie raz cez vsetky kanaly
-  // pre 20 hit bude 210 cyklov, pre 30 hitov bude 465 cyklov
-  // vytvorit mapu s hitami !!!
+  // leading tdc
 
   TClonesArray &hits = *fTDCHits;
-  new(hits[fNTDCHits++]) TTDCHit(ch, tdc);
+  new(hits[fNTDCHits++]) TTDCHit(ch, tld);
+
+  if (fIdxTDCHitChan.GetSize() > 0) fIdxTDCHitChan.AddAt(fNTDCHits, ch);
+}
+//______________________________________________________________________________
+void TVMEEvent::AddTDCHitCheck(Int_t ch, Int_t tdc, Bool_t ld)
+{
+  // leading or trailing tdc, assume sorted tdc time
+
+  Int_t prevIdx = fIdxTDCHitChan.At(ch);
+  if (prevIdx == 0) { // no previous hit of channel
+    if (ld) AddTDCHit(ch, tdc);
+    return;
+  }
+
+  TTDCHit *prevHit = GetTDCHit(prevIdx-1);
+  if (!prevHit) {
+    Error("AddTDCHitCheck", "no previous hit at %d", prevIdx-1);
+    return;
+  }
+  if (prevHit->GetChannel() != ch) {
+    Error("AddTDCHitCheck", "unfair channel %d", ch);
+    return;
+  }
+
+  // leading after leading
+  if (ld) {
+    if (prevHit->GetTLD() > tdc)
+      Warning("AddTDCHitCheck", "time (TLD) is not sorting");
+    AddTDCHit(ch, tdc);
+    return;
+  }
+
+  // trailing after leading (if) or trailing (else)
+  if (prevHit->GetDelta() == 0) prevHit->SetDelta(tdc); // and check on TTR > TLD
+  else if (prevHit->GetTTR() > tdc) {
+    Warning("AddTDCHitCheck", "time (TTR) is not sorting");
+    prevHit->SetDelta(tdc);
+  }
 }

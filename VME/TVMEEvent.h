@@ -1,10 +1,11 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    28 Mar 2014
+// @Date    09 Apr 2014
 
 #ifndef STRELA_TVMEEvent
 #define STRELA_TVMEEvent
 
 #include <TClonesArray.h>
+#include <TArrayI.h>
 
 class TTDCHit : public TObject {
 
@@ -16,15 +17,14 @@ public:
   Int_t         GetChannel() const { return fChannel; }
   Int_t         GetTime() const { return fTime; }
   Int_t         GetDelta() const { return fDelta; }
-
+  void          SetDelta(Int_t ttr);
   Int_t         GetTLD() const { return fTime; }
-  Int_t         GetTTR() const { return fDelta ? fDelta + fTime : 0; }
-  void          AddDelta(Int_t ttr);
+  Int_t         GetTTR() const { return fDelta ? fTime + fDelta : 0; }
 
 private:
-  Int_t         fChannel; // channel
-  Int_t         fTime;    // leading time
-  Int_t         fDelta;   // delta time
+  UShort_t      fChannel; // channel
+  UShort_t      fTime;    // leading time
+  UShort_t      fDelta;   // delta time
 
   ClassDef(TTDCHit, 1) // TTDCHit
 };
@@ -38,6 +38,7 @@ public:
   virtual ~TVMEEvent();
 
   Int_t         GetEvent() const { return fEvent; }
+  void          SetEvent(Int_t ev) { fEvent = ev; }
   Int_t         GetNTDCHits() const { return fNTDCHits; }
   TClonesArray *TDCHits() const { return fTDCHits; }
 
@@ -46,14 +47,15 @@ public:
 
   Int_t         GetNumOfTDCHits() const { return fTDCHits->GetEntriesFast(); }
   TTDCHit      *GetTDCHit(Int_t ih) const { return (TTDCHit *)fTDCHits->UncheckedAt(ih); }
-  void          AddTDCHit(Int_t ch, Int_t tdc, Bool_t lead);
+  void          AddTDCHit(Int_t ch, Int_t tld);
+  void          AddTDCHitCheck(Int_t ch, Int_t tdc, Bool_t ld);
 
 private:
-  Int_t         fEvent;    // event number
+  Int_t         fEvent;    // event number in one spill
   Int_t         fNTDCHits; // number of TDC hits
   TClonesArray *fTDCHits;  //->array with TDC hits
 
-  Int_t        *fPosTDCHitChan; //! array with position of last TDC hit by channel
+  TArrayI       fIdxTDCHitChan; //! array with positions of TDC hit (last) by channel
 
   ClassDef(TVMEEvent, 1) // TVMEEvent
 };
