@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    09 Apr 2014
+// @Date    10 Apr 2014
 
 #include "TVMEEvent.h"
 #include "TVME.h"
@@ -21,7 +21,6 @@ void TTDCHit::SetDelta(Int_t ttr)
   if (fTime > ttr) Warning("SetDelta", "TLD > TTR");
   else fDelta = ttr - fTime; // trailing - leading
 }
-
 //______________________________________________________________________________
 
 ClassImp(TVMEEvent)

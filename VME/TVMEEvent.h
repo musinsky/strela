@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    09 Apr 2014
+// @Date    10 Apr 2014
 
 #ifndef STRELA_TVMEEvent
 #define STRELA_TVMEEvent
@@ -26,7 +26,7 @@ private:
   UShort_t      fTime;    // leading time
   UShort_t      fDelta;   // delta time
 
-  ClassDef(TTDCHit, 1) // TTDCHit
+  ClassDef(TTDCHit, 1) // TDCHit
 };
 
 //______________________________________________________________________________
@@ -57,7 +57,7 @@ private:
 
   TArrayI       fIdxTDCHitChan; //! array with positions of TDC hit (last) by channel
 
-  ClassDef(TVMEEvent, 1) // TVMEEvent
+  ClassDef(TVMEEvent, 1) // VMEEvent
 };
 
 #endif
