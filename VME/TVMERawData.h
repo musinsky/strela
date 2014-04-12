@@ -1,10 +1,15 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    27 Mar 2014
+// @Date    12 Apr 2014
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
 
 #include <TBits.h>
+
+class TTree;
+
+class TVMEEvent;
+class TVirtualModule;
 
 class TVMERawData : public TObject {
 
@@ -52,7 +57,8 @@ public:
   virtual ~TVMERawData();
 
   void          Reset();
-  void          DecodeFile(const char *fname);
+  void          MakeTree(const char *fname);
+  void          DecodeFile(const char *fname, Bool_t tree = kTRUE);
   void          DecodeDataWord();
   void          DecodeSHDR();
   void          DecodeSTRL();
@@ -79,6 +85,8 @@ public:
 
   TBits        *GetPrintType() const { return fPrintType; }
   Bool_t        PrintDataType(Int_t nlevel) const;
+  const char   *GetTreeFileName() const { return fTreeFileName.Data(); }
+  void          SetTreeFileName(const char *name) { fTreeFileName = name; }
 
 private:
   UInt_t        fDataWord;   // one word of data
@@ -90,6 +98,11 @@ private:
   Int_t         fEventMHDR;  // event number in MHDR
   EDataFormat   fDataFormat; // data format
   TBits        *fPrintType;  // table of bits to print type of data
+
+  TTree          *fTree;
+  TVMEEvent      *fVMEEvent;
+  TVirtualModule *fModule;
+  TString         fTreeFileName;
 
   ClassDef(TVMERawData, 1) // VMERawData class
 };

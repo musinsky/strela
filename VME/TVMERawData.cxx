@@ -1,9 +1,14 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    27 Mar 2014
+// @Date    12 Apr 2014
 
-#include <TString.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TSystem.h>
 
 #include "TVMERawData.h"
+#include "TVME.h"
+#include "TVMEEvent.h"
+#include "TVirtualModule.h"
 
 ClassImp(TVMERawData)
 
@@ -18,7 +23,11 @@ TVMERawData::TVMERawData()
   fEventEHDR(0),
   fEventMHDR(0),
   fDataFormat(kOther),
-  fPrintType(0)
+  fPrintType(0),
+  fTree(0),
+  fVMEEvent(0),
+  fModule(0),
+  fTreeFileName()
 {
   // Default constructor
   fPrintType = new TBits(16); // kRESE+1
@@ -37,7 +46,32 @@ void TVMERawData::Reset()
   ResetBit(kSpillEnd);
 }
 //______________________________________________________________________________
-void TVMERawData::DecodeFile(const char *fname)
+void TVMERawData::MakeTree(const char *fname)
+{
+  if (!gVME) {
+    Error("MakeTree", "gVME not initialized");
+    return;
+  }
+
+  TString treeFileName = fTreeFileName;
+  if (fTreeFileName == "root") {
+    // replace file extension by ".root" and save in current dir
+    treeFileName = gSystem->BaseName(fname);
+    if (treeFileName.Last('.') != -1) treeFileName.Remove(treeFileName.Last('.'));
+    treeFileName += ".root";
+  }
+  else if (fTreeFileName.IsWhitespace())
+    treeFileName = "vme_data.root";
+
+  new TFile(treeFileName.Data(), "RECREATE");
+  fTree = new TTree("pp", gVME->GetName());
+  fTree->SetAutoSave(1000000000); // autosave when 1 Gbyte written
+  fVMEEvent = new TVMEEvent();
+  fTree->Branch("VMEEvent", &fVMEEvent);
+  //  fTree->Branch("VMEEvent", fVMEEvent->ClassName(), &fVMEEvent);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeFile(const char *fname, Bool_t tree)
 {
   FILE *file = fopen(fname, "rb");
   if (!file) {
@@ -46,6 +80,7 @@ void TVMERawData::DecodeFile(const char *fname)
   }
 
   Reset();
+  if (tree) MakeTree(fname);
   const size_t bufSize = 4096; // 4096 is blocksize in bytes (blockdev --getbsz /dev/sda1)
   UInt_t buffer[bufSize];      // data in buffer is 4 bytes (32 bits)
   size_t nread;
@@ -59,9 +94,18 @@ void TVMERawData::DecodeFile(const char *fname)
     }
   } while (nread == bufSize);
 
+  if (fTree) {
+    TFile *tfile = fTree->GetCurrentFile();
+    tfile->Write();
+    Printf("\ntree file: %s", tfile->GetName());
+    Printf("events = %llu", fTree->GetEntries());
+    SafeDelete(fVMEEvent);
+    SafeDelete(fTree);
+    delete tfile;
+  }
   fclose(file);
 
-  Printf("\nfile: %s", fname);
+  Printf("\ndata file: %s", fname);
   Printf("size   = %lu bytes (%lu words)", fNDataWords*sizeof(UInt_t), fNDataWords);
   Printf("spills = %d", fNSpills);
   Printf("events = %d", fNEvents);
@@ -153,6 +197,7 @@ void TVMERawData::DecodeEHDR()
   // reset
   fEventMHDR = -1;
   SetBit(kSkipEvent, kFALSE);
+  if (fTree) fVMEEvent->Clear();
 
   if (!PrintDataType(1)) return;
   printf("EHDR ev: %d\n", ev);
@@ -165,6 +210,10 @@ void TVMERawData::DecodeETRL()
 
   CheckIntegrity(kEvent, kFALSE, "ETRL");
   if (TestBit(kSkipEvent)) Warning("DecodeETRL", "skip wrong event = %d", fNEvents + fEventEHDR);
+  else if (fTree && !TestBit(kSpillEnd)) {
+    fVMEEvent->SetEvent(fEventEHDR);
+    fTree->Fill();
+  }
 
   if (!PrintDataType(1)) return;
   printf("ETRL wc: %d\n", wc);
@@ -202,6 +251,14 @@ void TVMERawData::DecodeMHDR()
     default:
       fDataFormat = kOther;
       break;
+  }
+
+  if (gVME) {
+    fModule = gVME->GetModule(ga); // suppose that ga is < 20
+    if (fModule && (fModule->GetId() != id)) {
+      Error("DecodeMHDR", "incorrect module ID %d != %d", id, fModule->GetId());
+      fModule = 0;
+    }
   }
 
   if (!PrintDataType(2)) return;
@@ -319,6 +376,9 @@ void TVMERawData::DecodeTLD()
   Int_t ch = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;  // (bits 24 - 27)
 
+  if (fModule && fTree)
+    fVMEEvent->AddTDCHitCheck(fModule->GetFirstChannel() + fModule->MapChannel(id, ch), tm, kTRUE);
+
   if (!PrintDataType(3)) return;
   printf("TLD tm: %6d, ch: %2d, id: %2d\n", tm, ch, id);
 }
@@ -329,6 +389,9 @@ void TVMERawData::DecodeTTR()
   Int_t tm = fDataWord & 0x7FFFF;      // (bits 0  - 18)
   Int_t ch = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;  // (bits 24 - 27)
+
+  if (fModule && fTree)
+    fVMEEvent->AddTDCHitCheck(fModule->GetFirstChannel() + fModule->MapChannel(id, ch), tm, kFALSE);
 
   if (!PrintDataType(3)) return;
   printf("TTR tm: %6d, ch: %2d, id: %2d\n", tm, ch, id);
@@ -382,14 +445,14 @@ void TVMERawData::CheckIntegrity2(ETypeStatus type, const char *where)
 Bool_t TVMERawData::PrintDataType(Int_t nlevel) const
 {
   /*
-  Int_t pt = 15360; // 0011110000000000 (bits 10-13) => spills + events
+  Int_t pt = 15360; // 0011110000000000 (bits 10-13) => events + spills
+  Int_t pt = 0xFFFF // 1111111111111111 (bits 00-15) => all
   fPrintType->Set(16, &pt);
 
   fPrintType->ResetAllBits();
-  fPrintType->SetBitNumber(kSHDR);
-  fPrintType->SetBitNumber(kSTRL);
+  fPrintType->SetBitNumber(TVMERawData::kSHDR);
+  fPrintType->SetBitNumber(TVMERawData::kSTRL);
    */
-
 
   if (!fPrintType->TestBitNumber(fDataType)) return kFALSE;
 
