@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    12 Apr 2014
+// @Date    13 Apr 2014
 
 #include <TFile.h>
 #include <TTree.h>
@@ -196,7 +196,7 @@ void TVMERawData::DecodeEHDR()
 
   // reset
   fEventMHDR = -1;
-  SetBit(kSkipEvent, kFALSE);
+  SetBit(kWrongEvent, kFALSE);
   if (fTree) fVMEEvent->Clear();
 
   if (!PrintDataType(1)) return;
@@ -209,8 +209,12 @@ void TVMERawData::DecodeETRL()
   Int_t wc = fDataWord & 0xFFFFFF; // (bits 0 - 23)
 
   CheckIntegrity(kEvent, kFALSE, "ETRL");
-  if (TestBit(kSkipEvent)) Warning("DecodeETRL", "skip wrong event = %d", fNEvents + fEventEHDR);
-  else if (fTree && !TestBit(kSpillEnd)) {
+  if (TestBit(kWrongEvent)) {
+    Warning("DecodeETRL", "wrong event = %d", fNEvents + fEventEHDR);
+    if (fTree) fVMEEvent->Clear();
+  }
+
+  if (fTree && !TestBit(kSpillEnd)) {
     fVMEEvent->SetEvent(fEventEHDR);
     fTree->Fill();
   }
@@ -425,14 +429,14 @@ void TVMERawData::CheckIntegrity2(ETypeStatus type, const char *where)
   if (type == kData) {               // data inside module
     if (TestBit(kModule) == kFALSE) {
       Warning("CheckIntegrity", "%s out of MHDR", where);
-      SetBit(kSkipEvent, kTRUE);
+      SetBit(kWrongEvent, kTRUE);
     }
     CheckIntegrity2(kModule, where); // recursive check module (and event)
   }
   else if (type == kModule) {        // module inside event
     if (TestBit(kEvent) == kFALSE) {
       Warning("CheckIntegrity", "%s out of EHDR", where);
-      SetBit(kSkipEvent, kTRUE);
+      SetBit(kWrongEvent, kTRUE);
     }
     CheckIntegrity2(kEvent, where);  // recursive check event
   }

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    12 Apr 2014
+// @Date    13 Apr 2014
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -24,7 +24,7 @@ public:
   };
   // Data options
   enum {
-    kSkipEvent = BIT(23) // Skip wrong event
+    kWrongEvent = BIT(23) // Wrong event
   };
   // Data format
   enum EDataFormat {
