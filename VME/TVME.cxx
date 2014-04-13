@@ -45,8 +45,7 @@ TVME::~TVME()
 {
   Info("~TVME", "Destructor");
   if (fModules) fModules->Delete();
-  delete fModules;
-  fModules = 0;
+  SafeDelete(fModules);
   DeleteChannels();
   if (gVME == this) gVME = 0;
 }
@@ -114,7 +113,7 @@ void TVME::ReDecodeChannels()
       inadc = first + ich;
       module->GetChannelIdCh(ich, tdcId, tdcCh);
       nadc = moduleShift + (tdcCh + tdcId*idMulti);
-      if (fgReDecode) fChannel[inadc] = nadc;  // original
+      if (fgReDecode) fChannel[inadc] = nadc;  // old
       else            fChannel[inadc] = inadc; // new
       if (gDebug > 0) Printf("[%3d] %4d", inadc, nadc);
     }
