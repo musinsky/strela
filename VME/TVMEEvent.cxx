@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    10 Apr 2014
+// @Date    16 Apr 2014
 
 #include "TVMEEvent.h"
 #include "TVME.h"
@@ -23,6 +23,8 @@ void TTDCHit::SetDelta(Int_t ttr)
 }
 //______________________________________________________________________________
 
+Int_t TVMEEvent::fgTrigChannel = -1;
+
 ClassImp(TVMEEvent)
 
 //______________________________________________________________________________
@@ -35,7 +37,11 @@ TVMEEvent::TVMEEvent()
 {
   // Default constructor
   fTDCHits = new TClonesArray(TTDCHit::Class(), 2000);
-  if (gVME) fIdxTDCHitChan.Set(gVME->GetNChannelsFast());
+  if (!gVME) return;
+
+  fIdxTDCHitChan.Set(gVME->GetNChannelsFast());
+  for (Int_t i = 0; i < kMaxMulti; i++)
+    fIdxTDCHitChanMulti[i].Set(fIdxTDCHitChan.GetSize());
 }
 //______________________________________________________________________________
 TVMEEvent::~TVMEEvent()
@@ -107,3 +113,13 @@ void TVMEEvent::AddTDCHitCheck(Int_t ch, Int_t tdc, Bool_t ld)
     prevHit->SetDelta(tdc);
   }
 }
+
+
+
+//______________________________________________________________________________
+void TVMEEvent::SetTrigChannel(Int_t ch)
+{
+  // static function
+  fgTrigChannel = ch;
+}
+//______________________________________________________________________________

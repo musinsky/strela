@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    10 Apr 2014
+// @Date    16 Apr 2014
 
 #ifndef STRELA_TVMEEvent
 #define STRELA_TVMEEvent
@@ -31,6 +31,8 @@ private:
 
 //______________________________________________________________________________
 
+const Int_t kMaxMulti = 3;
+
 class TVMEEvent : public TObject {
 
 public:
@@ -50,12 +52,17 @@ public:
   void          AddTDCHit(Int_t ch, Int_t tld);
   void          AddTDCHitCheck(Int_t ch, Int_t tdc, Bool_t ld);
 
+  static Int_t  GetTrigChannel() { return fgTrigChannel; }
+  static void   SetTrigChannel(Int_t ch);
+
 private:
   Int_t         fEvent;    // event number in one spill
   Int_t         fNTDCHits; // number of TDC hits
   TClonesArray *fTDCHits;  //->array with TDC hits
 
-  TArrayI       fIdxTDCHitChan; //! array with positions of TDC hit (last) by channel
+  TArrayI       fIdxTDCHitChan;                 //! positions of TDC hit (last) by channel
+  TArrayI       fIdxTDCHitChanMulti[kMaxMulti]; //! positions of TDC hit [first, second, ...] by channel
+  static Int_t  fgTrigChannel;                  //! number of Trig channel
 
   ClassDef(TVMEEvent, 1) // VMEEvent
 };
