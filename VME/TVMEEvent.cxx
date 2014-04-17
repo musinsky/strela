@@ -1,27 +1,11 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    16 Apr 2014
+// @Date    17 Apr 2014
 
 #include "TVMEEvent.h"
+#include "TTDCHit.h"
 #include "TVME.h"
 
-ClassImp(TTDCHit)
-
-//______________________________________________________________________________
-TTDCHit::TTDCHit(Int_t ch, Int_t tld)
-: TObject(),
-  fChannel(ch),
-  fTime(tld),
-  fDelta(0)
-{
-  // Normal constructor
-}
-//______________________________________________________________________________
-void TTDCHit::SetDelta(Int_t ttr)
-{
-  if (fTime > ttr) Warning("SetDelta", "TLD > TTR");
-  else fDelta = ttr - fTime; // trailing - leading
-}
-//______________________________________________________________________________
+const Int_t kNoneValue = -9999;
 
 Int_t TVMEEvent::fgTrigChannel = -1;
 
