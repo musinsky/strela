@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    17 Apr 2014
+// @Date    19 Apr 2014
 
 #ifndef STRELA_TVMEEvent
 #define STRELA_TVMEEvent
@@ -34,16 +34,24 @@ public:
   void          AddTDCHitCheck(Int_t ch, Int_t tdc, Bool_t ld);
 
   static Int_t  GetTrigChannel() { return fgTrigChannel; }
-  static void   SetTrigChannel(Int_t ch);
+  static Int_t  GetTrigOffset() { return fgTrigOffset; }
+  static void   SetTrigInfo(Int_t channel, Int_t offset);
+  Int_t         Multi(Int_t ch);
+  Int_t         Time(Int_t ch, Int_t multi);
+  Int_t         Delta(Int_t ch, Int_t multi);
 
 private:
   Int_t         fEvent;    // event number in one spill
   Int_t         fNTDCHits; // number of TDC hits
   TClonesArray *fTDCHits;  //->array with TDC hits
 
-  TArrayI       fIdxTDCHitChan;                 //! positions of TDC hit (last) by channel
-  TArrayI       fIdxTDCHitChanMulti[kMaxMulti]; //! positions of TDC hit [first, second, ...] by channel
+  TArrayI       fIdxTDCHitChanLast;             //! positions of last TDC hit by channel
+  TArrayI       fIdxTDCHitChanMulti[kMaxMulti]; //! positions of multi-th TDC hit by channel
   static Int_t  fgTrigChannel;                  //! number of Trig channel
+  static Int_t  fgTrigOffset;                   //! offset of Trig channel
+
+  void          IndexTDCHitChanMulti();
+  Int_t         GetIndexTDCHit(Int_t ch, Int_t multi);
 
   ClassDef(TVMEEvent, 1) // VMEEvent
 };
