@@ -1,11 +1,12 @@
-# @(#) 17 Apr 2014
+# @(#) 20 Apr 2014
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
 
 include $(ROOTSYS)/etc/Makefile.arch
 HdrSuf		= h
-CXXFLAGS	+= -Wall -Wextra -Wformat=2
+CXXFLAGS	+= -Wextra -Wformat=2 -Wshadow
+CXXFLAGS	+= -std=c++11 -Wpedantic -Wno-vla
 ifeq ($(MAKECMDGOALS),debug)
 CXXFLAGS	+= -DDEBUG
 endif
@@ -19,7 +20,7 @@ INCDIR		= include
 OBJDIR		= build
 LIBDIR		= lib
 LIBPREFIX	= lib
-DISTSRCNAME	= strela.$(shell date +%F).git$(shell git describe --always).source
+DISTSRCNAME	= strela.$(shell date +%F).git$(shell git describe --always)
 MAKEDEPEND	= rmkdepend
 DEPENDFILE	= $(OBJDIR)/Make-depend
 NODEPEND	= clean distclean distsrc showbuild
