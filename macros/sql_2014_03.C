@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 12/03/2014
+// 27/05/2014
 
 /*
   .x macros/sql_2014_03.C
@@ -15,7 +15,7 @@ void sql_2014_03(Bool_t print = kTRUE)
   gROOT->Macro("VME_2014_03.C");
   list->Clear();
 
-  // small (4y, 4x) chambers
+  // small (4y, 4x) chamber
   TString name1y[] = {"1y", "1y^", "2y", "2y^"};
   TSmall *cham1y = new TSmall(name1y);
   cham1y->SetTracker(1);
@@ -26,45 +26,44 @@ void sql_2014_03(Bool_t print = kTRUE)
   cham1x->SetTracker(2);
   cham1x->SetZ(0.0);
 
-  cham1y->SetConnect(7, 0);     // cable 2x (module 7, connector 0)
-  cham1x->SetConnect(7, 1);     // cable 3x (module 7, connector 1)
+  cham1y->SetConnect(7, 0);             // module 7, connector 0 (cable 2x)
+  cham1x->SetConnect(7, 1);             // module 7, connector 1 (cable 3x)
 
-  // big (4y, 4x) chambers
+  // small (only x) chamber
+  TString name4[] = {"4x", "5x", "4x^", "5x^"};
+  TSmall *cham4 = new TSmall(name4);
+  cham4->SetTracker(4);
+  cham4->SetZ(0.0);
+
+  cham4->SetConnect(13, 2, "onlyx");    // module 13, connector 2 (cable 3y)
+
+  // big (4y, 4x) chamber
   TString name10y[] = {"10y", "10y^", "11y", "11y^"};
   TBig *cham10y = new TBig(name10y);
-  cham10y->SetTracker(10);
+  cham10y->SetTracker(11);
   cham10y->SetZ(0.0);
 
   TString name10x[] = {"10x", "10x^", "11x", "11x^"};
   TBig *cham10x = new TBig(name10x);
-  cham10x->SetTracker(11);
+  cham10x->SetTracker(12);
   cham10x->SetZ(0.0);
 
   // SetConnect1 must be call before SetConnect2
-  cham10y->SetConnect1(9, 3);   // cable 4 (module 9, connector 3) "down"
-  cham10y->SetConnect2(9, 2);   // cable 3 (module 9, connector 2) "up"
-  cham10x->SetConnect1(9, 1);   // cable 2 (module 9, connector 1) "right"
-  cham10x->SetConnect2(9, 0);   // cable 1 (module 9, connector 0) "left"
+  cham10y->SetConnect1(9, 3);           // module 9, connector 3 (cable 4) "down"
+  cham10y->SetConnect2(9, 2);           // module 9, connector 2 (cable 3) "up"
+  cham10x->SetConnect1(9, 1);           // module 9, connector 1 (cable 2) "right"
+  cham10x->SetConnect2(9, 0);           // module 9, connector 0 (cable 1) "left"
 
-  // big (2y, 2x) chambers (previously rotate)
+  // big (2y, 2x) chamber (previously rotated)
   TString name12[] = {"12y^", "12y", "12x^", "12x"};
   TBig *cham12 = new TBig(name12);
-  cham12->SetTracker2(12, 13);
-  cham12->SetZ2(0.0, 0.0);
-  //  cham12->SetDirect2(-1, -1); // backwards
+  cham12->SetTracker2(11, 12);
+  cham12->SetZ2(31.4, 31.4);
+  cham12->SetDirect2(-1, -1); // reverse
 
   // SetConnect1 must be call before SetConnect2
-  cham12->SetConnect1(11, 0, "half");   // cable 5 (module 11, connector 0)
-  // ?! VICE VERSA ?! checking !!!
-  cham12->SetConnect2(11, 1, "half");   // cable 6 (module 11, connector 1)
-
-  // small (only x) chambers
-  TString name3[] = {"4x", "5x", "4x^", "5x^"};
-  TSmall *cham3 = new TSmall(name3);
-  cham3->SetTracker(5);
-  cham3->SetZ(0.0);
-
-  cham3->SetConnect(13, 2, "onlyx");    // cable 3y (module 13, connector 2)
+  cham12->SetConnect1(11, 0, "half");   // module 11, connector 0 (cable 5)
+  cham12->SetConnect2(11, 1, "half");   // module 11, connector 1 (cable 6)
 
   if (!print) return;
   TString fn0 = gSystem->BaseName(gInterpreter->GetCurrentMacroName());
