@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    15 Sep 2011
+// @Date    27 May 2014
 
 #include <TSQLServer.h>
 #include <TSQLResult.h>
@@ -12,6 +12,8 @@
 #include "TStrawCham.h"
 #include "TStrawTracker.h"
 #include "TGemEvent.h"
+#include "TVMEEvent.h"
+#include "TTDCHit.h"
 #include "TStrawMulti.h"
 #include "TVME.h"
 
@@ -241,45 +243,46 @@ void TStrawCham::AnalyzeEntry()
   for (Int_t it = 0; it < fTubes->GetEntriesFast(); it++)
     GetTube(it)->ResetHits();
 
-  TGemEvent *gemEvent = gStrela->GemEvent();
-  TAdcHit1 *adcHit1;
-  Int_t nadc, adc, pos, trigAdc = 0; // must be 0
+  TVMEEvent *event = gStrela->VMEEvent();
+  TTDCHit *hit;
+  Int_t channel, time, pos, trigTime = 0; // must be 0
   TStrawTube *tube;
 
-  // first find trigger tdc (quick), in mostly cases trigger is first hit
-  // starting from the seance 2009_12 is no longer necessary
+  // first find trigger channel (only if is necessary)
+  // in mostly cases trigger is first hit (quick)
   if (fgTrigNadc > 0) {
-    Bool_t findTrig = kFALSE;
-    for (Int_t ih = 0; ih < gemEvent->GetNumOfAdcHits1(); ih++) {
-      adcHit1 = gemEvent->GetAdcHit1(ih);
-      if (adcHit1->GetNadc() == fgTrigNadc) {
-        trigAdc = adcHit1->GetAdc() - fgShiftAdc;
-        findTrig = kTRUE;
+    Bool_t foundTrig = kFALSE;
+    for (Int_t ih = 0; ih < event->GetNTDCHits(); ih++) {
+      hit = event->GetTDCHit(ih);
+      if (hit->GetChannel() == fgTrigNadc) {
+        trigTime = hit->GetTime() - fgShiftAdc;
+        foundTrig = kTRUE;
         break;
       }
     }
-    if (!findTrig) {
+    if (!foundTrig) {
       Warning("AnalyzeEntry", "not found trigger hit");
       Printf("%s", gStrela->GetEventInfo());
       return;
     }
   }
 
-  for (Int_t ih = 0; ih < gemEvent->GetNumOfAdcHits1(); ih++) {
-    adcHit1 = gemEvent->GetAdcHit1(ih);
-    nadc    = adcHit1->GetNadc();
-    adc     = adcHit1->GetAdc();
-    adc    -= trigAdc; // (only if exist trigAdc, otherwise adc without change)
-    pos     = TMath::BinarySearch(fTubes->GetEntriesFast(), fTubesI, nadc);
+  for (Int_t ih = 0; ih < event->GetNTDCHits(); ih++) {
+    hit     = event->GetTDCHit(ih);
+    channel = hit->GetChannel();
+    time    = hit->GetTime();
+    //    delta   = hit->GetDelta();
+    time   -= trigTime; // only if trigTime, otherwise time without change
+    pos     = TMath::BinarySearch(fTubes->GetEntriesFast(), fTubesI, channel);
     if (pos < 0) continue;
     tube    = GetTube(pos);
-    if (nadc != tube->GetNadc()) continue;
+    if (channel != tube->GetNadc()) continue;
     tube->AddHit();
     if (tube->GetNHits() > TStrawTube::GetOnlyFirstNHits()) continue; // only first N hits of tube
-    tube->HisTime1()->Fill(adc);
+    tube->HisTime1()->Fill(time);
     if (tube->IsDisabled()) continue;
-    if ((adc < tube->GetTMin()) || (adc > tube->GetTMax())) continue;
-    tube->GetTracker()->AddHit(pos, tube->TInT0(adc));
+    if ((time < tube->GetTMin()) || (time > tube->GetTMax())) continue;
+    tube->GetTracker()->AddHit(pos, tube->TInT0(time));
   }
   if (fgTracking == 0) return;
 
@@ -347,4 +350,65 @@ void TStrawCham::EfficiencyTubes() const
     tube->HisEffi()->SetMinimum(0.0);
     tube->HisEffi()->SetStats(kFALSE);
   }
+}
+//______________________________________________________________________________
+void TStrawCham::AnalyzeEntryGemEvent()
+{
+  Clear();
+  TIter next(fTrackers);
+  TStrawTracker *tracker;
+  while ((tracker = (TStrawTracker *)next()))
+    tracker->ResetHits();
+  for (Int_t it = 0; it < fTubes->GetEntriesFast(); it++)
+    GetTube(it)->ResetHits();
+
+  TGemEvent *gemEvent = gStrela->GemEvent();
+  TAdcHit1 *adcHit1;
+  Int_t nadc, adc, pos, trigAdc = 0; // must be 0
+  TStrawTube *tube;
+
+  // first find trigger tdc (quick), in mostly cases trigger is first hit
+  // starting from the seance 2009_12 is no longer necessary
+  if (fgTrigNadc > 0) {
+    Bool_t findTrig = kFALSE;
+    for (Int_t ih = 0; ih < gemEvent->GetNumOfAdcHits1(); ih++) {
+      adcHit1 = gemEvent->GetAdcHit1(ih);
+      if (adcHit1->GetNadc() == fgTrigNadc) {
+        trigAdc = adcHit1->GetAdc() - fgShiftAdc;
+        findTrig = kTRUE;
+        break;
+      }
+    }
+    if (!findTrig) {
+      Warning("AnalyzeEntry", "not found trigger hit");
+      Printf("%s", gStrela->GetEventInfo());
+      return;
+    }
+  }
+
+  for (Int_t ih = 0; ih < gemEvent->GetNumOfAdcHits1(); ih++) {
+    adcHit1 = gemEvent->GetAdcHit1(ih);
+    nadc    = adcHit1->GetNadc();
+    adc     = adcHit1->GetAdc();
+    adc    -= trigAdc; // (only if exist trigAdc, otherwise adc without change)
+    pos     = TMath::BinarySearch(fTubes->GetEntriesFast(), fTubesI, nadc);
+    if (pos < 0) continue;
+    tube    = GetTube(pos);
+    if (nadc != tube->GetNadc()) continue;
+    tube->AddHit();
+    if (tube->GetNHits() > TStrawTube::GetOnlyFirstNHits()) continue; // only first N hits of tube
+    tube->HisTime1()->Fill(adc);
+    if (tube->IsDisabled()) continue;
+    if ((adc < tube->GetTMin()) || (adc > tube->GetTMax())) continue;
+    tube->GetTracker()->AddHit(pos, tube->TInT0(adc));
+  }
+  if (fgTracking == 0) return;
+
+  next.Reset();
+  if (fgTracking == -1)
+    while ((tracker = (TStrawTracker *)next()))
+      tracker->PureTrackHits();
+  else
+    while ((tracker = (TStrawTracker *)next()))
+      tracker->FindTracks();
 }

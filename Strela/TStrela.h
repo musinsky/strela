@@ -1,21 +1,18 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    09 Jun 2008
+// @Date    27 May 2014
 
 #ifndef STRELA_TStrela
 #define STRELA_TStrela
 
-#ifndef ROOT_TChain
 #include <TChain.h>
-#endif
-#ifndef ROOT_TList
 #include <TList.h>
-#endif
 
 class TSQLServer;
 
 class TPommeEvent;
 class TStrawEvent;
 class TGemEvent;
+class TVMEEvent;
 class TStrelaBase;
 class TWireCham;
 class TStrawCham;
@@ -32,6 +29,7 @@ private:
   TPommeEvent  *fPommeEvent; //  pointer to PommeEvent
   TStrawEvent  *fStrawEvent; //  pointer to StrawEvent
   TGemEvent    *fGemEvent;   //  pointer to GemEvent
+  TVMEEvent    *fVMEEvent;   //  pointer to TVMEEvent
 
   TList        *fDetectors;  //->list of all detectors
   TWireCham    *fWireCham;   //  pointer to WireCham
@@ -57,6 +55,7 @@ public:
   TPommeEvent  *PommeEvent() const { return fPommeEvent; }
   TStrawEvent  *StrawEvent() const { return fStrawEvent; }
   TGemEvent    *GemEvent() const { return fGemEvent; }
+  TVMEEvent    *VMEEvent() const { return fVMEEvent; }
   TList        *Detectors() const { return fDetectors; }
   Int_t         GetNumOfDetectors() const { return fDetectors->GetSize(); }
   TStrelaBase  *FindDetector(const char *name) const { return (TStrelaBase *)fDetectors->FindObject(name); }

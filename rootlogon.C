@@ -1,25 +1,18 @@
 // Author: Jan Musinsky
-// 04/12/2013
+// 27/05/2014
 
-#ifndef __CINT__
-#include <TROOT.h>
-#include <TSystem.h>
-#include <TStyle.h>
-
-void rootlogon()
-#endif
 {
-  if (gROOT->GetClass("TStrela")) {
-    Printf("Strela libraries was already loaded");
+  if (gROOT->GetClass("TStrela") || gROOT->GetClass("TVME")) {
+    Printf("Libraries was already loaded");
     return;
   }
 
   gSystem->AddIncludePath("-Iinclude");
   gSystem->SetBuildDir("build", kTRUE);
 
-  gSystem->Load("libGpad");
-  gSystem->Load("libSQLIO");
-  gSystem->Load("libTree");
+  gSystem->Load("libGpad.so");
+  gSystem->Load("libSQLIO.so");
+  gSystem->Load("libTree.so");
   gSystem->Load("lib/libVME.so");
   gSystem->Load("lib/libStrela.so");
 

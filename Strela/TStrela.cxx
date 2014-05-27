@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    12 Oct 2011
+// @Date    27 May 2014
 
 #include <TROOT.h>
 #include <TSQLServer.h>
@@ -15,6 +15,7 @@
 #include "TPommeEvent.h"
 #include "TStrawEvent.h"
 #include "TGemEvent.h"
+#include "TVMEEvent.h"
 #include "TWireCham.h"
 #include "TStrawCham.h"
 #include "TStrelaDisplay.h"
@@ -34,6 +35,7 @@ TStrela::TStrela()
   fPommeEvent = 0;
   fStrawEvent = 0;
   fGemEvent   = 0;
+  fVMEEvent   = 0;
   fDetectors  = 0;
   fWireCham   = 0;
   fStrawCham  = 0;
@@ -54,6 +56,7 @@ TStrela::TStrela(const char *name, const char *title) : TNamed(name, title)
   fPommeEvent = 0;
   fStrawEvent = 0;
   fGemEvent   = 0;
+  fVMEEvent   = 0;
 
   // order of detectors in list is not important (meanwhile)
   fDetectors  = new TList();
@@ -155,6 +158,10 @@ void TStrela::ChangeBranchAddress(TChain *chain)
   if (fChain->GetBranch("event")) {
     fChain->SetBranchAddress("event", &fGemEvent);
     if (!fRawEvents->FindObject(fGemEvent)) fRawEvents->Add(fGemEvent);
+  }
+  if (fChain->GetBranch("VMEEvent")) {
+    fChain->SetBranchAddress("VMEEvent", &fVMEEvent);
+    if (!fRawEvents->FindObject(fVMEEvent)) fRawEvents->Add(fVMEEvent);
   }
 
   if (fChain->InheritsFrom("TChain")) fChain->GetListOfFiles()->ls();

@@ -1,16 +1,12 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    18 Nov 2010
+// @Date    27 May 2014
 
 #ifndef STRELA_TStrawCham
 #define STRELA_TStrawCham
 
-#ifndef ROOT_TList
 #include <TList.h>
-#endif
 
-#ifndef STRELA_TStrelaBase
 #include "TStrelaBase.h"
-#endif
 
 class TStrawTracker;
 class TStrawLayer;
@@ -58,6 +54,7 @@ public:
   virtual Bool_t ReadSQL(TSQLServer *ser);
   virtual void   AnalyzeBegin();
   virtual void   AnalyzeEntry();
+  virtual void   AnalyzeEntryGemEvent();
   virtual void   AnalyzeTerminate();
 
   TStrawTube    *SearchTube(Int_t nadc) const;
