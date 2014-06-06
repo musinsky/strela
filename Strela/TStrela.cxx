@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    27 May 2014
+// @Date    06 Jun 2014
 
 #include <TROOT.h>
 #include <TSQLServer.h>
@@ -164,7 +164,10 @@ void TStrela::ChangeBranchAddress(TChain *chain)
     if (!fRawEvents->FindObject(fVMEEvent)) fRawEvents->Add(fVMEEvent);
   }
 
-  if (fChain->InheritsFrom("TChain")) fChain->GetListOfFiles()->ls();
+  if (fChain->InheritsFrom("TChain")) {
+    fChain->GetEntries();
+    fChain->ls();
+  }
   else Printf("Working file %s", fChain->GetCurrentFile()->GetName());
 }
 //______________________________________________________________________________
