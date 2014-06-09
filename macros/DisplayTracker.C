@@ -1,7 +1,13 @@
 // Author: Jan Musinsky
-// 11/11/2010
+// 09/06/2014
 
-void DisplayTracker()
+#include <TPad.h>
+
+#include "TStrela.h"
+#include "TStrelaDisplay.h"
+
+void DisplayTracker(TStrawTracker *trX_1, TStrawTracker *trX_2, TStrawTracker *trX_3,
+                    TStrawTracker *trY_1, TStrawTracker *trY_2, TStrawTracker *trY_3)
 {
   // all trackers
   if (gStrela->GetDisplay()) return;
@@ -25,28 +31,37 @@ void DisplayTracker()
       pad->Draw();
     }
   }
+  // special pad_7
   pad = new TPad(Form("%s_%d", pad0->GetName(), npad), "",
-                 0.45, yl[0], 0.65, yu[0]);
+                 0.30, yl[0], 0.50, yu[0]);
   pad->SetNumber(npad++);
   pad->Draw();
 
-  pad0->cd(1);
-  display->DrawTracker(t1);
-  pad0->cd(2);
-  display->DrawTracker(t3);
-  display->FindRange(0.006);
-  pad0->cd(3);
-  display->DrawTracker(t10);
-
-  pad0->cd(4);
-  display->DrawTracker(t2);
-  pad0->cd(5);
-  display->DrawTracker(t4);
-  display->FindRange(0.006);
-  pad0->cd(6);
-  display->DrawTracker(t11);
-  pad0->cd(7);
-  display->DrawTracker(t5);
+  if (trY_1) {
+    pad0->cd(1);
+    display->DrawTracker(trY_1);
+  }
+  if (trY_2) {
+    pad0->cd(2);
+    display->DrawTracker(trY_2);
+  }
+  if (trY_3) {
+    pad0->cd(3);
+    display->DrawTracker(trY_3);
+  }
+  if (trX_1) {
+    pad0->cd(4);
+    display->DrawTracker(trX_1);
+  }
+  if (trX_2) {
+    pad0->cd(7);
+    display->DrawTracker(trX_2);
+    //    display->FindRange(0.006);
+  }
+  if (trX_3) {
+    pad0->cd(6);
+    display->DrawTracker(trX_3);
+  }
 
   pad0->cd(0);
 }
