@@ -20,7 +20,7 @@
 class TStrawTracker : public TNamed {
 
 private:
-  TList        *fLayers;   //->list of tracker layeres
+  TList        *fLayers;   //->list of tracker layeres, sorted
   TList        *fTubes;    //->list of tracker tubes
   Int_t         fId;       //  id number of tracker
   Int_t         fNHits;    //  number of hits

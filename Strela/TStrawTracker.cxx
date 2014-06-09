@@ -259,7 +259,7 @@ void TStrawTracker::AllocateLayers()
     TIter tubes(layer->Tubes());
     TStrawTube *tube;
     while ((tube = (TStrawTube *)tubes())) {
-      fTubes->Add(tube); // tubes are fully ordered by geometry of tracker
+      fTubes->Add(tube); // tubes are fully ordered by geometry of tracker (not by increasing Nadc)
     }
   }
 

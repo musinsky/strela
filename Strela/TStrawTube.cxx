@@ -272,8 +272,7 @@ void TStrawTube::SetTMinMax(Int_t tmin, Int_t tmax, Bool_t delta)
   }
 
   TimesChanged();
-  if (fTMin == fTMax)
-    Warning("SetTMinMax", "tube %d has Tmin = Tmax = %d", fNadc, fTMin);
+  //  if (fTMin == fTMax) Warning("SetTMinMax", "tube %d has Tmin = Tmax = %d", fNadc, fTMin);
 }
 //______________________________________________________________________________
 void TStrawTube::TimesChanged()

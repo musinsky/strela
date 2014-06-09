@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    06 Jun 2014
+// @Date    09 Jun 2014
 
 #include <TROOT.h>
 #include <TSQLServer.h>
@@ -69,8 +69,8 @@ TStrela::TStrela(const char *name, const char *title) : TNamed(name, title)
   gROOT->GetListOfCleanups()->Add(fHistograms);
 
   gROOT->GetListOfBrowsables()->Add(this, title);
-  Printf("\n\033[1m Welcome to %s \033[0m", title);
-  Printf(" Last update: %s  %s\n", __DATE__, __TIME__);
+  Printf("\n\033[1m %s\033[0m", title);
+  Printf(" Last build: %s  %s\n", __DATE__, __TIME__);
 }
 //______________________________________________________________________________
 TStrela::~TStrela()
