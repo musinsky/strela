@@ -887,9 +887,9 @@ void TStrawTracker::ShowHistograms(Option_t * /*option*/) const
   c->cd(2);
   fhBz->Draw();
   c->cd(3);
-  fhDisRes->Draw();
+  fhDisRes->Draw("COL");
   c->cd(4);
-  fhBzRes->Draw();
+  fhBzRes->Draw("COL");
   c->cd(5);
   fhSumD->Draw();
   fhSumR->Draw("same");
@@ -900,7 +900,7 @@ void TStrawTracker::ShowHistograms(Option_t * /*option*/) const
   fhChi2Tan->Draw();
   c->cd(8);
   //  fhDisZTan->Draw();
-  fhBzAz->Draw();
+  fhBzAz->Draw("COL");
 
   c->SetTitle(GetName());
   c->Update();

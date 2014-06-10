@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 27/05/2014
+// 10/06/2014
 
 {
   if (gROOT->GetClass("TStrela") || gROOT->GetClass("TVME")) {
@@ -16,6 +16,7 @@
   gSystem->Load("lib/libVME.so");
   gSystem->Load("lib/libStrela.so");
 
-  gStyle->SetHistLineColor(kBlack);
+  //  gStyle->SetHistLineColor(kBlack);
+  gStyle->SetPalette(55);
   gStyle->SetGridColor(kGray);
 }

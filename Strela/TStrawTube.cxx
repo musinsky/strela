@@ -361,10 +361,10 @@ void TStrawTube::ShowHistoFull(TCanvas *can) const
   fhRad1->Draw();
   fhRad2->Draw("same");
   can->cd(3);
-  fhTimeRes->Draw();
+  fhTimeRes->Draw("COL");
   line.DrawLine(kBaseT0, fhTimeRes->GetYaxis()->GetXmin(), kBaseT0, fhTimeRes->GetYaxis()->GetXmax());
   can->cd(4);
-  fhBzRes->Draw();
+  fhBzRes->Draw("COL");
   can->cd(5);
   fhDis2->Draw();
   fhDis1->Draw("same");
@@ -372,8 +372,8 @@ void TStrawTube::ShowHistoFull(TCanvas *can) const
   if ((Int_t) max != (Int_t) maxe) fhEffi->Scale(max/maxe);
   fhEffi->Draw("same");
   can->cd(6);
-  fhDisTime->Draw();
-  //  fhBzAz->Draw();
+  fhDisTime->Draw("COL");
+  //  fhBzAz->Draw("COL");
 
   // tracker
   if (!gROOT->GetListOfCanvases()->FindObject("c_tracker")) return;
