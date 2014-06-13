@@ -256,6 +256,7 @@ void TStrawTracker::AllocateLayers()
   TIter layers(fLayers);
   TStrawLayer *layer;
   while ((layer = (TStrawLayer *)layers())) {
+    layer->SetConIdx(fLayers->IndexOf(layer));
     TIter tubes(layer->Tubes());
     TStrawTube *tube;
     while ((tube = (TStrawTube *)tubes())) {

@@ -1,15 +1,11 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    15 Jul 2010
+// @Date    13 Jun 2014
 
 #ifndef STRELA_TStrawLayer
 #define STRELA_TStrawLayer
 
-#ifndef ROOT_TNamed
 #include <TNamed.h>
-#endif
-#ifndef ROOT_TList
 #include <TList.h>
-#endif
 
 class TStrawTube;
 class TStrawTracker;
@@ -22,6 +18,7 @@ private:
   Double_t       fRange;   //  range of straw tube
   Int_t          fNumb;    //  unique number from SQL
   TStrawTracker *fTracker; //! pointer to parent tracker
+  Int_t          fConIdx;  //  consecutive index (number) within the frame of tracker
 
 public:
   TStrawLayer();
@@ -38,6 +35,8 @@ public:
   Int_t          GetNumb() const { return fNumb; }
   void           SetTracker(TStrawTracker *tracker) { fTracker = tracker; }
   TStrawTracker *GetTracker() const { return fTracker; }
+  void           SetConIdx(Int_t idx) { fConIdx = idx; }
+  Int_t          GetConIdx() const { return fConIdx; }
 
   virtual Int_t  Compare(const TObject *obj) const;
   virtual Bool_t IsSortable() const { return kTRUE; }

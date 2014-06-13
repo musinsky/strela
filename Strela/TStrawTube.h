@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    04 Aug 2011
+// @Date    13 Jun 2014
 
 #ifndef STRELA_TStrawTube
 #define STRELA_TStrawTube
@@ -107,6 +107,7 @@ public:
   Double_t       GetZ() const { return fLayer->GetZ(); }
   Double_t       GetRange() const { return fLayer->GetRange(); }
   TStrawTracker *GetTracker() const { return fLayer->GetTracker(); }
+  Int_t          GetConIdx() const { return fLayer->GetConIdx(); }
 
   virtual Int_t  Compare(const TObject *obj) const;
   virtual void   Draw(Option_t *option = "");

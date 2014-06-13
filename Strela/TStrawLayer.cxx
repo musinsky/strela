@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 May 2008
+// @Date    13 Jun 2014
 
 #include "TStrawLayer.h"
 #include "TStrawTube.h"
@@ -15,6 +15,7 @@ TStrawLayer::TStrawLayer()
   fRange   = 0;
   fNumb    = -1;
   fTracker = 0;
+  fConIdx  = -1;
 }
 //______________________________________________________________________________
 TStrawLayer::TStrawLayer(Int_t numb, const char *name, const char *title) : TNamed(name, title)
@@ -25,6 +26,7 @@ TStrawLayer::TStrawLayer(Int_t numb, const char *name, const char *title) : TNam
   fRange   = 0;
   fNumb    = numb;
   fTracker = 0;
+  fConIdx  = -1;
 }
 //______________________________________________________________________________
 TStrawLayer::~TStrawLayer()
