@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    12 Sep 2012
+// @Date    13 Jun 2014
 
 #include <TMath.h>
 #include <TH2.h>
@@ -9,7 +9,7 @@
 
 #include "TStrawTracker.h"
 #include "TStrawTrack.h"
-#include "TGemEvent.h"
+#include "TVMEEvent.h"
 
 const Int_t kMaxHits    = 50;
 const Int_t kMaxPairs   = 200; // sum(kMaxHits - 1)
@@ -251,7 +251,7 @@ void TStrawTracker::AllocateLayers()
   TStrawLayer *l;
   while ((l = (TStrawLayer *)next()))
     if (l->GetTracker() == this) fLayers->Add(l);
-  fLayers->Sort(); // sort by increasing Z (tubes in each layer are ordered)
+  fLayers->Sort(); // sort by increasing Z (tubes in each layer are ordered by coordinate)
 
   TIter layers(fLayers);
   TStrawLayer *layer;
@@ -857,7 +857,8 @@ void TStrawTracker::GenerateHits(Double_t a, Double_t b, Double_t sig) const
         found = kTRUE;
         // TODO (before or after tube->GetRange())
         // d += gRandom->Gaus(0, sig);
-        gStrela->GemEvent()->AddHit(tube->GetNadc(), tube->R2T(d));
+        //        gStrela->GemEvent()->AddHit(tube->GetNadc(), tube->R2T(d));
+        gStrela->VMEEvent()->AddTDCHit(tube->GetNadc(), tube->TExT0(tube->R2T(d)));
       }
       else if (found) break; // hits in one layer go consecutive
     }
