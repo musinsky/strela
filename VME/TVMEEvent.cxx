@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    19 Apr 2014
+// @Date    16 Jun 2014
 
 #include "TVMEEvent.h"
 #include "TTDCHit.h"
@@ -22,7 +22,10 @@ TVMEEvent::TVMEEvent()
 {
   // Default constructor
   fTDCHits = new TClonesArray(TTDCHit::Class(), 2000);
-  if (!gVME) return;
+  if (!gVME) {
+    Warning("TVMEEvent", "gVME not initialized");
+    return;
+  }
 
   // or implement function for manual set size of array(s)
   fIdxTDCHitChanLast.Set(gVME->GetNChannelsFast());
