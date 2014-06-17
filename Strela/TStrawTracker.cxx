@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    13 Jun 2014
+// @Date    17 Jun 2014
 
 #include <TMath.h>
 #include <TH2.h>
@@ -326,12 +326,12 @@ void TStrawTracker::MarginalTubes(Int_t set, Bool_t onlyhalf) const
 TStrawTube *TStrawTracker::GetTube(Int_t il0, Int_t it0, Bool_t info) const
 {
   TStrawLayer *layer = GetLayer(il0);
-  if (!layer) {
+  if (!layer || (il0 < 0)) {
     Printf("%s: %d-th layer does not exist", GetName(), il0);
     return 0;
   }
   TStrawTube *tube = layer->GetTube(it0);
-  if (!tube) {
+  if (!tube || (it0 < 0)) {
     Printf("%s: %d-th tube of %dth layer does not exist", GetName(), it0, il0);
     return 0;
   }
@@ -342,6 +342,28 @@ TStrawTube *TStrawTracker::GetTube(Int_t il0, Int_t it0, Bool_t info) const
   }
 
   return tube;
+}
+//______________________________________________________________________________
+void TStrawTracker::ConsecutiveTubes(Int_t itube, Bool_t up, TObjArray *oa) const
+{
+  if (!oa) return;
+  oa->Clear();
+  if (fLayers->GetSize() != 4) {
+    Info("ConsecutiveTubes", "only for 4-layers tracker");
+    return;
+  }
+  if ((GetTube(0, 0, kFALSE)->GetMargin() != TStrawTube::kHalfPos) ||
+      (GetTube(1, 0, kFALSE)->GetMargin() != TStrawTube::kMargin)  ||
+      (GetTube(2, 0, kFALSE)->GetMargin() != TStrawTube::kHalfPos) ||
+      (GetTube(3, 0, kFALSE)->GetMargin() != TStrawTube::kMargin)) {
+    Info("ConsecutiveTubes", "only for specific pattern");
+    return;
+  }
+
+  for (Int_t il = 0; il < fLayers->GetSize(); il++) {
+    if ((il%2) && !up) oa->AddAt(GetTube(il, itube - 1, kFALSE), il);
+    else               oa->AddAt(GetTube(il, itube,     kFALSE), il);
+  }
 }
 //______________________________________________________________________________
 void TStrawTracker::SetMinNHitsAdvanced(Int_t n)

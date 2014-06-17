@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    01 Jun 2011
+// @Date    17 Jun 2014
 
 #ifndef STRELA_TStrawTracker
 #define STRELA_TStrawTracker
@@ -131,6 +131,7 @@ public:
   void         AllocateLayers();
   void         MarginalTubes(Int_t set = 0, Bool_t onlyhalf = kTRUE) const;
   TStrawTube  *GetTube(Int_t il0, Int_t it0, Bool_t info = kTRUE) const;
+  void         ConsecutiveTubes(Int_t itube, Bool_t up, TObjArray *oa) const;
   void         SetMinNHitsAdvanced(Int_t n);
   void         AddHit(Int_t itube, Int_t tdc);
   void         FindTracks();
