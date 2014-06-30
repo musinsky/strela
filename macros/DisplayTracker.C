@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 09/06/2014
+// 30/06/2014
 
 #include <TPad.h>
 
@@ -13,8 +13,8 @@ void DisplayTracker(TStrawTracker *trX_1, TStrawTracker *trX_2, TStrawTracker *t
   if (gStrela->GetDisplay()) return;
   TStrelaDisplay *display = new TStrelaDisplay();
 
-  Double_t xl[3] = {0.00, 0.25, 0.75};
-  Double_t xu[3] = {0.25, 0.75, 1.00};
+  Double_t xl[3] = {0.00, 0.20, 0.475}; // 0.00, 0.25, 0.75
+  Double_t xu[3] = {0.20, 0.475, 1.00}; // 0.25, 0.75, 1.00
   Double_t yl[3] = {0.1072, 0.192, 0.000};
   Double_t yu[3] = {0.3929, 0.308, 0.500};
   TPad *pad;

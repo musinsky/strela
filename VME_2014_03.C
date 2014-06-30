@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 04/03/2014
+// 30/06/2014
 
 {
   if (gVME) {
@@ -13,4 +13,6 @@
   new TModuleTDC64V(9);
   new TModuleTDC64V(11);
   new TModuleTDC64V(13);
+
+  TVMEEvent::SetTrigInfo(58, 8000);
 }
