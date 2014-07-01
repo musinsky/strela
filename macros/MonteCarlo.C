@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 13/06/2014
+// 01/07/2014
 
 /*
   .x Strela.C
@@ -32,28 +32,50 @@ void GenerateRun(Int_t run = 0, Int_t ne = 100000, Bool_t analyze = kTRUE)
   TStrawTracker *t11 = gStrela->StrawCham()->FindTracker("tracker_11");
   TStrawTracker *t12 = gStrela->StrawCham()->FindTracker("tracker_12");
 
-  Int_t tshift = 2500, tmax = 4750;
+  Int_t tshift = 2470, tmax = 4752;
   TStrawTube::BaseT0(-tshift);
-  gStrela->StrawCham()->SetTubesTimes(0, tshift, tshift + tmax);
   TStrawTube::DriftVel(2.1/tmax);
+  gStrela->StrawCham()->SetTubesTimes(0, tshift, tshift + tmax);
+  TStrawCham::TrigNadc(-1);
 
+  // set particular T0 time (and modify sigma of "b" parameter)
+  //  t11->GetTube(2)->SetT0(10); t11->GetTube(3)->SetT0(20); t11->GetTube(4)->SetT0(30);
+  //  t12->GetTube(2)->SetT0(10); t12->GetTube(3)->SetT0(20); t12->GetTube(4)->SetT0(30);
+
+  Double_t a, b;
   for (Int_t i = 0; i < ne; i++) {
     gStrela->VMEEvent()->Clear();
-    if (t1)   t1->GenerateHits(gRandom->Gaus(0, 0.033),      gRandom->Uniform(-7, 7), 0.01);
-    if (t2)   t2->GenerateHits(gRandom->Gaus(-0.025, 0.01),  gRandom->Uniform(-5, 5), 0.03);
-    if (t11) t11->GenerateHits(gRandom->Gaus(0.025, 0.025),  gRandom->Gaus(0, 10),    0.01);
-    if (t12) t12->GenerateHits(gRandom->Gaus(-0.050, 0.010), gRandom->Gaus(-7, 10),   0.01);
+
+    // bad MC events
+    if (t1) t1->GenerateHits(gRandom->Gaus( 0.000, 0.03), gRandom->Uniform(-7.0, 7.0), 0.01);
+    if (t2) t2->GenerateHits(gRandom->Gaus(-0.025, 0.01), gRandom->Uniform(-5.0, 5.0), 0.03);
+
+    // good MC events
+    a = gRandom->Gaus(0.015, 0.015);
+    b = gRandom->Gaus(-8.0, 0.75) - a*-333.0   ; // sigma (from generated gauss) is important for T0 analyze
+    if (t11) t11->GenerateHits(a, b, 0.010);
+    a = gRandom->Gaus(-0.020, 0.030);
+    b = gRandom->Gaus(10.0, 2.00) - a*-343.0;
+    if (t12) t12->GenerateHits(a, b, 0.012);
+    // "beam tail" (only for X chamber)
+    a = gRandom->Gaus(0.12, 0.030);
+    b = gRandom->Gaus(-18.0, 1.50) - a*-343.0;
+    if (t12) t12->GenerateHits(a, b, 0.012);
+
     tree->Fill();
     //    gStrela->AnalyzeEntry(i);
   }
   file->Write();
   delete file;
+  if (!analyze) return;
 
   // see in TStrela::SetRun, but dont use gStrela->SetRun()
   // gStrela->GetChain() is deleted from memory, but still refers to bad (old) address
   file = TFile::Open(TString::Format("run%03d.root", run), "READ");
   tree = (TChain *)file->Get("pp");
   gStrela->ChangeBranchAddress(tree);
-  TStrawCham::TrigNadc(-1);
-  if (analyze) gStrela->AnalyzeEntries();
+
+  // reset particular T0 time
+  //  gStrela->StrawCham()->SetTubesTimes(3, 0);
+  gStrela->AnalyzeEntries();
 }

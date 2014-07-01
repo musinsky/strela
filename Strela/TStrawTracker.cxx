@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    17 Jun 2014
+// @Date    01 Jul 2014
 
 #include <TMath.h>
 #include <TH2.h>
@@ -875,12 +875,9 @@ void TStrawTracker::GenerateHits(Double_t a, Double_t b, Double_t sig) const
     TIter nextt(layer->Tubes());
     while ((tube = (TStrawTube *)nextt())) {
       d  = (a*tube->GetZ() - tube->GetCenter() + b)/d0;
-      d += gRandom->Gaus(0, sig);
       if (TMath::Abs(d) <= tube->GetRange()) {
         found = kTRUE;
-        // TODO (before or after tube->GetRange())
-        // d += gRandom->Gaus(0, sig);
-        //        gStrela->GemEvent()->AddHit(tube->GetNadc(), tube->R2T(d));
+        d += gRandom->Gaus(0, sig);
         gStrela->VMEEvent()->AddTDCHit(tube->GetNadc(), tube->TExT0(tube->R2T(d)));
       }
       else if (found) break; // hits in one layer go consecutive

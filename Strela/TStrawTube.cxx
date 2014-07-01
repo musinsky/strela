@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    12 Sep 2012
+// @Date    01 Jul 2014
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -302,11 +302,9 @@ Int_t TStrawTube::R2T(Double_t radius) const
   // need for Monte Carlo
 
   radius = TMath::Abs(radius);
-  // TODO
-  //  if      (radius < fgWireRadius) return 0;//(GetTMin());
-  //  else if (radius > GetRange())   return 4400;//(GetTMax());
-  //  else                            return (radius/fgDriftVel);
-  return (radius/fgDriftVel);
+  if      (radius < fgWireRadius) return (TInT0(fTMin) - 500);
+  else if (radius > GetRange())   return (TInT0(fTMax) + 500);
+  else                            return (radius/fgDriftVel);
 }
 //______________________________________________________________________________
 void TStrawTube::SetShowHistograms(Option_t *option) const
@@ -355,7 +353,7 @@ void TStrawTube::ShowHistoFull(TCanvas *can) const
   line.DrawLine(fTMax, fhTime1->GetMinimum(), fTMax, fhTime1->GetMaximum());
   line.SetLineColor(kGreen);
   line.SetLineStyle(2);
-  line.DrawLine(fT0, fhTime1->GetMinimum(), fT0, fhTime1->GetMaximum());
+  line.DrawLine(TExT0(0), fhTime1->GetMinimum(), TExT0(0), fhTime1->GetMaximum());
   fhTime2->Draw("same");
   can->cd(2);
   fhRad1->Draw();
@@ -366,11 +364,12 @@ void TStrawTube::ShowHistoFull(TCanvas *can) const
   can->cd(4);
   fhBzRes->Draw("COL");
   can->cd(5);
-  fhDis2->Draw();
-  fhDis1->Draw("same");
-  Double_t max = fhDis2->GetMaximum()/2.0, maxe = fhEffi->GetMaximum();
-  if ((Int_t) max != (Int_t) maxe) fhEffi->Scale(max/maxe);
-  fhEffi->Draw("same");
+  fhBzAz->Draw("COL");
+  //  fhDis2->Draw();
+  //  fhDis1->Draw("same");
+  //  Double_t max = fhDis2->GetMaximum()/2.0, maxe = fhEffi->GetMaximum();
+  //  if ((Int_t) max != (Int_t) maxe) fhEffi->Scale(max/maxe);
+  //  fhEffi->Draw("same");
   can->cd(6);
   fhDisTime->Draw("COL");
   //  fhBzAz->Draw("COL");
