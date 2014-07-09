@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 01/07/2014
+// 09/07/2014
 
 /*
   .x Strela.C
@@ -36,15 +36,23 @@ void GenerateRun(Int_t run = 0, Int_t ne = 100000, Bool_t analyze = kTRUE)
   TStrawTube::BaseT0(-tshift);
   TStrawTube::DriftVel(2.1/tmax);
   gStrela->StrawCham()->SetTubesTimes(0, tshift, tshift + tmax);
-  TStrawCham::TrigNadc(-1);
 
-  // set particular T0 time (and modify sigma of "b" parameter)
-  //  t11->GetTube(2)->SetT0(10); t11->GetTube(3)->SetT0(20); t11->GetTube(4)->SetT0(30);
-  //  t12->GetTube(2)->SetT0(10); t12->GetTube(3)->SetT0(20); t12->GetTube(4)->SetT0(30);
+  // set particular T0 time (and try modifying sigma of "b" parameter)
+  Bool_t partT0 = kFALSE;
+  if (partT0) {
+    t11->GetTube(2)->SetT0(20); t11->GetTube(3)->SetT0(30);
+    t11->GetTube(4)->SetT0(45); t11->GetTube(5)->SetT0(55);
+    t12->GetTube(2)->SetT0(10); t12->GetTube(3)->SetT0(20);
+    t12->GetTube(4)->SetT0(30); t12->GetTube(5)->SetT0(40);
+  }
 
   Double_t a, b;
   for (Int_t i = 0; i < ne; i++) {
     gStrela->VMEEvent()->Clear();
+
+    // generate trigger hit
+    if (!(TVMEEvent::GetTrigChannel() < 0))
+      gStrela->VMEEvent()->AddTDCHit(TVMEEvent::GetTrigChannel(), TVMEEvent::GetTrigOffset());
 
     // bad MC events
     if (t1) t1->GenerateHits(gRandom->Gaus( 0.000, 0.03), gRandom->Uniform(-7.0, 7.0), 0.01);
@@ -75,7 +83,9 @@ void GenerateRun(Int_t run = 0, Int_t ne = 100000, Bool_t analyze = kTRUE)
   tree = (TChain *)file->Get("pp");
   gStrela->ChangeBranchAddress(tree);
 
+  // reset min, max time
+  gStrela->StrawCham()->SetTubesTimes(0, 0, 9999);
   // reset particular T0 time
-  //  gStrela->StrawCham()->SetTubesTimes(3, 0);
+  if (partT0) gStrela->StrawCham()->SetTubesTimes(3, 0);
   gStrela->AnalyzeEntries();
 }
