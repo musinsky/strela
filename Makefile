@@ -1,12 +1,13 @@
-# @(#) 20 Apr 2014
+# @(#) 10 Feb 2015
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
 
 include $(ROOTSYS)/etc/Makefile.arch
 HdrSuf		= h
-CXXFLAGS	+= -Wextra -Wformat=2 -Wshadow
-CXXFLAGS	+= -std=c++11 -Wpedantic -Wno-vla
+CXXFLAGS	+= -Wshadow -Woverloaded-virtual
+CXXFLAGS	+= -std=c++11 #-Wno-deprecated-declarations
+CXXFLAGS	+= -Wextra -Wformat=2 -Wreorder -Wpedantic #-Wno-vla -Wno-long-long
 ifeq ($(MAKECMDGOALS),debug)
 CXXFLAGS	+= -DDEBUG
 endif
@@ -92,7 +93,7 @@ distsrc:
 		@echo -e "\n$(DISTSRCNAME).tar.xz done\n"
 
 showbuild:
-		@echo "ROOTSYS        = $(ROOTSYS)"
+		@echo "ROOTSYS        = $(realpath $(ROOTSYS))"
 		@echo "PLATFORM       = $(PLATFORM)"
 		@echo "ARCH           = $(ARCH)"
 		@echo ""
