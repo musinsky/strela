@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    12 Sep 2012
+// @Date    10 Feb 2015
 
 #include <TCanvas.h>
 #include <TButton.h>
@@ -165,7 +165,7 @@ void TStrelaDisplay::DisplayEvent(const TStrawTracker *tracker, Option_t * /*opt
 {
   if (!gPad) return;
 
-  Int_t indexMark[tracker->GetNHits()];
+  Int_t *indexMark = new Int_t[tracker->GetNHits()];
   TEllipse eh;
   eh.SetFillStyle(0);
   eh.SetLineColor(kRed);
@@ -209,6 +209,8 @@ void TStrelaDisplay::DisplayEvent(const TStrawTracker *tracker, Option_t * /*opt
       ((TEllipse *)obj)->SetLineColor(line.GetLineColor());
     }
   }
+
+  delete [] indexMark;
 }
 //______________________________________________________________________________
 void TStrelaDisplay::DeletePrimitives() const

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    24 Nov 2010
+// @Date    10 Feb 2015
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -171,7 +171,9 @@ void TStrawMulti::IterFirst()
   Int_t nb = fhTimeRes->GetNbinsX();
   // all projection histograms are deleted when file is closed
   TH1D *htemp = fhTimeRes->ProjectionX("_px", 1, nb);
-  Double_t x[nb], y[nb], sum = 0;
+  Double_t *x = new Double_t[nb];
+  Double_t *y = new Double_t[nb];
+  Double_t sum = 0;
   for (Int_t i = 0; i < nb; i++) {
     x[i] = htemp->GetBinCenter(i+1);
     sum += htemp->GetBinContent(i+1);
@@ -182,6 +184,8 @@ void TStrawMulti::IterFirst()
     if (fSpline) delete fSpline;
     fSpline = 0;
     Warning("IterFirst", "%s, first analyze entries", GetName());
+    delete [] x;
+    delete [] y;
     return;
   }
 
@@ -192,6 +196,8 @@ void TStrawMulti::IterFirst()
   if (fSpline) delete fSpline;
   fSpline = new TSpline3(Form("%s_spline", GetName()), x, y, nb);
   // need checking grows full time interval
+  delete [] x;
+  delete [] y;
 
   if (fCorrect) delete fCorrect;
   fCorrect = new TGraph();
