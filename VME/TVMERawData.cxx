@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    13 Apr 2014
+// @Date    16 Feb 2015
 
 #include <TFile.h>
 #include <TTree.h>
@@ -30,7 +30,7 @@ TVMERawData::TVMERawData()
   fTreeFileName()
 {
   // Default constructor
-  fPrintType = new TBits(16); // kRESE+1
+  fPrintType = new TBits(16); // kPADD+1
 }
 //______________________________________________________________________________
 TVMERawData::~TVMERawData()
@@ -137,8 +137,8 @@ void TVMERawData::DecodeDataWord()
     case kSTAT:
       DecodeSTAT();
       return;
-    case kRESE:
-      DecodeRESE();
+    case kPADD:
+      DecodePADD();
       return;
     default:
       DecodeData();
@@ -291,12 +291,12 @@ void TVMERawData::DecodeSTAT()
   printf("Status\n");
 }
 //______________________________________________________________________________
-void TVMERawData::DecodeRESE()
+void TVMERawData::DecodePADD()
 {
-  // 0xF Reserved
+  // 0xF Padding
 
   if (!PrintDataType(0)) return;
-  printf("Reserved\n");
+  printf("Padding\n");
 }
 //______________________________________________________________________________
 void TVMERawData::DecodeData()

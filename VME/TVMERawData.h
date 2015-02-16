@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    13 Apr 2014
+// @Date    16 Feb 2015
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -42,7 +42,7 @@ public:
     kSHDR = 0xC, // Spill header
     kSTRL = 0xD, // Spill trailer
     kSTAT = 0xE, // Status
-    kRESE = 0xF  // Reserved
+    kPADD = 0xF  // Padding
   };
   // TDC data type
   enum ETDCType {
@@ -67,7 +67,7 @@ public:
   void          DecodeMHDR();
   void          DecodeMTRL();
   void          DecodeSTAT();
-  void          DecodeRESE();
+  void          DecodePADD();
   void          DecodeData();
   void          DecodeDataTDC();
   //  void          DecodeDataTQDC();
