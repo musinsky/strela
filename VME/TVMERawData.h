@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    16 Feb 2015
+// @Date    17 Feb 2015
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -26,12 +26,13 @@ public:
   enum {
     kWrongEvent = BIT(23) // Wrong event
   };
-  // Data format
-  enum EDataFormat {
-    kTDC,  // TDC64V, TDC96, PhTDC
-    kTQDC, // TQDC (not used)
-    kTTCM, // TRIG (not used)
-    kOther // not specified
+  // Module Id
+  enum EModuleId {
+    kPhTDC  = 0x04, // TDC (obsolete)
+    kTDC96  = 0x05, // TDC (obsolete)
+    kTQDC16 = 0x09, // TQDC
+    kTRIG   = 0x0A, // Logic (not used)
+    kTDC64V = 0x10  // TDC
   };
   // Common data type
   enum ECommonType {
@@ -96,7 +97,7 @@ private:
   Int_t         fNEvents;    // all events
   Int_t         fEventEHDR;  // event number in EHDR
   Int_t         fEventMHDR;  // event number in MHDR
-  EDataFormat   fDataFormat; // data format
+  Int_t         fModuleId;   // module Id from MHDR
   TBits        *fPrintType;  // table of bits to print type of data
 
   TTree          *fTree;

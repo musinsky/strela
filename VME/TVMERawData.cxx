@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    16 Feb 2015
+// @Date    17 Feb 2015
 
 #include <TFile.h>
 #include <TTree.h>
@@ -22,7 +22,7 @@ TVMERawData::TVMERawData()
   fNEvents(0),
   fEventEHDR(0),
   fEventMHDR(0),
-  fDataFormat(kOther),
+  fModuleId(0),
   fPrintType(0),
   fTree(0),
   fVMEEvent(0),
@@ -235,27 +235,7 @@ void TVMERawData::DecodeMHDR()
   if (fEventMHDR == -1) fEventMHDR = ev;
   else if (ev != fEventMHDR) Warning("DecodeMHDR", "event number mismatch %d != %d", ev, fEventMHDR);
   fEventMHDR = ev;
-
-  switch (id) {
-    case 0x10: // TDC64V
-      fDataFormat = kTDC;
-      break;
-      //    case 0x05: // TDC96
-      //      fDataFormat = kTDC;
-      //      break;
-      //    case 0x04: // PhTDC
-      //      fDataFormat = kTDC;
-      //      break;
-      //    case 0x09: // TQDC
-      //      fDataFormat = kTQDC;
-      //      break;
-      //    case 0x0A: // TRIG
-      //      fDataFormat = kTTCM;
-      //      break;
-    default:
-      fDataFormat = kOther;
-      break;
-  }
+  fModuleId = id;
 
   if (gVME) {
     fModule = gVME->GetModule(ga); // suppose that ga is < 20
@@ -305,14 +285,17 @@ void TVMERawData::DecodeData()
 
   CheckIntegrity2(kData, "Data");
 
-  switch (fDataFormat) {
-    case kTDC:
+  switch (fModuleId) {
+    case kTDC64V:
       DecodeDataTDC();
       return;
-      //    case kTQDC:
+      //    case kTDC96:
+      //      DecodeDataTDC();
+      //      return;
+      //    case kTQDC16:
       //      DecodeDataTQDC();
       //      return;
-      //    case kTTCM:
+      //    case kTRIG:
       //      DecodeDataTTCM();
       //      return;
     default:
@@ -456,6 +439,9 @@ Bool_t TVMERawData::PrintDataType(Int_t nlevel) const
   fPrintType->ResetAllBits();
   fPrintType->SetBitNumber(TVMERawData::kSHDR);
   fPrintType->SetBitNumber(TVMERawData::kSTRL);
+
+  // binary representation of fDataWord
+  for (UInt_t ib = 1 << 31; ib > 0; ib = ib/2) (fDataWord & ib) ? printf("1") : printf("0");
    */
 
   if (!fPrintType->TestBitNumber(fDataType)) return kFALSE;
