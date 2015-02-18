@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    17 Feb 2015
+// @Date    18 Feb 2015
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -53,6 +53,16 @@ public:
     kTTR  = 0x5, // TDC trailing time
     kTERR = 0x6  // TDC error
   };
+  // TQDC data type
+  enum ETQDCType {
+    kTQCHI = 0x0, // TQDC input counters high bits
+    kTQCLO = 0x1, // TQDC input counters low bits
+    kTQHDR = 0x2, // TQDC header
+    kTQTRL = 0x3, // TQDC trailer
+    kTQDC4 = 0x4, // TQDC ADC timestamp or TDC data
+    kTQDC5 = 0x5, // TQDC TDC or ADC data
+    kTQERR = 0x6  // TQDC error
+  };
 
   TVMERawData();
   virtual ~TVMERawData();
@@ -70,16 +80,22 @@ public:
   void          DecodeSTAT();
   void          DecodePADD();
   void          DecodeData();
-  void          DecodeDataTDC();
-  //  void          DecodeDataTQDC();
-  //  void          DecodeDataTTCM();
-
   // TDC decoding
+  void          DecodeDataTDC();
   void          DecodeTHDR();
   void          DecodeTTRL();
   void          DecodeTLD();
   void          DecodeTTR();
   void          DecodeTERR();
+  // TQDC decoding
+  void          DecodeDataTQDC();
+  void          DecodeTQCHI();
+  void          DecodeTQCLO();
+  void          DecodeTQHDR();
+  void          DecodeTQTRL();
+  void          DecodeTQDC4();
+  void          DecodeTQDC5();
+  void          DecodeTQERR();
 
   void          CheckIntegrity(ETypeStatus type, Bool_t status, const char *where);
   void          CheckIntegrity2(ETypeStatus type, const char *where);

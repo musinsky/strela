@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    17 Feb 2015
+// @Date    18 Feb 2015
 
 #include <TFile.h>
 #include <TTree.h>
@@ -289,14 +289,14 @@ void TVMERawData::DecodeData()
     case kTDC64V:
       DecodeDataTDC();
       return;
+    case kTQDC16:
+      DecodeDataTQDC();
+      return;
       //    case kTDC96:
       //      DecodeDataTDC();
       //      return;
-      //    case kTQDC16:
-      //      DecodeDataTQDC();
-      //      return;
       //    case kTRIG:
-      //      DecodeDataTTCM();
+      //      DecodeDataTRIG();
       //      return;
     default:
       break;
@@ -336,7 +336,7 @@ void TVMERawData::DecodeDataTDC()
 //______________________________________________________________________________
 void TVMERawData::DecodeTHDR()
 {
-  // 0x2 TDC header (it will not be stored anymore)
+  // 0x2 TDC header (nothing interesting)
   Int_t ts = fDataWord & 0xFFF;         // (bits 0  - 11)
   Int_t ev = (fDataWord >> 12) & 0xFFF; // (bits 12 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;   // (bits 24 - 27)
@@ -347,7 +347,7 @@ void TVMERawData::DecodeTHDR()
 //______________________________________________________________________________
 void TVMERawData::DecodeTTRL()
 {
-  // 0x3 TDC trailer (it will not be stored anymore)
+  // 0x3 TDC trailer (nothing interesting)
   Int_t wc = fDataWord & 0xFFF;         // (bits 0  - 11)
   Int_t ev = (fDataWord >> 12) & 0xFFF; // (bits 12 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;   // (bits 24 - 27)
@@ -390,6 +390,128 @@ void TVMERawData::DecodeTERR()
   Int_t flag = fDataWord & 0x7FFF; // (bits 0  - 14)
 
   Warning("DecodeTERR", "TDC error flags: 0x%X", flag);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeDataTQDC()
+{
+  // 0x0 - 0x6 only for TQDC Data format
+
+  switch (fDataType) {
+    case kTQCHI:
+      DecodeTQCHI();
+      return;
+    case kTQCLO:
+      DecodeTQCLO();
+      return;
+    case kTQHDR:
+      DecodeTQHDR();
+      return;
+    case kTQTRL:
+      DecodeTQTRL();
+      return;
+    case kTQDC4:
+      DecodeTQDC4();
+      return;
+    case kTQDC5:
+      DecodeTQDC5();
+      return;
+    case kTQERR:
+      DecodeTQERR();
+      return;
+    default:
+      break;
+  }
+
+  if (!PrintDataType(3)) return;
+  printf("DATA TQDC not specified\n");
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeTQCHI()
+{
+  // 0x0 TQDC input counters high bits 31:16 (nothing interesting)
+  Int_t chi = fDataWord & 0xFFFF;       // (bits 0  - 15)
+  Int_t ch  = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
+
+  if (!PrintDataType(3)) return;
+  printf("TQCHI chi: %d, ch: %d\n", chi, ch);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeTQCLO()
+{
+  // 0x1 TQDC input counters low bits 15:0 (nothing interesting)
+  Int_t clo = fDataWord & 0xFFFF;       // (bits 0  - 15)
+  Int_t ch  = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
+
+  if (!PrintDataType(3)) return;
+  printf("TQCLO clo: %d, ch: %d\n", clo, ch);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeTQHDR()
+{
+  // 0x2 TQDC header (nothing interesting)
+  Int_t ts = fDataWord & 0xFFF;         // (bits 0  - 11)
+  Int_t ev = (fDataWord >> 12) & 0xFFF; // (bits 12 - 23)
+
+  if (!PrintDataType(3)) return;
+  printf("TQHDR ts: %d, ev: %d\n", ts, ev);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeTQTRL()
+{
+  // 0x3 TQDC trailer (nothing interesting)
+  Int_t wc = fDataWord & 0xFFF;         // (bits 0  - 11)
+  Int_t ev = (fDataWord >> 12) & 0xFFF; // (bits 12 - 23)
+
+  if (!PrintDataType(3)) return;
+  printf("TQTRL wc: %d, ev: %d\n", wc, ev);
+}
+
+
+
+//______________________________________________________________________________
+void TVMERawData::DecodeTQDC4()
+{
+  // 0x4 TQDC data (ADC timestamp or TDC data)
+  Int_t ch   = (fDataWord >> 19) & 0x1F;  // (bits 19 - 23)
+  Int_t mode = (fDataWord >> 26) & 0x3;   // (bits 26 - 27)
+
+  if (mode != 0) { // ADC timestamp
+    Int_t ts   = fDataWord & 0xFFFF;      // (bits 0  - 15)
+    Bool_t adc = (fDataWord >> 16) & 0x1; // (bit  16)
+
+    if (!PrintDataType(3)) return;
+    printf("TQDC4 ts(%s): %6d, ch: %2d, mode: %d\n", adc ? "ADC " : "TRIG", ts, ch, mode);
+  }
+  else {           // TDC data
+    Int_t data = fDataWord & 0x7FFFF;     // (bits 0  - 18)
+    Int_t rc   = (fDataWord >> 24) & 0x3; // (bits 24 - 25)
+
+    if (!PrintDataType(3)) return;
+    printf("TQDC4 data: %6d, ch: %2d, rc: %d, mode: %d\n", data, ch, rc, mode);
+  }
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeTQDC5()
+{
+  // 0x5 TQDC data (TDC or ADC data)
+  Int_t data = fDataWord & 0x7FFFF;      // (bits 0  - 18)
+  Int_t ch   = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
+  Int_t rc   = (fDataWord >> 24) & 0x3;  // (bits 24 - 25)
+  Int_t mode = (fDataWord >> 26) & 0x3;  // (bits 26 - 27)
+
+  if (!PrintDataType(3)) return;
+  printf("TQDC5 data: %6d, ch: %2d, rc: %d, mode: %d\n", data, ch, rc, mode);
+}
+
+
+
+//______________________________________________________________________________
+void TVMERawData::DecodeTQERR()
+{
+  // 0x6 TQDC error
+  Int_t flag = fDataWord & 0x7FFF; // (bits 0  - 14)
+
+  Warning("DecodeTQERR", "TQDC error flags: 0x%X", flag);
 }
 //______________________________________________________________________________
 void TVMERawData::CheckIntegrity(ETypeStatus type, Bool_t status, const char *where)
