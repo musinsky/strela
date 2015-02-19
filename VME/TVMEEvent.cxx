@@ -28,7 +28,7 @@ TVMEEvent::TVMEEvent()
   }
 
   // or implement function for manual set size of array(s)
-  fIdxTDCHitChanLast.Set(gVME->GetNChannelsFast());
+  fIdxTDCHitChanLast.Set(gVME->GetNChannelsTDC());
   for (Int_t multi = 0; multi < kMaxMulti; multi++)
     fIdxTDCHitChanMulti[multi].Set(fIdxTDCHitChanLast.GetSize());
 }

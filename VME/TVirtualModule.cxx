@@ -67,14 +67,3 @@ void TVirtualModule::ConnectorChannels(Int_t con, Int_t * /*pins*/, Option_t * /
   if (con >= fNChips)
     Error("ConnectorChannels", "module %s has only %d chips", GetTitle(), fNChips);
 }
-//______________________________________________________________________________
-Int_t TVirtualModule::DecodeTDCChannel(UInt_t word) const
-{
-  UInt_t type = word >> 28;
-  if ((type != 0x4) && (type != 0x5)) {
-    Warning("DecodeChannel", "decode only DATA (0x4 or 0x5), not: 0x%X", type);
-    return -1;
-  }
-  // tdc_id = bits 24 - 27, tdc_ch = bits 19 - 23
-  return MapChannel((word >> 24) & 0xF, (word >> 19) & 0x1F);
-}

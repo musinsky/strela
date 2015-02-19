@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    29 Mar 2014
+// @Date    19 Feb 2015
 
 #include <TMath.h>
 
@@ -15,6 +15,7 @@ ClassImp(TVME)
 TVME::TVME()
 : TNamed(),
   fModules(0),
+  fNChannelsTQDC(0),
   fNChannels(0),
   fChannel(0),
   fIndexCha(0),
@@ -26,6 +27,7 @@ TVME::TVME()
 TVME::TVME(const char *name, const char *title)
 : TNamed(name, title),
   fModules(0),
+  fNChannelsTQDC(0),
   fNChannels(0),
   fChannel(0),
   fIndexCha(0),
@@ -52,37 +54,30 @@ TVME::~TVME()
 //______________________________________________________________________________
 void TVME::DeleteChannels()
 {
-  fNChannels = 0;
-  delete [] fChannel;
-  delete [] fIndexCha;
-  delete [] fSortCha;
+  if (fChannel)  delete [] fChannel;
+  if (fIndexCha) delete [] fIndexCha;
+  if (fSortCha)  delete [] fSortCha;
 }
 //______________________________________________________________________________
-Int_t TVME::GetNChannels() const
-{
-  if (!fModules) return 0;
-
-  TVirtualModule *module;
-  Int_t sum = 0;
-  for (Int_t im = 0; im < fModules->GetSize(); im++) {
-    module = GetModule(im);
-    if (!module) continue;
-    sum += module->GetModuleNChannels();
-  }
-  return sum;
-}
-//______________________________________________________________________________
-void TVME::FirstChannelOfModules() const
+void TVME::CountChannels()
 {
   if (!fModules) return;
 
   TVirtualModule *module;
-  Int_t first = 0;
+  fNChannelsTQDC = 0;
+  fNChannels     = 0;
+
   for (Int_t im = 0; im < fModules->GetSize(); im++) {
     module = GetModule(im);
     if (!module) continue;
-    module->SetFirstChannel(first);
-    first += module->GetModuleNChannels();
+    if (module->IsTQDC()) {
+      module->SetFirstChannel(fNChannelsTQDC);
+      fNChannelsTQDC += module->GetModuleNChannels();
+    }
+    else {
+      module->SetFirstChannel(fNChannels);
+      fNChannels += module->GetModuleNChannels();
+    }
   }
 }
 //______________________________________________________________________________
@@ -95,9 +90,10 @@ void TVME::ReDecodeChannels()
   // for 2007_03, 2008_06, 2009_12, 2011_03 see in pomme.cxx
   Int_t moduleShift = 100 - 512, moduleDelta = 512, idMulti = 32;
 
-  FirstChannelOfModules();
+  CountChannels();
+  if (fNChannels == 0) return; // no TDC channels (only TQDC)
+
   DeleteChannels();
-  fNChannels = GetNChannels();
   fChannel  = new Int_t[fNChannels];
   fIndexCha = new Int_t[fNChannels];
   fSortCha  = new Int_t[fNChannels];
