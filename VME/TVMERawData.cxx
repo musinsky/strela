@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    18 Feb 2015
+// @Date    19 Feb 2015
 
 #include <TFile.h>
 #include <TTree.h>
@@ -296,7 +296,7 @@ void TVMERawData::DecodeData()
       //      DecodeDataTDC();
       //      return;
       //    case kTRIG:
-      //      DecodeDataTRIG();
+      //      DecodeDataTTCM();
       //      return;
     default:
       break;
@@ -489,6 +489,8 @@ void TVMERawData::DecodeTQDC4()
     if (!PrintDataType(3)) return;
     printf("TQDC4 data: %6d, ch: %2d, rc: %d, mode: %d\n", data, ch, rc, mode);
   }
+
+  // TODO
 }
 //______________________________________________________________________________
 void TVMERawData::DecodeTQDC5()
@@ -501,6 +503,8 @@ void TVMERawData::DecodeTQDC5()
 
   if (!PrintDataType(3)) return;
   printf("TQDC5 data: %6d, ch: %2d, rc: %d, mode: %d\n", data, ch, rc, mode);
+
+  // TODO
 }
 
 

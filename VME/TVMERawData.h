@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    18 Feb 2015
+// @Date    19 Feb 2015
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -31,7 +31,7 @@ public:
     kPhTDC  = 0x04, // TDC (obsolete)
     kTDC96  = 0x05, // TDC (obsolete)
     kTQDC16 = 0x09, // TQDC
-    kTRIG   = 0x0A, // Logic (not used)
+    kTRIG   = 0x0A, // TTCM (not used)
     kTDC64V = 0x10  // TDC
   };
   // Common data type
