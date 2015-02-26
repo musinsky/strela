@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    19 Feb 2015
+// @Date    26 Feb 2015
 
 #include <TFile.h>
 #include <TTree.h>
@@ -363,6 +363,13 @@ void TVMERawData::DecodeTLD()
   Int_t ch = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;  // (bits 24 - 27)
 
+  // correct only for normal resolution, 19 bits (100ps)
+  // see also daqlib/hptdc/hptdc.cpp (by Ilja Slepnev)
+  //
+  // for very high resolution, 21 bits (25ps)
+  // tm = ((fDataWord & 0x7FFFF) << 2) | ((fDataWord >> 19) & 0x3);
+  // and ! different channel decoding !
+
   if (fModule && fTree)
     fVMEEvent->AddTDCHitCheck(fModule->GetFirstChannel() + fModule->MapChannel(id, ch), tm, kTRUE);
 
@@ -376,6 +383,8 @@ void TVMERawData::DecodeTTR()
   Int_t tm = fDataWord & 0x7FFFF;      // (bits 0  - 18)
   Int_t ch = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
   Int_t id = (fDataWord >> 24) & 0xF;  // (bits 24 - 27)
+
+  // normal resolution, same remarks as in DecodeTLD
 
   if (fModule && fTree)
     fVMEEvent->AddTDCHitCheck(fModule->GetFirstChannel() + fModule->MapChannel(id, ch), tm, kFALSE);
@@ -432,8 +441,10 @@ void TVMERawData::DecodeTQCHI()
   Int_t chi = fDataWord & 0xFFFF;       // (bits 0  - 15)
   Int_t ch  = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
 
+  // data (counters/rate) only between SHDR_END and STRL_END
+
   if (!PrintDataType(3)) return;
-  printf("TQCHI chi: %d, ch: %d\n", chi, ch);
+  printf("TQCHI chi: %6d, ch: %d\n", chi, ch);
 }
 //______________________________________________________________________________
 void TVMERawData::DecodeTQCLO()
@@ -443,7 +454,7 @@ void TVMERawData::DecodeTQCLO()
   Int_t ch  = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
 
   if (!PrintDataType(3)) return;
-  printf("TQCLO clo: %d, ch: %d\n", clo, ch);
+  printf("TQCLO clo: %6d, ch: %d\n", clo, ch);
 }
 //______________________________________________________________________________
 void TVMERawData::DecodeTQHDR()
@@ -465,50 +476,73 @@ void TVMERawData::DecodeTQTRL()
   if (!PrintDataType(3)) return;
   printf("TQTRL wc: %d, ev: %d\n", wc, ev);
 }
-
-
-
 //______________________________________________________________________________
 void TVMERawData::DecodeTQDC4()
 {
   // 0x4 TQDC data (ADC timestamp or TDC data)
-  Int_t ch   = (fDataWord >> 19) & 0x1F;  // (bits 19 - 23)
-  Int_t mode = (fDataWord >> 26) & 0x3;   // (bits 26 - 27)
+  Int_t ch   = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
+  Int_t mode = (fDataWord >> 26) & 0x3;  // (bits 26 - 27)
 
   if (mode != 0) { // ADC timestamp
-    Int_t ts   = fDataWord & 0xFFFF;      // (bits 0  - 15)
-    Bool_t adc = (fDataWord >> 16) & 0x1; // (bit  16)
+    Int_t ts  = fDataWord & 0xFFFF;      // (bits 0  - 15)
+    Int_t wts = (fDataWord >> 16) & 0x7; // (bits 16 - 18)
 
-    if (!PrintDataType(3)) return;
-    printf("TQDC4 ts(%s): %6d, ch: %2d, mode: %d\n", adc ? "ADC " : "TRIG", ts, ch, mode);
+    if (wts == 0) {
+      if (!PrintDataType(3)) return;
+      printf("TQDC4 ts(TRIG): %6d, ch: %2d, wts: %d, mode: %d\n", ts, ch, wts, mode);
+    }
+    else if (wts == 1) {
+      if (!PrintDataType(3)) return;
+      printf("TQDC4 ts(ADC ): %6d, ch: %2d, wts: %d, mode: %d\n", ts, ch, wts, mode);
+    }
+    else {
+      if (!PrintDataType(3)) return;
+      printf("TQDC4 ts(!!!!): %6d, ch: %2d, wts: %d, mode: %d\n", ts, ch, wts, mode);
+    }
   }
   else {           // TDC data
-    Int_t data = fDataWord & 0x7FFFF;     // (bits 0  - 18)
-    Int_t rc   = (fDataWord >> 24) & 0x3; // (bits 24 - 25)
+    Int_t tm = fDataWord & 0x7FFFF;      // (bits 0  - 18)
+
+    // correct only for normal resolution, 19 bits (100ps)
+    //
+    // for very high resolution, 21 bits (25ps)
+    // tm = ((fDataWord & 0x7FFFF) << 2) | ((fDataWord >> 24) & 0x3);
 
     if (!PrintDataType(3)) return;
-    printf("TQDC4 data: %6d, ch: %2d, rc: %d, mode: %d\n", data, ch, rc, mode);
+    printf("TQDC4 tm: %6d, ch: %2d, mode: %d\n", tm, ch, mode);
   }
-
-  // TODO
 }
 //______________________________________________________________________________
 void TVMERawData::DecodeTQDC5()
 {
   // 0x5 TQDC data (TDC or ADC data)
-  Int_t data = fDataWord & 0x7FFFF;      // (bits 0  - 18)
   Int_t ch   = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
-  Int_t rc   = (fDataWord >> 24) & 0x3;  // (bits 24 - 25)
   Int_t mode = (fDataWord >> 26) & 0x3;  // (bits 26 - 27)
 
-  if (!PrintDataType(3)) return;
-  printf("TQDC5 data: %6d, ch: %2d, rc: %d, mode: %d\n", data, ch, rc, mode);
+  if (mode == 0) {      // TDC data
+    Int_t tm = fDataWord & 0x7FFFF;      // (bits 0  - 18)
 
-  // TODO
+    // normal resolution, same remarks as in DecodeTQDC4 (mode == 0)
+
+    if (!PrintDataType(3)) return;
+    printf("TQDC5 tm: %6d, ch: %2d, mode: %d\n", tm, ch, mode);
+  }
+  else if (mode == 2) { // ADC sampling
+    const Int_t kADCBits = 14; // 0x3FFF    (bits 0  - 13)
+    Int_t sample = (fDataWord & ((1 << kADCBits) - 1)) - (1 << (kADCBits - 1));
+    // same as     (fDataWord & 0x3FFF)                - (1 << (kADCBits - 1));
+
+    // ADC is sampling at 80 MHz with resolution of 14 bits (one sample 12.5ns)
+    // (old module revision 100 MHz and 10 bits)
+
+    if (!PrintDataType(3)) return;
+    printf("TQDC5   sample: %6d, ch: %2d, mode: %d\n", sample, ch, mode);
+  }
+  else {
+    if (!PrintDataType(3)) return;
+    printf("TQDC5 ch: %2d, unsupported mode: %d\n", ch, mode);
+  }
 }
-
-
-
 //______________________________________________________________________________
 void TVMERawData::DecodeTQERR()
 {
