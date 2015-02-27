@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    16 Jun 2014
+// @Date    27 Feb 2015
 
 #include "TVMEEvent.h"
 #include "TTDCHit.h"
@@ -61,8 +61,8 @@ void TVMEEvent::AddTDCHit(Int_t ch, Int_t tld)
 {
   // leading tdc
 
-  TClonesArray &hits = *fTDCHits;
-  new(hits[fNTDCHits++]) TTDCHit(ch, tld);
+  TTDCHit *hit = (TTDCHit *)fTDCHits->ConstructedAt(fNTDCHits++);
+  hit->Set(ch, tld);
 
   if (fIdxTDCHitChanLast.GetSize() > 0) fIdxTDCHitChanLast.AddAt(fNTDCHits, ch);
 }
