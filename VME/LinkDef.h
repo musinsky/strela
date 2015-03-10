@@ -10,6 +10,9 @@
 #pragma link C++ class TVMERawData+;
 #pragma link C++ class TVMEEvent+;
 #pragma link C++ class TTDCHit+;
+#pragma link C++ class TTQDCEvent+;
+#pragma link C++ class TTQDCHitT+;
+#pragma link C++ class TTQDCHitQ+;
 #pragma link C++ class TVirtualModule+;
 #pragma link C++ class TModulePhTDC+;
 #pragma link C++ class TModuleTDC96+;
