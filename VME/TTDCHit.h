@@ -22,7 +22,7 @@ public:
 
 private:
   UShort_t      fChannel; // channel
-  UShort_t      fTime;    // leading time
+  UShort_t      fTime;    // leading time (19 bits word)
   UShort_t      fDelta;   // delta time
 
   ClassDef(TTDCHit, 1) // TDCHit

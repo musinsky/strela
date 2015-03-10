@@ -50,6 +50,7 @@ void TVMEEvent::Clear(Option_t *option)
 void TVMEEvent::Print(Option_t * /*option*/) const
 {
   TTDCHit *hit;
+  Printf("event: %d", fEvent);
   for (Int_t i = 0; i < GetNumOfTDCHits(); i++) {
     hit = GetTDCHit(i);
     Printf(" %2d) channel = %3d, time = %6d, delta = %4d",
@@ -136,6 +137,7 @@ Int_t TVMEEvent::GetIndexTDCHit(Int_t ch, Int_t multi)
   // trick how call (only once) IndexTDCHitChanMulti() for each given event
   // bit kNextEvent from stored event (from root file) is always kFALSE
   // works wih TTree::Draw (Scan or Query even thought call more than once)
+  // don't use TVMEEvent::Class()->IgnoreTObjectStreamer(kTRUE);
   if (!TestBit(kNextEvent)) IndexTDCHitChanMulti();
 
   if ((multi < 0) || (multi >= kMaxMulti))
