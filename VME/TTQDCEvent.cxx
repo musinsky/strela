@@ -83,7 +83,7 @@ void TTQDCEvent::AddHitQ(Int_t ch, Int_t ts, Bool_t adc)
     fHitQLast = (TTQDCHitQ *)fHitsQ->ConstructedAt(fNHitsQ++);
     fHitQLast->Set(ch, ts - fHitQTimeStamp); // timestamp (ADC ts - TRIG ts)
 
-    if (fHitQTimeStamp == -1) Warning("AddTQDCHitQ", "no previous TRIG ts");
+    if (fHitQTimeStamp == -1) Warning("AddHitQ", "no previous TRIG ts");
     fHitQTimeStamp = -1;
   } else
     fHitQTimeStamp = ts; // TRIG ts
@@ -94,7 +94,7 @@ void TTQDCEvent::NextSampleHitQ(Int_t ch, Int_t sample) const
   // ADC sampling
 
   if (fHitQLast->GetChannelQ() != ch) {
-    Warning("NextSample", "unfair channel %d", ch);
+    Warning("NextSampleHitQ", "unfair channel %d", ch);
   } else
     fHitQLast->NextSample(sample);
 }

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    19 Feb 2015
+// @Date    11 Mar 2015
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -9,6 +9,7 @@
 class TTree;
 
 class TVMEEvent;
+class TTQDCEvent;
 class TVirtualModule;
 
 class TVMERawData : public TObject {
@@ -118,6 +119,7 @@ private:
 
   TTree          *fTree;
   TVMEEvent      *fVMEEvent;
+  TTQDCEvent     *fTQDCEvent;
   TVirtualModule *fModule;
   TString         fTreeFileName;
 

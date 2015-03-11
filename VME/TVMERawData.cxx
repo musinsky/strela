@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    26 Feb 2015
+// @Date    11 Mar 2015
 
 #include <TFile.h>
 #include <TTree.h>
@@ -8,6 +8,7 @@
 #include "TVMERawData.h"
 #include "TVME.h"
 #include "TVMEEvent.h"
+#include "TTQDCEvent.h"
 #include "TVirtualModule.h"
 
 ClassImp(TVMERawData)
@@ -26,6 +27,7 @@ TVMERawData::TVMERawData()
   fPrintType(0),
   fTree(0),
   fVMEEvent(0),
+  fTQDCEvent(0),
   fModule(0),
   fTreeFileName()
 {
@@ -68,7 +70,10 @@ void TVMERawData::MakeTree(const char *fname)
   fTree->SetAutoSave(1000000000); // autosave when 1 Gbyte written
   fVMEEvent = new TVMEEvent();
   fTree->Branch("VMEEvent", &fVMEEvent);
+  fTQDCEvent = new TTQDCEvent();
+  fTree->Branch("TQDCEvent", &fTQDCEvent);
   //  fTree->Branch("VMEEvent", fVMEEvent->ClassName(), &fVMEEvent);
+  //  fTree->Branch("TQDCEvent", fTQDCEvent->ClassName(), &fTQDCEvent);
 }
 //______________________________________________________________________________
 void TVMERawData::DecodeFile(const char *fname, Bool_t tree)
@@ -100,6 +105,7 @@ void TVMERawData::DecodeFile(const char *fname, Bool_t tree)
     Printf("\ntree file: %s", tfile->GetName());
     Printf("events = %llu", fTree->GetEntries());
     SafeDelete(fVMEEvent);
+    SafeDelete(fTQDCEvent);
     SafeDelete(fTree);
     delete tfile;
   }
@@ -197,7 +203,8 @@ void TVMERawData::DecodeEHDR()
   // reset
   fEventMHDR = -1;
   SetBit(kWrongEvent, kFALSE);
-  if (fTree) fVMEEvent->Clear();
+  if (fVMEEvent) fVMEEvent->Clear();
+  if (fTQDCEvent) fTQDCEvent->Clear();
 
   if (!PrintDataType(1)) return;
   printf("EHDR ev: %d\n", ev);
@@ -211,11 +218,13 @@ void TVMERawData::DecodeETRL()
   CheckIntegrity(kEvent, kFALSE, "ETRL");
   if (TestBit(kWrongEvent)) {
     Warning("DecodeETRL", "wrong event = %d", fNEvents + fEventEHDR);
-    if (fTree) fVMEEvent->Clear();
+    if (fVMEEvent) fVMEEvent->Clear();
+    if (fTQDCEvent) fTQDCEvent->Clear();
   }
 
   if (fTree && !TestBit(kSpillEnd)) {
-    fVMEEvent->SetEvent(fEventEHDR);
+    if (fVMEEvent) fVMEEvent->SetEvent(fEventEHDR);
+    if (fTQDCEvent) fTQDCEvent->SetEvent(fEventEHDR);
     fTree->Fill();
   }
 
@@ -370,7 +379,7 @@ void TVMERawData::DecodeTLD()
   // tm = ((fDataWord & 0x7FFFF) << 2) | ((fDataWord >> 19) & 0x3);
   // and ! different channel decoding !
 
-  if (fModule && fTree)
+  if (fModule && fVMEEvent)
     fVMEEvent->AddTDCHitCheck(fModule->GetFirstChannel() + fModule->MapChannel(id, ch), tm, kTRUE);
 
   if (!PrintDataType(3)) return;
@@ -386,7 +395,7 @@ void TVMERawData::DecodeTTR()
 
   // normal resolution, same remarks as in DecodeTLD
 
-  if (fModule && fTree)
+  if (fModule && fVMEEvent)
     fVMEEvent->AddTDCHitCheck(fModule->GetFirstChannel() + fModule->MapChannel(id, ch), tm, kFALSE);
 
   if (!PrintDataType(3)) return;
@@ -488,10 +497,16 @@ void TVMERawData::DecodeTQDC4()
     Int_t wts = (fDataWord >> 16) & 0x7; // (bits 16 - 18)
 
     if (wts == 0) {
+      if (fModule && fTQDCEvent)
+        fTQDCEvent->AddHitQ(fModule->GetFirstChannel() + ch, ts, kFALSE);
+
       if (!PrintDataType(3)) return;
       printf("TQDC4 ts(TRIG): %6d, ch: %2d, wts: %d, mode: %d\n", ts, ch, wts, mode);
     }
     else if (wts == 1) {
+      if (fModule && fTQDCEvent)
+        fTQDCEvent->AddHitQ(fModule->GetFirstChannel() + ch, ts, kTRUE);
+
       if (!PrintDataType(3)) return;
       printf("TQDC4 ts(ADC ): %6d, ch: %2d, wts: %d, mode: %d\n", ts, ch, wts, mode);
     }
@@ -501,12 +516,13 @@ void TVMERawData::DecodeTQDC4()
     }
   }
   else {           // TDC data
+    // normal resolution, 19 bits (100ps)
     Int_t tm = fDataWord & 0x7FFFF;      // (bits 0  - 18)
+    //    // very high resolution, 21 bits (25ps)
+    //    tm = ((fDataWord & 0x7FFFF) << 2) | ((fDataWord >> 24) & 0x3);
 
-    // correct only for normal resolution, 19 bits (100ps)
-    //
-    // for very high resolution, 21 bits (25ps)
-    // tm = ((fDataWord & 0x7FFFF) << 2) | ((fDataWord >> 24) & 0x3);
+    if (fModule && fTQDCEvent)
+      fTQDCEvent->AddHitT(fModule->GetFirstChannel() + ch, tm);
 
     if (!PrintDataType(3)) return;
     printf("TQDC4 tm: %6d, ch: %2d, mode: %d\n", tm, ch, mode);
@@ -520,9 +536,13 @@ void TVMERawData::DecodeTQDC5()
   Int_t mode = (fDataWord >> 26) & 0x3;  // (bits 26 - 27)
 
   if (mode == 0) {      // TDC data
+    // normal resolution, 19 bits (100ps)
     Int_t tm = fDataWord & 0x7FFFF;      // (bits 0  - 18)
+    //    // very high resolution, 21 bits (25ps)
+    //    tm = ((fDataWord & 0x7FFFF) << 2) | ((fDataWord >> 24) & 0x3);
 
-    // normal resolution, same remarks as in DecodeTQDC4 (mode == 0)
+    if (fModule && fTQDCEvent)
+      fTQDCEvent->AddHitT(fModule->GetFirstChannel() + ch, tm);
 
     if (!PrintDataType(3)) return;
     printf("TQDC5 tm: %6d, ch: %2d, mode: %d\n", tm, ch, mode);
@@ -534,6 +554,9 @@ void TVMERawData::DecodeTQDC5()
 
     // ADC is sampling at 80 MHz with resolution of 14 bits (one sample 12.5ns)
     // (old module revision 100 MHz and 10 bits)
+
+    if (fModule && fTQDCEvent)
+      fTQDCEvent->NextSampleHitQ(fModule->GetFirstChannel() + ch, sample);
 
     if (!PrintDataType(3)) return;
     printf("TQDC5   sample: %6d, ch: %2d, mode: %d\n", sample, ch, mode);
