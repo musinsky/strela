@@ -68,12 +68,16 @@ void TVMERawData::MakeTree(const char *fname)
   new TFile(treeFileName.Data(), "RECREATE");
   fTree = new TTree("pp", gVME->GetName());
   fTree->SetAutoSave(1000000000); // autosave when 1 Gbyte written
-  fVMEEvent = new TVMEEvent();
-  fTree->Branch("VMEEvent", &fVMEEvent);
-  fTQDCEvent = new TTQDCEvent();
-  fTree->Branch("TQDCEvent", &fTQDCEvent);
-  //  fTree->Branch("VMEEvent", fVMEEvent->ClassName(), &fVMEEvent);
-  //  fTree->Branch("TQDCEvent", fTQDCEvent->ClassName(), &fTQDCEvent);
+  if (gVME->GetNChannelsTDC() > 0) {
+    fVMEEvent = new TVMEEvent();
+    fTree->Branch("VMEEvent", &fVMEEvent);
+    //  fTree->Branch("VMEEvent", fVMEEvent->ClassName(), &fVMEEvent);
+  }
+  if (gVME->GetNChannelsTQDC() > 0) {
+    fTQDCEvent = new TTQDCEvent();
+    fTree->Branch("TQDCEvent", &fTQDCEvent);
+    //  fTree->Branch("TQDCEvent", fTQDCEvent->ClassName(), &fTQDCEvent);
+  }
 }
 //______________________________________________________________________________
 void TVMERawData::DecodeFile(const char *fname, Bool_t tree)
