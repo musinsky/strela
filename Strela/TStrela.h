@@ -12,7 +12,7 @@ class TSQLServer;
 class TPommeEvent;
 class TStrawEvent;
 class TGemEvent;
-class TVMEEvent;
+class TTDCEvent;
 class TStrelaBase;
 class TWireCham;
 class TStrawCham;
@@ -29,7 +29,7 @@ private:
   TPommeEvent  *fPommeEvent; //  pointer to PommeEvent
   TStrawEvent  *fStrawEvent; //  pointer to StrawEvent
   TGemEvent    *fGemEvent;   //  pointer to GemEvent
-  TVMEEvent    *fVMEEvent;   //  pointer to TVMEEvent
+  TTDCEvent    *fTDCEvent;   //  pointer to TDCEvent
 
   TList        *fDetectors;  //->list of all detectors
   TWireCham    *fWireCham;   //  pointer to WireCham
@@ -55,7 +55,7 @@ public:
   TPommeEvent  *PommeEvent() const { return fPommeEvent; }
   TStrawEvent  *StrawEvent() const { return fStrawEvent; }
   TGemEvent    *GemEvent() const { return fGemEvent; }
-  TVMEEvent    *VMEEvent() const { return fVMEEvent; }
+  TTDCEvent    *TDCEvent() const { return fTDCEvent; }
   TList        *Detectors() const { return fDetectors; }
   Int_t         GetNumOfDetectors() const { return fDetectors->GetSize(); }
   TStrelaBase  *FindDetector(const char *name) const { return (TStrelaBase *)fDetectors->FindObject(name); }

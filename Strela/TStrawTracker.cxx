@@ -9,7 +9,7 @@
 
 #include "TStrawTracker.h"
 #include "TStrawTrack.h"
-#include "TVMEEvent.h"
+#include "TTDCEvent.h"
 
 const Int_t kMaxHits    = 50;
 const Int_t kMaxPairs   = 200; // sum(kMaxHits - 1)
@@ -878,7 +878,7 @@ void TStrawTracker::GenerateHits(Double_t a, Double_t b, Double_t sig) const
       if (TMath::Abs(d) <= tube->GetRange()) {
         found = kTRUE;
         d += gRandom->Gaus(0, sig);
-        gStrela->VMEEvent()->AddTDCHit(tube->GetNadc(), tube->TExT0(tube->R2T(d)));
+        gStrela->TDCEvent()->AddTDCHit(tube->GetNadc(), tube->TExT0(tube->R2T(d)));
       }
       else if (found) break; // hits in one layer go consecutive
     }

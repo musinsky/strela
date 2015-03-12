@@ -12,7 +12,7 @@
 #include "TStrawCham.h"
 #include "TStrawTracker.h"
 #include "TGemEvent.h"
-#include "TVMEEvent.h"
+#include "TTDCEvent.h"
 #include "TTDCHit.h"
 #include "TStrawMulti.h"
 #include "TVME.h"
@@ -243,7 +243,7 @@ void TStrawCham::AnalyzeEntry()
   for (Int_t it = 0; it < fTubes->GetEntriesFast(); it++)
     GetTube(it)->ResetHits();
 
-  TVMEEvent *event = gStrela->VMEEvent();
+  TTDCEvent *event = gStrela->TDCEvent();
   TTDCHit *hit;
   Int_t channel, time, pos, trigTime = 0; // must be 0
   TStrawTube *tube;

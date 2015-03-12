@@ -8,7 +8,7 @@
 
 class TTree;
 
-class TVMEEvent;
+class TTDCEvent;
 class TTQDCEvent;
 class TVirtualModule;
 
@@ -118,7 +118,7 @@ private:
   TBits        *fPrintType;  // table of bits to print type of data
 
   TTree          *fTree;
-  TVMEEvent      *fVMEEvent;
+  TTDCEvent      *fTDCEvent;
   TTQDCEvent     *fTQDCEvent;
   TVirtualModule *fModule;
   TString         fTreeFileName;

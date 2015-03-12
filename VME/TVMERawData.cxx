@@ -7,7 +7,7 @@
 
 #include "TVMERawData.h"
 #include "TVME.h"
-#include "TVMEEvent.h"
+#include "TTDCEvent.h"
 #include "TTQDCEvent.h"
 #include "TVirtualModule.h"
 
@@ -26,7 +26,7 @@ TVMERawData::TVMERawData()
   fModuleId(0),
   fPrintType(0),
   fTree(0),
-  fVMEEvent(0),
+  fTDCEvent(0),
   fTQDCEvent(0),
   fModule(0),
   fTreeFileName()
@@ -69,9 +69,9 @@ void TVMERawData::MakeTree(const char *fname)
   fTree = new TTree("pp", gVME->GetName());
   fTree->SetAutoSave(1000000000); // autosave when 1 Gbyte written
   if (gVME->GetNChannelsTDC() > 0) {
-    fVMEEvent = new TVMEEvent();
-    fTree->Branch("VMEEvent", &fVMEEvent);
-    //  fTree->Branch("VMEEvent", fVMEEvent->ClassName(), &fVMEEvent);
+    fTDCEvent = new TTDCEvent();
+    fTree->Branch("TDCEvent", &fTDCEvent);
+    //  fTree->Branch("TDCEvent", fTDCEvent->ClassName(), &fTDCEvent);
   }
   if (gVME->GetNChannelsTQDC() > 0) {
     fTQDCEvent = new TTQDCEvent();
@@ -108,7 +108,7 @@ void TVMERawData::DecodeFile(const char *fname, Bool_t tree)
     tfile->Write();
     Printf("\ntree file: %s", tfile->GetName());
     Printf("events = %llu", fTree->GetEntries());
-    SafeDelete(fVMEEvent);
+    SafeDelete(fTDCEvent);
     SafeDelete(fTQDCEvent);
     SafeDelete(fTree);
     delete tfile;
@@ -207,7 +207,7 @@ void TVMERawData::DecodeEHDR()
   // reset
   fEventMHDR = -1;
   SetBit(kWrongEvent, kFALSE);
-  if (fVMEEvent) fVMEEvent->Clear();
+  if (fTDCEvent) fTDCEvent->Clear();
   if (fTQDCEvent) fTQDCEvent->Clear();
 
   if (!PrintDataType(1)) return;
@@ -222,12 +222,12 @@ void TVMERawData::DecodeETRL()
   CheckIntegrity(kEvent, kFALSE, "ETRL");
   if (TestBit(kWrongEvent)) {
     Warning("DecodeETRL", "wrong event = %d", fNEvents + fEventEHDR);
-    if (fVMEEvent) fVMEEvent->Clear();
+    if (fTDCEvent) fTDCEvent->Clear();
     if (fTQDCEvent) fTQDCEvent->Clear();
   }
 
   if (fTree && !TestBit(kSpillEnd)) {
-    if (fVMEEvent) fVMEEvent->SetEvent(fEventEHDR);
+    if (fTDCEvent) fTDCEvent->SetEvent(fEventEHDR);
     if (fTQDCEvent) fTQDCEvent->SetEvent(fEventEHDR);
     fTree->Fill();
   }
@@ -383,8 +383,8 @@ void TVMERawData::DecodeTLD()
   // tm = ((fDataWord & 0x7FFFF) << 2) | ((fDataWord >> 19) & 0x3);
   // and ! different channel decoding !
 
-  if (fModule && fVMEEvent)
-    fVMEEvent->AddTDCHitCheck(fModule->GetFirstChannel() + fModule->MapChannel(id, ch), tm, kTRUE);
+  if (fModule && fTDCEvent)
+    fTDCEvent->AddTDCHitCheck(fModule->GetFirstChannel() + fModule->MapChannel(id, ch), tm, kTRUE);
 
   if (!PrintDataType(3)) return;
   printf("TLD tm: %6d, ch: %2d, id: %2d\n", tm, ch, id);
@@ -399,8 +399,8 @@ void TVMERawData::DecodeTTR()
 
   // normal resolution, same remarks as in DecodeTLD
 
-  if (fModule && fVMEEvent)
-    fVMEEvent->AddTDCHitCheck(fModule->GetFirstChannel() + fModule->MapChannel(id, ch), tm, kFALSE);
+  if (fModule && fTDCEvent)
+    fTDCEvent->AddTDCHitCheck(fModule->GetFirstChannel() + fModule->MapChannel(id, ch), tm, kFALSE);
 
   if (!PrintDataType(3)) return;
   printf("TTR tm: %6d, ch: %2d, id: %2d\n", tm, ch, id);
