@@ -8,7 +8,7 @@
 
 #pragma link C++ class TVME+;
 #pragma link C++ class TVMERawData+;
-#pragma link C++ class TVMEEvent+;
+#pragma link C++ class TTDCEvent+;
 #pragma link C++ class TTDCHit+;
 #pragma link C++ class TTQDCEvent+;
 #pragma link C++ class TTQDCHitT+;

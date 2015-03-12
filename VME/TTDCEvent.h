@@ -1,8 +1,8 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
 // @Date    19 Apr 2014
 
-#ifndef STRELA_TVMEEvent
-#define STRELA_TVMEEvent
+#ifndef STRELA_TTDCEvent
+#define STRELA_TTDCEvent
 
 #include <TClonesArray.h>
 #include <TArrayI.h>
@@ -11,14 +11,14 @@ class TTDCHit;
 
 const Int_t kMaxMulti = 3;
 
-class TVMEEvent : public TObject {
+class TTDCEvent : public TObject {
 
 public:
   // status bit used for indexing (not stored)
   enum { kNextEvent = BIT(14) };
 
-  TVMEEvent();
-  virtual ~TVMEEvent();
+  TTDCEvent();
+  virtual ~TTDCEvent();
 
   Int_t         GetEvent() const { return fEvent; }
   void          SetEvent(Int_t ev) { fEvent = ev; }
@@ -53,7 +53,7 @@ private:
   void          IndexTDCHitChanMulti();
   Int_t         GetIndexTDCHit(Int_t ch, Int_t multi);
 
-  ClassDef(TVMEEvent, 1) // VMEEvent
+  ClassDef(TTDCEvent, 1) // TDCEvent
 };
 
 #endif

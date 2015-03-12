@@ -1,19 +1,19 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
 // @Date    27 Feb 2015
 
-#include "TVMEEvent.h"
+#include "TTDCEvent.h"
 #include "TTDCHit.h"
 #include "TVME.h"
 
 const Int_t kNoneValue = -9999;
 
-Int_t TVMEEvent::fgTrigChannel = -1;
-Int_t TVMEEvent::fgTrigOffset  = 0;
+Int_t TTDCEvent::fgTrigChannel = -1;
+Int_t TTDCEvent::fgTrigOffset  = 0;
 
-ClassImp(TVMEEvent)
+ClassImp(TTDCEvent)
 
 //______________________________________________________________________________
-TVMEEvent::TVMEEvent()
+TTDCEvent::TTDCEvent()
 : TObject(),
   fEvent(0),
   fNTDCHits(0),
@@ -23,7 +23,7 @@ TVMEEvent::TVMEEvent()
   // Default constructor
   fTDCHits = new TClonesArray(TTDCHit::Class(), 2000);
   if (!gVME) {
-    Warning("TVMEEvent", "gVME not initialized");
+    Warning("TTDCEvent", "gVME not initialized");
     return;
   }
 
@@ -33,21 +33,21 @@ TVMEEvent::TVMEEvent()
     fIdxTDCHitChanMulti[multi].Set(fIdxTDCHitChanLast.GetSize());
 }
 //______________________________________________________________________________
-TVMEEvent::~TVMEEvent()
+TTDCEvent::~TTDCEvent()
 {
-  Info("~TVMEEvent", "Destructor");
+  Info("~TTDCEvent", "Destructor");
   if (fTDCHits) fTDCHits->Delete();
   SafeDelete(fTDCHits);
 }
 //______________________________________________________________________________
-void TVMEEvent::Clear(Option_t *option)
+void TTDCEvent::Clear(Option_t *option)
 {
   fNTDCHits = 0;
   fTDCHits->Clear(option);
   fIdxTDCHitChanLast.Reset(); // also OK with no (zero) elements
 }
 //______________________________________________________________________________
-void TVMEEvent::Print(Option_t * /*option*/) const
+void TTDCEvent::Print(Option_t * /*option*/) const
 {
   TTDCHit *hit;
   Printf("event: %d", fEvent);
@@ -58,7 +58,7 @@ void TVMEEvent::Print(Option_t * /*option*/) const
   }
 }
 //______________________________________________________________________________
-void TVMEEvent::AddTDCHit(Int_t ch, Int_t tld)
+void TTDCEvent::AddTDCHit(Int_t ch, Int_t tld)
 {
   // leading tdc
 
@@ -68,7 +68,7 @@ void TVMEEvent::AddTDCHit(Int_t ch, Int_t tld)
   if (fIdxTDCHitChanLast.GetSize() > 0) fIdxTDCHitChanLast.AddAt(fNTDCHits, ch);
 }
 //______________________________________________________________________________
-void TVMEEvent::AddTDCHitCheck(Int_t ch, Int_t tdc, Bool_t ld)
+void TTDCEvent::AddTDCHitCheck(Int_t ch, Int_t tdc, Bool_t ld)
 {
   // leading or trailing tdc, assume sorted tdc time
 
@@ -104,14 +104,14 @@ void TVMEEvent::AddTDCHitCheck(Int_t ch, Int_t tdc, Bool_t ld)
   }
 }
 //______________________________________________________________________________
-void TVMEEvent::SetTrigInfo(Int_t channel, Int_t offset)
+void TTDCEvent::SetTrigInfo(Int_t channel, Int_t offset)
 {
   // static function
   fgTrigChannel = channel;
   fgTrigOffset  = offset;
 }
 //______________________________________________________________________________
-void TVMEEvent::IndexTDCHitChanMulti()
+void TTDCEvent::IndexTDCHitChanMulti()
 {
   // indexing all hits, must be call (but only once) for each given event
 
@@ -132,12 +132,12 @@ void TVMEEvent::IndexTDCHitChanMulti()
   SetBit(kNextEvent, kTRUE); // only once
 }
 //______________________________________________________________________________
-Int_t TVMEEvent::GetIndexTDCHit(Int_t ch, Int_t multi)
+Int_t TTDCEvent::GetIndexTDCHit(Int_t ch, Int_t multi)
 {
   // trick how call (only once) IndexTDCHitChanMulti() for each given event
   // bit kNextEvent from stored event (from root file) is always kFALSE
   // works wih TTree::Draw (Scan or Query even thought call more than once)
-  // don't use TVMEEvent::Class()->IgnoreTObjectStreamer(kTRUE);
+  // don't use TTDCEvent::Class()->IgnoreTObjectStreamer(kTRUE);
   if (!TestBit(kNextEvent)) IndexTDCHitChanMulti();
 
   if ((multi < 0) || (multi >= kMaxMulti))
@@ -146,7 +146,7 @@ Int_t TVMEEvent::GetIndexTDCHit(Int_t ch, Int_t multi)
     return (fIdxTDCHitChanMulti[multi].At(ch)-1);
 }
 //______________________________________________________________________________
-Int_t TVMEEvent::Multi(Int_t ch)
+Int_t TTDCEvent::Multi(Int_t ch)
 {
   Int_t lastIdx = GetIndexTDCHit(ch, -1);
   if (lastIdx == -1) return 0;
@@ -157,7 +157,7 @@ Int_t TVMEEvent::Multi(Int_t ch)
   return (kMaxMulti+1);
 }
 //______________________________________________________________________________
-Int_t TVMEEvent::Time(Int_t ch, Int_t multi)
+Int_t TTDCEvent::Time(Int_t ch, Int_t multi)
 {
   Int_t idx = GetIndexTDCHit(ch, multi);
   if (idx == -1) return kNoneValue;
@@ -173,7 +173,7 @@ Int_t TVMEEvent::Time(Int_t ch, Int_t multi)
   return (time - GetTDCHit(GetIndexTDCHit(fgTrigChannel, -1))->GetTime() + fgTrigOffset);
 }
 //______________________________________________________________________________
-Int_t TVMEEvent::Delta(Int_t ch, Int_t multi)
+Int_t TTDCEvent::Delta(Int_t ch, Int_t multi)
 {
   Int_t idx = GetIndexTDCHit(ch, multi);
   if (idx == -1) return kNoneValue;
