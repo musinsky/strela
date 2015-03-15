@@ -95,7 +95,12 @@ void TVMERawData::DecodeFile(const char *fname, Bool_t tree)
   UInt_t buffer[bufSize];      // data in buffer is 4 bytes (32 bits)
   size_t nread;
 
+  fseek(file, 0L, SEEK_END);
+  Double_t nwords = ftell(file)/sizeof(UInt_t)/100.0; // in percentages
+  fseek(file, 0L, SEEK_SET);
+
   do {
+    if (!(fNDataWords % 10000)) fprintf(stderr, "decoding progress: %6.2f %%\r", fNDataWords/nwords);
     nread = fread(buffer, sizeof(UInt_t), bufSize, file);
     for (size_t i = 0; i < nread; i++) {
       fDataWord = buffer[i];
@@ -103,6 +108,7 @@ void TVMERawData::DecodeFile(const char *fname, Bool_t tree)
       fNDataWords++;
     }
   } while (nread == bufSize);
+  fprintf(stderr, "decoding progress: %6.2f %%\n", fNDataWords/nwords);
 
   if (fTree) {
     TFile *tfile = fTree->GetCurrentFile();
