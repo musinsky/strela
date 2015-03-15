@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    27 May 2014
+// @Date    15 Mar 2015
 
 #include <TSQLServer.h>
 #include <TSQLResult.h>
@@ -248,6 +248,7 @@ void TStrawCham::AnalyzeEntry()
   Int_t channel, time, pos, trigTime = 0; // must be 0
   TStrawTube *tube;
 
+  /*
   // first find trigger channel (only if is necessary)
   // in mostly cases trigger is first hit (quick)
   if (fgTrigNadc > 0) {
@@ -266,6 +267,8 @@ void TStrawCham::AnalyzeEntry()
       return;
     }
   }
+   */
+  if (fgTrigNadc > 0) trigTime = event->GetTrigTime() - fgShiftAdc;
 
   for (Int_t ih = 0; ih < event->GetNTDCHits(); ih++) {
     hit     = event->GetTDCHit(ih);

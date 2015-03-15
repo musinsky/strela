@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    10 Mar 2015
+// @Date    15 Mar 2015
 
 #include "TTQDCEvent.h"
 #include "TTQDCHitT.h"
@@ -11,6 +11,7 @@ ClassImp(TTQDCEvent)
 TTQDCEvent::TTQDCEvent()
 : TObject(),
   fEvent(0),
+  fTrigTime(0),
   fNHitsT(0),
   fHitsT(0),
   fNHitsQ(0),
@@ -34,6 +35,7 @@ TTQDCEvent::~TTQDCEvent()
 //______________________________________________________________________________
 void TTQDCEvent::Clear(Option_t *option)
 {
+  fTrigTime = 0; // must be 0
   fNHitsT = 0;
   fHitsT->Clear(option);
   fNHitsQ = 0;

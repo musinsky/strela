@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    27 Feb 2015
+// @Date    15 Mar 2015
 
 #include "TTDCEvent.h"
 #include "TTDCHit.h"
@@ -16,6 +16,7 @@ ClassImp(TTDCEvent)
 TTDCEvent::TTDCEvent()
 : TObject(),
   fEvent(0),
+  fTrigTime(0),
   fNTDCHits(0),
   fTDCHits(0),
   fIdxTDCHitChanLast()
@@ -42,6 +43,7 @@ TTDCEvent::~TTDCEvent()
 //______________________________________________________________________________
 void TTDCEvent::Clear(Option_t *option)
 {
+  fTrigTime = 0; // must be 0
   fNTDCHits = 0;
   fTDCHits->Clear(option);
   fIdxTDCHitChanLast.Reset(); // also OK with no (zero) elements
@@ -66,6 +68,9 @@ void TTDCEvent::AddTDCHit(Int_t ch, Int_t tld)
   hit->Set(ch, tld);
 
   if (fIdxTDCHitChanLast.GetSize() > 0) fIdxTDCHitChanLast.AddAt(fNTDCHits, ch);
+
+  // trigger time, if multi than first time, same as Time(fgTrigChannel, 0)
+  if ((ch == fgTrigChannel) && (fTrigTime == 0)) fTrigTime = tld;
 }
 //______________________________________________________________________________
 void TTDCEvent::AddTDCHitCheck(Int_t ch, Int_t tdc, Bool_t ld)
@@ -167,10 +172,10 @@ Int_t TTDCEvent::Time(Int_t ch, Int_t multi)
 
   if (Multi(fgTrigChannel) != 1) {
     Warning("Time", "not exactly one trigger channel per event");
-    return kNoneValue;
+    //    return kNoneValue;
   }
 
-  return (time - GetTDCHit(GetIndexTDCHit(fgTrigChannel, -1))->GetTime() + fgTrigOffset);
+  return (time - GetTDCHit(GetIndexTDCHit(fgTrigChannel, 0))->GetTime() + fgTrigOffset);
 }
 //______________________________________________________________________________
 Int_t TTDCEvent::Delta(Int_t ch, Int_t multi)

@@ -32,7 +32,7 @@ public:
     kPhTDC  = 0x04, // TDC (obsolete)
     kTDC96  = 0x05, // TDC (obsolete)
     kTQDC16 = 0x09, // TQDC
-    kTRIG   = 0x0A, // TTCM (not used)
+    kTTCM   = 0x0A, // TTCM (not used)
     kTDC64V = 0x10  // TDC
   };
   // Common data type

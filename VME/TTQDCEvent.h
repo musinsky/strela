@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    10 Mar 2015
+// @Date    15 Mar 2015
 
 #ifndef STRELA_TTQDCEvent
 #define STRELA_TTQDCEvent
@@ -17,6 +17,8 @@ public:
 
   Int_t         GetEvent() const { return fEvent; }
   void          SetEvent(Int_t ev) { fEvent = ev; }
+  Int_t         GetTrigTime() const { return fTrigTime; }
+  void          SetTrigTime(Int_t tt) { fTrigTime = tt; }
 
   virtual void  Clear(Option_t *option = "");
   virtual void  Print(Option_t *option = "") const;
@@ -39,13 +41,14 @@ public:
   void          NextSampleHitQ(Int_t ch, Int_t sample) const;
 
 private:
-  Int_t         fEvent;  // event number in one spill
+  Int_t         fEvent;    // event number in one spill
+  Int_t         fTrigTime; // trigger time
 
-  Int_t         fNHitsT; // number of TQDC time hits
-  TClonesArray *fHitsT;  //->array with TQDC time hits
+  Int_t         fNHitsT;   // number of TQDC time hits
+  TClonesArray *fHitsT;    //->array with TQDC time hits
 
-  Int_t         fNHitsQ; // number of TQDC charge hits
-  TClonesArray *fHitsQ;  //->array with TQDC charge hits
+  Int_t         fNHitsQ;   // number of TQDC charge hits
+  TClonesArray *fHitsQ;    //->array with TQDC charge hits
 
   TTQDCHitQ    *fHitQLast;      //! last TQDC charge hit
   Int_t         fHitQTimeStamp; //! ADC timestamp

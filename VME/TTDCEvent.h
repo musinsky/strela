@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    19 Apr 2014
+// @Date    15 Mar 2015
 
 #ifndef STRELA_TTDCEvent
 #define STRELA_TTDCEvent
@@ -22,6 +22,8 @@ public:
 
   Int_t         GetEvent() const { return fEvent; }
   void          SetEvent(Int_t ev) { fEvent = ev; }
+  Int_t         GetTrigTime() const { return fTrigTime; }
+  void          SetTrigTime(Int_t tt) { fTrigTime = tt; }
   Int_t         GetNTDCHits() const { return fNTDCHits; }
   TClonesArray *TDCHits() const { return fTDCHits; }
 
@@ -42,6 +44,7 @@ public:
 
 private:
   Int_t         fEvent;    // event number in one spill
+  Int_t         fTrigTime; // trigger time
   Int_t         fNTDCHits; // number of TDC hits
   TClonesArray *fTDCHits;  //->array with TDC hits
 

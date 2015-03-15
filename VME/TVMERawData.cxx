@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    11 Mar 2015
+// @Date    15 Mar 2015
 
 #include <TFile.h>
 #include <TTree.h>
@@ -65,6 +65,7 @@ void TVMERawData::MakeTree(const char *fname)
   else if (fTreeFileName.IsWhitespace())
     treeFileName = "vme_data.root";
 
+  //  new TMemFile(treeFileName.Data(), "RECREATE", "", 0);
   new TFile(treeFileName.Data(), "RECREATE");
   fTree = new TTree("pp", gVME->GetName());
   fTree->SetAutoSave(1000000000); // autosave when 1 Gbyte written
@@ -228,7 +229,10 @@ void TVMERawData::DecodeETRL()
 
   if (fTree && !TestBit(kSpillEnd)) {
     if (fTDCEvent) fTDCEvent->SetEvent(fEventEHDR);
-    if (fTQDCEvent) fTQDCEvent->SetEvent(fEventEHDR);
+    if (fTQDCEvent) {
+      fTQDCEvent->SetEvent(fEventEHDR);
+      if (fTDCEvent) fTQDCEvent->SetTrigTime(fTDCEvent->GetTrigTime());
+    }
     fTree->Fill();
   }
 
@@ -308,7 +312,7 @@ void TVMERawData::DecodeData()
       //    case kTDC96:
       //      DecodeDataTDC();
       //      return;
-      //    case kTRIG:
+      //    case kTTCM:
       //      DecodeDataTTCM();
       //      return;
     default:
