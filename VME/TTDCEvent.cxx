@@ -69,7 +69,7 @@ void TTDCEvent::AddTDCHit(Int_t ch, Int_t tld)
 
   if (fIdxTDCHitChanLast.GetSize() > 0) fIdxTDCHitChanLast.AddAt(fNTDCHits, ch);
 
-  // trigger time, if multi than first time, same as Time(fgTrigChannel, 0)
+  // trigger time, if multi then first hit time, i.e. same as Time(fgTrigChannel, 0)
   if ((ch == fgTrigChannel) && (fTrigTime == 0)) fTrigTime = tld;
 }
 //______________________________________________________________________________
