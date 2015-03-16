@@ -1,12 +1,10 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    10 Mar 2015
+// @Date    16 Mar 2015
 
 #ifndef STRELA_TTQDCHitQ
 #define STRELA_TTQDCHitQ
 
 #include <TObject.h>
-
-const Int_t kMaxSamples = 8;
 
 class TTQDCHitQ : public TObject {
 
@@ -26,8 +24,11 @@ private:
   UShort_t      fChannelQ;  // channel
   Int_t         fQ;         // charge (sum of samples)
   Short_t       fTimeStamp; // timestamp (ADC ts - TRIG ts)
-  UShort_t      fNSamples;            // number of samples
-  Short_t       fSample[kMaxSamples]; //[fNSamples] array of samples (14 bits word, signed)
+  Int_t         fNSamples;  // number of samples
+  Short_t      *fSample;    //[fNSamples] array of samples (14 bits word, signed)
+
+  Int_t         fMaxSamples; //! maximum number of samples
+  void          ExpandSamples(Int_t nsize);
 
   ClassDef(TTQDCHitQ, 1) // TQDCHitQ
 };
