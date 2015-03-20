@@ -12,8 +12,8 @@
 #include "TStrawCham.h"
 #include "TStrawTracker.h"
 #include "TGemEvent.h"
-#include "TTDCEvent.h"
-#include "TTDCHit.h"
+#include "TEventTdc.h"
+#include "THitTdc.h"
 #include "TStrawMulti.h"
 #include "TVME.h"
 
@@ -243,8 +243,8 @@ void TStrawCham::AnalyzeEntry()
   for (Int_t it = 0; it < fTubes->GetEntriesFast(); it++)
     GetTube(it)->ResetHits();
 
-  TTDCEvent *event = gStrela->TDCEvent();
-  TTDCHit *hit;
+  TEventTdc *event = gStrela->EventTdc();
+  THitTdc *hit;
   Int_t channel, time, pos, trigTime = 0; // must be 0
   TStrawTube *tube;
 
@@ -253,8 +253,8 @@ void TStrawCham::AnalyzeEntry()
   // in mostly cases trigger is first hit (quick)
   if (fgTrigNadc > 0) {
     Bool_t foundTrig = kFALSE;
-    for (Int_t ih = 0; ih < event->GetNTDCHits(); ih++) {
-      hit = event->GetTDCHit(ih);
+    for (Int_t ih = 0; ih < event->GetNHits(); ih++) {
+      hit = event->GetHitTdc(ih);
       if (hit->GetChannel() == fgTrigNadc) {
         trigTime = hit->GetTime() - fgShiftAdc;
         foundTrig = kTRUE;
@@ -270,8 +270,8 @@ void TStrawCham::AnalyzeEntry()
    */
   if (fgTrigNadc > 0) trigTime = event->GetTrigTime() - fgShiftAdc;
 
-  for (Int_t ih = 0; ih < event->GetNTDCHits(); ih++) {
-    hit     = event->GetTDCHit(ih);
+  for (Int_t ih = 0; ih < event->GetNHits(); ih++) {
+    hit     = event->GetHitTdc(ih);
     channel = hit->GetChannel();
     time    = hit->GetTime();
     //    delta   = hit->GetDelta();

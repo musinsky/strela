@@ -15,7 +15,7 @@
 #include "TPommeEvent.h"
 #include "TStrawEvent.h"
 #include "TGemEvent.h"
-#include "TTDCEvent.h"
+#include "TEventTdc.h"
 #include "TWireCham.h"
 #include "TStrawCham.h"
 #include "TStrelaDisplay.h"
@@ -35,7 +35,7 @@ TStrela::TStrela()
   fPommeEvent = 0;
   fStrawEvent = 0;
   fGemEvent   = 0;
-  fTDCEvent   = 0;
+  fEventTdc   = 0;
   fDetectors  = 0;
   fWireCham   = 0;
   fStrawCham  = 0;
@@ -56,7 +56,7 @@ TStrela::TStrela(const char *name, const char *title) : TNamed(name, title)
   fPommeEvent = 0;
   fStrawEvent = 0;
   fGemEvent   = 0;
-  fTDCEvent   = 0;
+  fEventTdc   = 0;
 
   // order of detectors in list is not important (meanwhile)
   fDetectors  = new TList();
@@ -159,9 +159,9 @@ void TStrela::ChangeBranchAddress(TChain *chain)
     fChain->SetBranchAddress("event", &fGemEvent);
     if (!fRawEvents->FindObject(fGemEvent)) fRawEvents->Add(fGemEvent);
   }
-  if (fChain->GetBranch("TDCEvent")) {
-    fChain->SetBranchAddress("TDCEvent", &fTDCEvent);
-    if (!fRawEvents->FindObject(fTDCEvent)) fRawEvents->Add(fTDCEvent);
+  if (fChain->GetBranch("EventTdc")) {
+    fChain->SetBranchAddress("EventTdc", &fEventTdc);
+    if (!fRawEvents->FindObject(fEventTdc)) fRawEvents->Add(fEventTdc);
   }
 
   if (fChain->InheritsFrom("TChain")) {
