@@ -10,7 +10,7 @@
 #include <TFile.h>
 #include <TRandom.h>
 
-#include "TTDCEvent.h"
+#include "TEventTdc.h"
 #include "TStrawTracker.h"
 
 void GenerateRun(Int_t run = 0, Int_t ne = 100000, Bool_t analyze = kTRUE)
@@ -22,9 +22,9 @@ void GenerateRun(Int_t run = 0, Int_t ne = 100000, Bool_t analyze = kTRUE)
     delete gStrela->GetChain()->GetCurrentFile();
   TFile *file = new TFile(TString::Format("run%03d.root", run), "RECREATE");
   TTree *tree = new TTree("pp", "Monte Carlo");
-  TTDCEvent *event = new TTDCEvent();
-  tree->Branch("TDCEvent", &event);
-  // need assign gStrela->GetChain() and gStrela->GemEvent()
+  TEventTdc *event = new TEventTdc();
+  tree->Branch("EventTdc", &event);
+  // need assign gStrela->GetChain() and gStrela->EventTdc()
   gStrela->ChangeBranchAddress(tree);
 
   TStrawTracker *t1  = gStrela->StrawCham()->FindTracker("tracker_1");
@@ -48,11 +48,11 @@ void GenerateRun(Int_t run = 0, Int_t ne = 100000, Bool_t analyze = kTRUE)
 
   Double_t a, b;
   for (Int_t i = 0; i < ne; i++) {
-    gStrela->TDCEvent()->Clear();
+    gStrela->EventTdc()->Clear();
 
     // generate trigger hit
-    if (!(TTDCEvent::GetTrigChannel() < 0))
-      gStrela->TDCEvent()->AddTDCHit(TTDCEvent::GetTrigChannel(), TTDCEvent::GetTrigOffset());
+    if (!(TEventTdc::GetTrigChannel() < 0))
+      gStrela->EventTdc()->AddHitTdc(TEventTdc::GetTrigChannel(), TEventTdc::GetTrigOffset());
 
     // bad MC events
     if (t1) t1->GenerateHits(gRandom->Gaus( 0.000, 0.03), gRandom->Uniform(-7.0, 7.0), 0.01);

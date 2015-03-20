@@ -17,5 +17,5 @@
   new TModuleTQDC16(17);
   new TModuleTQDC16(19);
 
-  TTDCEvent::SetTrigInfo(58, 6000);
+  TEventTdc::SetTrigInfo(58, 6000);
 }

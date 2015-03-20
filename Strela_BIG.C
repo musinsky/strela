@@ -8,8 +8,8 @@ void Strela_BIG()
   if (gStrela) return;
   new TStrela("strela_BIG");
   gROOT->Macro("VME_2014_03.C");
-  TStrawCham::ShiftAdc(TTDCEvent::GetTrigOffset());  // 8000
-  TStrawCham::TrigNadc(TTDCEvent::GetTrigChannel()); // 58
+  TStrawCham::ShiftAdc(TEventTdc::GetTrigOffset());  // 8000
+  TStrawCham::TrigNadc(TEventTdc::GetTrigChannel()); // 58
   gStrela->SetSeance("2014_03_BIG");
   gStrela->Init();
   gStrela->SetPath("BIG");

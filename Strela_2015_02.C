@@ -8,8 +8,8 @@ void Strela_2015_02()
   if (gStrela) return;
   new TStrela("strela");
   gROOT->Macro("VME_2015_02.C");
-  TStrawCham::ShiftAdc(TTDCEvent::GetTrigOffset());  // 6000
-  TStrawCham::TrigNadc(TTDCEvent::GetTrigChannel()); // 58
+  TStrawCham::ShiftAdc(TEventTdc::GetTrigOffset());  // 6000
+  TStrawCham::TrigNadc(TEventTdc::GetTrigChannel()); // 58
   gStrela->SetSeance("2015_02");
   gStrela->Init();
   gStrela->SetPath(".");

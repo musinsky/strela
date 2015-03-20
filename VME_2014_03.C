@@ -14,5 +14,5 @@
   new TModuleTDC64V(11);
   new TModuleTDC64V(13);
 
-  TTDCEvent::SetTrigInfo(58, 8000);
+  TEventTdc::SetTrigInfo(58, 8000);
 }
