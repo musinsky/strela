@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    09 Jun 2014
+// @Date    20 Mar 2015
 
 #include <TROOT.h>
 #include <TSQLServer.h>
@@ -209,8 +209,10 @@ void TStrela::AnalyzeEntries(Int_t ne, Option_t *option, Bool_t timer) const
   TStrelaBase *detector;
   while ((detector = (TStrelaBase *)next()))
     detector->AnalyzeBegin();
-  for (Int_t i = 0; i < ne; i++)
+  for (Int_t i = 0; i < ne; i++) {
+    if (!(i % 10000)) fprintf(stderr, "analyzing progress: %6.2f %%\r", 100.0*i/ne);
     AnalyzeEntry(i);
+  }
   next.Reset();
   while ((detector = (TStrelaBase *)next()))
     detector->AnalyzeTerminate();
