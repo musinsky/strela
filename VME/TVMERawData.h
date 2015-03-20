@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    11 Mar 2015
+// @Date    20 Mar 2015
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -8,8 +8,9 @@
 
 class TTree;
 
-class TTDCEvent;
-class TTQDCEvent;
+class TEventTdc;
+class TEventTqdcT;
+class TEventTqdcQ;
 class TVirtualModule;
 
 class TVMERawData : public TObject {
@@ -118,8 +119,9 @@ private:
   TBits        *fPrintType;  // table of bits to print type of data
 
   TTree          *fTree;
-  TTDCEvent      *fTDCEvent;
-  TTQDCEvent     *fTQDCEvent;
+  TEventTdc      *fEventTdc;
+  TEventTqdcT    *fEventTqdcT;
+  TEventTqdcQ    *fEventTqdcQ;
   TVirtualModule *fModule;
   TString         fTreeFileName;
 
