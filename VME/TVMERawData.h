@@ -1,10 +1,11 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    20 Mar 2015
+// @Date    21 Mar 2015
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
 
 #include <TBits.h>
+#include <TString.h>
 
 class TTree;
 
@@ -64,6 +65,10 @@ public:
     kTQDC4 = 0x4, // TQDC ADC timestamp or TDC data
     kTQDC5 = 0x5, // TQDC TDC or ADC data
     kTQERR = 0x6  // TQDC error
+  };
+  // TQDC options
+  enum {
+    kADCBits = 14 // ADC sampling resolution
   };
 
   TVMERawData();

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    20 Mar 2015
+// @Date    21 Mar 2015
 
 #include <TMemFile.h>
 #include <TTree.h>
@@ -566,11 +566,11 @@ void TVMERawData::DecodeTQDC5()
     printf("TQDC5 tm: %6d, ch: %2d, mode: %d\n", tm, ch, mode);
   }
   else if (mode == 2) { // ADC sampling
-    const Int_t kADCBits = 14; // 0x3FFF    (bits 0  - 13)
     Int_t sample = (fDataWord & ((1 << kADCBits) - 1)) - (1 << (kADCBits - 1));
     // same as     (fDataWord & 0x3FFF)                - (1 << (kADCBits - 1));
 
     // ADC is sampling at 80 MHz with resolution of 14 bits (one sample 12.5ns)
+    // kADCBits = 14 =>         0x3FFF      (bits 0  - 13)
     // (old module revision 100 MHz and 10 bits)
 
     if (fModule && fEventTqdcQ)

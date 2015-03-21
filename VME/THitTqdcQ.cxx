@@ -1,7 +1,8 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    19 Mar 2015
+// @Date    21 Mar 2015
 
 #include "THitTqdcQ.h"
+#include "TVMERawData.h"
 
 ClassImp(THitTqdcQ)
 
@@ -30,11 +31,13 @@ void THitTqdcQ::Set(Int_t ch, Int_t ts)
   fTimeStamp = ts;
   fNSamples  = 0;
   memset(fSample, 0, fMaxSamples*sizeof(Short_t));
+  ResetBit(kOverflow);
 }
 //______________________________________________________________________________
 void THitTqdcQ::NextSample(Int_t sample)
 {
   fQ += sample;
+  if (sample >= ((1 << (TVMERawData::kADCBits - 1)) - 1)) SetBit(kOverflow); // 8191
 
   if (fNSamples >= fMaxSamples) ExpandSamples(fNSamples + 1);
   fSample[fNSamples++] = sample;

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    19 Mar 2015
+// @Date    21 Mar 2015
 
 #include "TEventTqdcQ.h"
 #include "THitTqdcQ.h"
@@ -86,8 +86,11 @@ Int_t TEventTqdcQ::Q(Int_t ch, Int_t multi)
   Int_t idx = GetIndexHit(ch, multi);
   if (idx == -1) return kNoneValue;
 
-  Int_t del = GetHitTqdcQ(idx)->GetNSamples()*GetHitTqdcQ(idx)->GetSample()[0];
-  return (GetHitTqdcQ(idx)->GetQ() - del);
+  THitTqdcQ *hit = GetHitTqdcQ(idx);
+  if (hit->HasOverflowSample()) return kNoneValue;
+
+  Int_t bl = hit->GetNSamples()*hit->GetSample()[0];
+  return (hit->GetQ() - bl);
 }
 //______________________________________________________________________________
 Int_t TEventTqdcQ::TimeStamp(Int_t ch, Int_t multi)
@@ -95,7 +98,10 @@ Int_t TEventTqdcQ::TimeStamp(Int_t ch, Int_t multi)
   Int_t idx = GetIndexHit(ch, multi);
   if (idx == -1) return kNoneValue;
 
-  return GetHitTqdcQ(idx)->GetTimeStamp();
+  THitTqdcQ *hit = GetHitTqdcQ(idx);
+  if (hit->HasOverflowSample()) return kNoneValue;
+
+  return hit->GetTimeStamp();
 }
 //______________________________________________________________________________
 Int_t TEventTqdcQ::Sample(Int_t ch, Int_t multi, Int_t samp)
@@ -103,5 +109,8 @@ Int_t TEventTqdcQ::Sample(Int_t ch, Int_t multi, Int_t samp)
   Int_t idx = GetIndexHit(ch, multi);
   if (idx == -1) return kNoneValue;
 
-  return GetHitTqdcQ(idx)->GetSample()[samp];
+  THitTqdcQ *hit = GetHitTqdcQ(idx);
+  if (hit->HasOverflowSample()) return kNoneValue;
+
+  return hit->GetSample()[samp];
 }
