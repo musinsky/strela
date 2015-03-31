@@ -213,6 +213,7 @@ void TStrela::AnalyzeEntries(Int_t ne, Option_t *option, Bool_t timer) const
     if (!(i % 10000)) fprintf(stderr, "analyzing progress: %6.2f %%\r", 100.0*i/ne);
     AnalyzeEntry(i);
   }
+  fprintf(stderr, "analyzing progress: %6.2f %%\n", 100.0);
   next.Reset();
   while ((detector = (TStrelaBase *)next()))
     detector->AnalyzeTerminate();
