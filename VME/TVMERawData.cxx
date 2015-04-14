@@ -70,7 +70,8 @@ void TVMERawData::MakeTree(const char *fname)
   //  new TMemFile(treeFileName.Data(), "RECREATE", "", 0);
   new TFile(treeFileName.Data(), "RECREATE");
   fTree = new TTree("pp", gVME->GetName());
-  fTree->SetAutoSave(1000000000); // autosave when 1 Gbyte written
+  //  fTree->SetAutoSave(10000000);    // autosave when 10M entries written
+  //  fTree->SetAutoSave(-1000000000); // autosave when 1 Gbyte (unzipped) written
 
   fTree->Branch("EventEHDR", &fEventEHDR, "fEventEHDR/I");
   if (gVME->GetNChannelsTDC() > 0) {
