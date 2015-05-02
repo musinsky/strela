@@ -63,7 +63,11 @@ $(OBJDIR)/%.$(ObjSuf) : %.$(SrcSuf)
 $(DICTPREFIX)%.$(SrcSuf) :
 		@echo "Generating dictionary $@ ..."
 		$(checkdir)
+ifeq ($(ROOTCINT),)
+		$(ROOTCLING) -f $@ -c -I$(INCDIR) $^
+else
 		$(ROOTCINT) -f $@ -c -I$(INCDIR) $^
+endif
 
 $(DICTPREFIX)%.$(ObjSuf) : $(DICTPREFIX)%.$(SrcSuf)
 		$(checkdir)
@@ -103,10 +107,12 @@ distsrc:
 
 showbuild:
 		@echo "ROOTSYS        = $(realpath $(ROOTSYS))"
+		@echo "ROOT VERSION   = $(shell $(RC) --version)"
 		@echo "PLATFORM       = $(PLATFORM)"
 		@echo "ARCH           = $(ARCH)"
 		@echo ""
 		@echo "CXX            = $(CXX)"
+		@echo "CXX VERSION    = $(shell $(CXX) -dumpversion)"
 		@echo "CXXFLAGS       = $(CXXFLAGS)"
 		@echo ""
 		@echo "LD             = $(LD)"
@@ -114,7 +120,11 @@ showbuild:
 		@echo "LDFLAGS        = $(LDFLAGS)"
 		@echo ""
 		@echo "INCDIR         = $(INCDIR)"
-		@echo "ROOTCINT       = $(ROOTCINT)"
+ifeq ($(ROOTCINT),)
+		@echo "ROOTDICT       = $(ROOTCLING)"
+else
+		@echo "ROOTDICT       = $(ROOTCINT)"
+endif
 		@echo "MAKEDEPEND     = $(MAKEDEPEND)"
 		@echo ""
 		@echo "The list of what to be built"
