@@ -1,4 +1,4 @@
-# @(#) 20 Mar 2015
+# @(#) 02 May 2015
 # module for VME
 
 # Author: Jan Musinsky
@@ -9,19 +9,12 @@ FILES	= TVME TVirtualModule TModulePhTDC TModuleTDC96 TModuleTDC64V TModuleTQDC1
 	  TVMERawData TVirtualEvent TVirtualHit \
 	  TEventTdc THitTdc TEventTqdcT THitTqdcT TEventTqdcQ THitTqdcQ
 
-LNKDEF	= $(MODDIR)/$(LNKFILE).$(HdrSuf)
-SRCS	= $(patsubst %,$(MODDIR)/%.$(SrcSuf),$(FILES))
-HDRS	= $(SRCS:.$(SrcSuf)=.$(HdrSuf))
-DICT	= $(OBJDIR)/$(MODDIR)/$(DICTPREFIX)$(MODULE).$(SrcSuf)
-DICTH	= $(DICT:.$(SrcSuf)=.$(HdrSuf))
-DICTO	= $(DICT:.$(SrcSuf)=.$(ObjSuf))
-OBJS	= $(patsubst %.$(SrcSuf),$(OBJDIR)/%.$(ObjSuf),$(SRCS))
-MODLIB	= $(LIBDIR)/$(LIBPREFIX)$(MODULE).$(DllSuf)
-
 VMECLEAN	:= $(OBJS) $(DICT) $(DICTH) $(DICTO)
 ifeq ($(MAKECMDGOALS),distclean)
 VMECLEAN	+= $(MODLIB) $(subst $(MODDIR)/,$(INCDIR)/,$(HDRS)) # '/' important
 endif
+
+$(MODLIB)EXTRA	= -O2
 
 # used in the main Makefile
 ALLLIBS		+= $(MODLIB)
@@ -29,6 +22,7 @@ ALLHDRS		+= $(HDRS)
 ALLDIST		+= $(SRCS) $(HDRS) $(LNKDEF) $(MODDIR)/$(MODMAKEFILE)
 ALLDEPEND	+= $(SRCS)
 
+# local rules
 $(MODDIR):	$(MODLIB)
 
 $(MODLIB):	$(OBJS) $(DICTO)

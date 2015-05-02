@@ -1,4 +1,4 @@
-# @(#) 25 Nov 2013
+# @(#) 02 May 2015
 # module for Strela
 
 # Author: Jan Musinsky
@@ -6,24 +6,15 @@
 MODULE	= Strela
 MODDIR	= Strela
 FILES	= TStrela TStrelaBase TStrelaDisplay \
-	  TPommeEvent TGemEvent TStrawEvent \
-	  TWirePoint TWireCham \
-	  TStrawTrack TStrawTube TStrawMulti TStrawLayer TStrawTracker \
-	  TStrawCham
-
-LNKDEF	= $(MODDIR)/$(LNKFILE).$(HdrSuf)
-SRCS	= $(patsubst %,$(MODDIR)/%.$(SrcSuf),$(FILES))
-HDRS	= $(SRCS:.$(SrcSuf)=.$(HdrSuf))
-DICT	= $(OBJDIR)/$(MODDIR)/$(DICTPREFIX)$(MODULE).$(SrcSuf)
-DICTH	= $(DICT:.$(SrcSuf)=.$(HdrSuf))
-DICTO	= $(DICT:.$(SrcSuf)=.$(ObjSuf))
-OBJS	= $(patsubst %.$(SrcSuf),$(OBJDIR)/%.$(ObjSuf),$(SRCS))
-MODLIB	= $(LIBDIR)/$(LIBPREFIX)$(MODULE).$(DllSuf)
+	  TPommeEvent TGemEvent TStrawEvent TWirePoint TWireCham \
+	  TStrawTrack TStrawTube TStrawMulti TStrawLayer TStrawTracker TStrawCham
 
 STRELACLEAN	:= $(OBJS) $(DICT) $(DICTH) $(DICTO)
 ifeq ($(MAKECMDGOALS),distclean)
 STRELACLEAN	+= $(MODLIB) $(subst $(MODDIR)/,$(INCDIR)/,$(HDRS)) # '/' important
 endif
+
+$(MODLIB)EXTRA	= -O1
 
 # used in the main Makefile
 ALLLIBS		+= $(MODLIB)
@@ -31,6 +22,7 @@ ALLHDRS		+= $(HDRS)
 ALLDIST		+= $(SRCS) $(HDRS) $(LNKDEF) $(MODDIR)/$(MODMAKEFILE)
 ALLDEPEND	+= $(SRCS)
 
+# local rules
 $(MODDIR):	$(MODLIB)
 
 $(MODLIB):	$(OBJS) $(DICTO)

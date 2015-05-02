@@ -1,4 +1,4 @@
-# @(#) 10 Feb 2015
+# @(#) 02 May 2015
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
@@ -26,6 +26,15 @@ MAKEDEPEND	= rmkdepend
 DEPENDFILE	= $(OBJDIR)/Make-depend
 NODEPEND	= clean distclean distsrc showbuild
 
+LNKDEF		= $(MODDIR)/$(LNKFILE).$(HdrSuf)
+SRCS		= $(patsubst %,$(MODDIR)/%.$(SrcSuf),$(FILES))
+HDRS		= $(SRCS:.$(SrcSuf)=.$(HdrSuf))
+DICT		= $(OBJDIR)/$(MODDIR)/$(DICTPREFIX)$(MODULE).$(SrcSuf)
+DICTH		= $(DICT:.$(SrcSuf)=.$(HdrSuf))
+DICTO		= $(DICT:.$(SrcSuf)=.$(ObjSuf))
+OBJS		= $(patsubst %.$(SrcSuf),$(OBJDIR)/%.$(ObjSuf),$(SRCS))
+MODLIB		= $(LIBDIR)/$(LIBPREFIX)$(MODULE).$(DllSuf)
+
 # all
 ALLHDRS		:=
 ALLLIBS		:=
@@ -47,26 +56,26 @@ endef
 .PRECIOUS: $(INCDIR)/%.$(HdrSuf) # preserve intermediate files
 
 $(OBJDIR)/%.$(ObjSuf) : %.$(SrcSuf)
-			$(checkdir)
-			@$(CXX) $(CXXFLAGS) -I$(INCDIR) -c $< -o $@
-			@echo -e "$@ done"
+		$(checkdir)
+		$(CXX) $(CXXFLAGS) -I$(INCDIR) -c $< -o $@
+		@echo -e "$@ done"
 
 $(DICTPREFIX)%.$(SrcSuf) :
-			@echo "Generating dictionary $@ ..."
-			$(checkdir)
-			@$(ROOTCINT) -f $@ -c -I$(INCDIR) $^
+		@echo "Generating dictionary $@ ..."
+		$(checkdir)
+		$(ROOTCINT) -f $@ -c -I$(INCDIR) $^
 
 $(DICTPREFIX)%.$(ObjSuf) : $(DICTPREFIX)%.$(SrcSuf)
-			$(checkdir)
-			@$(CXX) $(CXXFLAGS) -I$(INCDIR) -I. -c $< -o $@
-			@echo -e "$@ done"
+		$(checkdir)
+		$(CXX) $(CXXFLAGS) -I$(INCDIR) -I. -c $< -o $@
+		@echo -e "$@ done"
 
 $(LIBDIR)/$(LIBPREFIX)%.$(DllSuf) :
-			$(checkdir)
-			@rm -f $@
-			@$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@
-			@chmod 555 $@
-			@echo "==> $@ done"
+		$(checkdir)
+		@rm -f $@
+		$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(call $@EXTRA)
+		@chmod 555 $@
+		@echo "==> $@ done"
 
 # targets
 all:		libs
