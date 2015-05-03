@@ -1,4 +1,4 @@
-# @(#) 02 May 2015
+# @(#) 03 May 2015
 # module for Strela
 
 # Author: Jan Musinsky
@@ -9,18 +9,22 @@ FILES	= TStrela TStrelaBase TStrelaDisplay \
 	  TPommeEvent TGemEvent TStrawEvent TWirePoint TWireCham \
 	  TStrawTrack TStrawTube TStrawMulti TStrawLayer TStrawTracker TStrawCham
 
+STRELADOPT	:= $(LIBPREFIX)$(MODULE)
 STRELACLEAN	:= $(OBJS) $(DICT) $(DICTH) $(DICTO)
-ifeq ($(MAKECMDGOALS),distclean)
+ifneq (,$(findstring distclean,$(MAKECMDGOALS)))
 STRELACLEAN	+= $(MODLIB) $(subst $(MODDIR)/,$(INCDIR)/,$(HDRS)) # '/' important
+STRELACLEAN	+= $(subst $(DllSuf),$(MAPSUF),$(MODLIB))
+STRELACLEAN	+= $(subst .$(DllSuf),*.$(PCMSUF),$(MODLIB))
 endif
-
-$(MODLIB)EXTRA	= -O1
 
 # used in the main Makefile
 ALLLIBS		+= $(MODLIB)
 ALLHDRS		+= $(HDRS)
 ALLDIST		+= $(SRCS) $(HDRS) $(LNKDEF) $(MODDIR)/$(MODMAKEFILE)
 ALLDEPEND	+= $(SRCS)
+
+$(DICT)DictOpt	= $(call DictOpt,$(STRELADOPT))
+#$(MODLIB)Extra	= # nothing yet
 
 # local rules
 $(MODDIR):	$(MODLIB)

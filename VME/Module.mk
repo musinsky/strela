@@ -1,4 +1,4 @@
-# @(#) 02 May 2015
+# @(#) 03 May 2015
 # module for VME
 
 # Author: Jan Musinsky
@@ -9,18 +9,22 @@ FILES	= TVME TVirtualModule TModulePhTDC TModuleTDC96 TModuleTDC64V TModuleTQDC1
 	  TVMERawData TVirtualEvent TVirtualHit \
 	  TEventTdc THitTdc TEventTqdcT THitTqdcT TEventTqdcQ THitTqdcQ
 
+VMEDOPT		:= $(LIBPREFIX)$(MODULE)
 VMECLEAN	:= $(OBJS) $(DICT) $(DICTH) $(DICTO)
-ifeq ($(MAKECMDGOALS),distclean)
+ifneq (,$(findstring distclean,$(MAKECMDGOALS)))
 VMECLEAN	+= $(MODLIB) $(subst $(MODDIR)/,$(INCDIR)/,$(HDRS)) # '/' important
+VMECLEAN	+= $(subst $(DllSuf),$(MAPSUF),$(MODLIB))
+VMECLEAN	+= $(subst .$(DllSuf),*.$(PCMSUF),$(MODLIB))
 endif
-
-$(MODLIB)EXTRA	= -O2
 
 # used in the main Makefile
 ALLLIBS		+= $(MODLIB)
 ALLHDRS		+= $(HDRS)
 ALLDIST		+= $(SRCS) $(HDRS) $(LNKDEF) $(MODDIR)/$(MODMAKEFILE)
 ALLDEPEND	+= $(SRCS)
+
+$(DICT)DictOpt	= $(call DictOpt,$(VMEDOPT))
+#$(MODLIB)Extra	= # nothing yet
 
 # local rules
 $(MODDIR):	$(MODLIB)

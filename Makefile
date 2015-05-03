@@ -1,4 +1,4 @@
-# @(#) 02 May 2015
+# @(#) 03 May 2015
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
@@ -17,6 +17,8 @@ MODULES		= Strela VME
 MODMAKEFILE	= Module.mk
 LNKFILE		= LinkDef
 DICTPREFIX	= G__
+MAPSUF		= rootmap
+PCMSUF		= pcm
 INCDIR		= include
 OBJDIR		= build
 LIBDIR		= lib
@@ -42,8 +44,15 @@ ALLDIST		:= Makefile
 ALLDEPEND	:=
 
 # verbatim variables
+DictOpt		= -s $(LIBDIR)/$1.$(DllSuf) -rml $1.$(DllSuf) -rmf $(LIBDIR)/$1.$(MAPSUF)
+
+# define is just syntax to create (easier) variables with multi-line values
 define checkdir
 @if [ ! -d $@ ]; then mkdir -p $(dir $@); fi
+endef
+
+define checkdir1
+@if [ ! -d $1 ]; then mkdir -p $1; fi
 endef
 
 define emptyfile
@@ -64,7 +73,8 @@ $(DICTPREFIX)%.$(SrcSuf) :
 		@echo "Generating dictionary $@ ..."
 		$(checkdir)
 ifeq ($(ROOTCINT),)
-		$(ROOTCLING) -f $@ -c -I$(INCDIR) $^
+		$(call checkdir1,$(LIBDIR)) # needed for pcm and rootmap
+		$(ROOTCLING) -f $@ $(call $@DictOpt) -c -I$(INCDIR) $^
 else
 		$(ROOTCINT) -f $@ -c -I$(INCDIR) $^
 endif
@@ -77,7 +87,7 @@ $(DICTPREFIX)%.$(ObjSuf) : $(DICTPREFIX)%.$(SrcSuf)
 $(LIBDIR)/$(LIBPREFIX)%.$(DllSuf) :
 		$(checkdir)
 		@rm -f $@
-		$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(call $@EXTRA)
+		$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(call $@Extra)
 		@chmod 555 $@
 		@echo "==> $@ done"
 
