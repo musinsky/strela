@@ -1,15 +1,21 @@
-# @(#) 03 May 2015
+# @(#) 04 May 2015
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
 
 include $(ROOTSYS)/etc/Makefile.arch
 HdrSuf		= h
-CXXFLAGS	+= -Wshadow -Woverloaded-virtual
-CXXFLAGS	+= -std=c++11 #-Wno-deprecated-declarations
-CXXFLAGS	+= -Wextra -Wformat=2 -Wreorder -Wpedantic #-Wno-vla -Wno-long-long
+
 ifeq ($(MAKECMDGOALS),debug)
 CXXFLAGS	+= -DDEBUG
+endif
+CXXFLAGS	+= -Wshadow -Woverloaded-virtual
+CXXFLAGS	+= -Wextra -Wformat=2 -Wreorder -Wpedantic
+ifeq ($(ROOTCINT),) # ROOT6
+CXXFLAGS	+= -Wdeprecated-declarations # enforce to enable
+DICTCXXFLAGS	+= -Wno-format-nonliteral # dict warning (enabled by format=2)
+else
+CXXFLAGS	+= -std=c++11
 endif
 
 MODULES		= Strela VME
@@ -81,7 +87,7 @@ endif
 
 $(DICTPREFIX)%.$(ObjSuf) : $(DICTPREFIX)%.$(SrcSuf)
 		$(checkdir)
-		$(CXX) $(CXXFLAGS) -I$(INCDIR) -I. -c $< -o $@
+		$(CXX) $(CXXFLAGS) $(DICTCXXFLAGS) -I$(INCDIR) -I. -c $< -o $@
 		@echo -e "$@ done"
 
 $(LIBDIR)/$(LIBPREFIX)%.$(DllSuf) :
@@ -124,6 +130,7 @@ showbuild:
 		@echo "CXX            = $(CXX)"
 		@echo "CXX VERSION    = $(shell $(CXX) -dumpversion)"
 		@echo "CXXFLAGS       = $(CXXFLAGS)"
+		@echo "DICTCXXFLAGS   = $(DICTCXXFLAGS)"
 		@echo ""
 		@echo "LD             = $(LD)"
 		@echo "SOFLAGS        = $(SOFLAGS)"
