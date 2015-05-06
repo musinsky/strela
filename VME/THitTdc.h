@@ -4,7 +4,7 @@
 #ifndef STRELA_THitTdc
 #define STRELA_THitTdc
 
-#include <TVirtualHit.h>
+#include "TVirtualHit.h"
 
 class THitTdc : public TVirtualHit {
 

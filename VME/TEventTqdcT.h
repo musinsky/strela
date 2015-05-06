@@ -4,7 +4,7 @@
 #ifndef STRELA_TEventTqdcT
 #define STRELA_TEventTqdcT
 
-#include <TVirtualEvent.h>
+#include "TVirtualEvent.h"
 
 class THitTqdcT;
 
