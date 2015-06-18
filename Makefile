@@ -1,4 +1,4 @@
-# @(#) 04 May 2015
+# @(#) 18 Jun 2015
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
@@ -13,7 +13,7 @@ CXXFLAGS	+= -Wshadow -Woverloaded-virtual
 CXXFLAGS	+= -Wextra -Wformat=2 -Wreorder -Wpedantic
 ifeq ($(ROOTCINT),) # ROOT6
 CXXFLAGS	+= -Wdeprecated-declarations # enforce to enable
-DICTCXXFLAGS	+= -Wno-format-nonliteral # dict warning (enabled by format=2)
+DICTCXXFLAGS	= -Wno-format-nonliteral # dict warning (enabled by format=2)
 else
 CXXFLAGS	+= -std=c++11
 endif
@@ -72,7 +72,7 @@ endef
 
 $(OBJDIR)/%.$(ObjSuf) : %.$(SrcSuf)
 		$(checkdir)
-		$(CXX) $(CXXFLAGS) -I$(INCDIR) -c $< -o $@
+		@$(CXX) $(CXXFLAGS) -I$(INCDIR) -c $< -o $@
 		@echo -e "$@ done"
 
 $(DICTPREFIX)%.$(SrcSuf) :
@@ -80,20 +80,20 @@ $(DICTPREFIX)%.$(SrcSuf) :
 		$(checkdir)
 ifeq ($(ROOTCINT),)
 		$(call checkdir1,$(LIBDIR)) # needed for pcm and rootmap
-		$(ROOTCLING) -f $@ $(call $@DictOpt) -c -I$(INCDIR) $^
+		@$(ROOTCLING) -f $@ $(call $@DictOpt) -c -I$(INCDIR) $^
 else
-		$(ROOTCINT) -f $@ -c -I$(INCDIR) $^
+		@$(ROOTCINT) -f $@ -c -I$(INCDIR) $^
 endif
 
 $(DICTPREFIX)%.$(ObjSuf) : $(DICTPREFIX)%.$(SrcSuf)
 		$(checkdir)
-		$(CXX) $(CXXFLAGS) $(DICTCXXFLAGS) -I$(INCDIR) -I. -c $< -o $@
+		@$(CXX) $(CXXFLAGS) $(DICTCXXFLAGS) -I$(INCDIR) -I. -c $< -o $@
 		@echo -e "$@ done"
 
 $(LIBDIR)/$(LIBPREFIX)%.$(DllSuf) :
 		$(checkdir)
 		@rm -f $@
-		$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(call $@Extra)
+		@$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(call $@Extra)
 		@chmod 555 $@
 		@echo "==> $@ done"
 
