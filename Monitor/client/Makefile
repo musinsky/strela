@@ -7,21 +7,29 @@ endif
 CFLAGS		+= -pedantic -Wall -Wextra -Wformat=2 -Wmissing-prototypes
 
 SOURCES		= $(wildcard *.c)
+HEADERS		= $(patsubst %.c, %.h, $(SOURCES))
+OBJECTS		= $(patsubst %.c, %.o, $(SOURCES))
 PROGRAM		= vmemonitor
 
 all:		default
 
 default:	$(PROGRAM)
 
-$(PROGRAM):	$(SOURCES)
-		$(CC) $(CFLAGS) $^ -o $(PROGRAM)
+%.o:		%.c $(HEADERS)
+		$(CC) $(CFLAGS) -c $< -o $@
+
+$(PROGRAM):	$(OBJECTS)
+		$(CC) $^ -o $@
 		@echo "==> $@ done"
 
 distsrc:
 		@rm -f $(PROGRAM).tar.xz
 		@tar --ignore-failed-read -cJvf $(PROGRAM).tar.xz \
-		  *.c *.h Makefile
+		  $(SOURCES) $(HEADERS) Makefile
 		@echo -e "\n$(PROGRAM).tar.xz done\n"
 
 clean:
-		@rm -fv $(PROGRAM)
+		@rm -fv $(OBJECTS)
+
+distclean:
+		@rm -fv $(PROGRAM) $(OBJECTS)
