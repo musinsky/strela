@@ -31,7 +31,7 @@ void closeWatch(int nfd)
 int waitFile(int nfd, char *fname)
 {
   ssize_t nread;
-  static char buf[BUF_SIZE];
+  char buf[BUF_SIZE];
   char *bp;
   struct inotify_event *event;
 
