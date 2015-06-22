@@ -10,6 +10,7 @@ SOURCES		= $(wildcard *.c)
 HEADERS		= $(patsubst %.c, %.h, $(SOURCES))
 OBJECTS		= $(patsubst %.c, %.o, $(SOURCES))
 PROGRAM		= vmemonitor
+DISTSRCNAME	= $(PROGRAM).$(shell date +%F).tar.xz
 
 all:		default
 
@@ -23,10 +24,10 @@ $(PROGRAM):	$(OBJECTS)
 		@echo "==> $@ done"
 
 distsrc:
-		@rm -f $(PROGRAM).tar.xz
-		@tar --ignore-failed-read -cJvf $(PROGRAM).tar.xz \
+		@rm -f $(DISTSRCNAME)
+		@tar --ignore-failed-read -cJvf $(DISTSRCNAME) \
 		  $(SOURCES) $(HEADERS) Makefile
-		@echo -e "\n$(PROGRAM).tar.xz done\n"
+		@echo -e "\n$(DISTSRCNAME) done\n"
 
 clean:
 		@rm -fv $(OBJECTS)
