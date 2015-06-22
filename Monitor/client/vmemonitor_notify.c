@@ -76,19 +76,3 @@ int waitFile(int nfd, char *fname)
   fprintf(stderr, "something wrong in waitFile\n");
   return 0;
 }
-
-int endsWith(const char *name, const char *ext)
-{
-  // if name string ends with ext string return length of name string
-  // otherwise return -1 (similar as TString::EndsWith() from ROOT)
-
-  if (name == NULL) return -1;
-  size_t namel = strlen(name);
-  if (ext == NULL) return namel;
-  size_t extl = strlen(ext);
-
-  if (extl > namel) return -1;
-  if (strncmp(name + namel - extl, ext, extl) == 0) return namel;
-
-  return -1;
-}

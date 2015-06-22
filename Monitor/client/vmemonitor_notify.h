@@ -19,6 +19,4 @@ void closeWatch(int nfd);
 
 int waitFile(int nfd, char *fname);
 
-int endsWith(const char *name, const char *ext);
-
 #endif
