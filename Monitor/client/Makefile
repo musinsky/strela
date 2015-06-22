@@ -10,7 +10,7 @@ SOURCES		= $(wildcard *.c)
 HEADERS		= $(patsubst %.c, %.h, $(SOURCES))
 OBJECTS		= $(patsubst %.c, %.o, $(SOURCES))
 PROGRAM		= vmemonitor
-DISTSRCNAME	= $(PROGRAM).$(shell date +%F).tar.xz
+DISTSRCNAME	= $(PROGRAM).$(shell date +%F).git$(shell git describe --always).tar.xz
 
 all:		default
 
