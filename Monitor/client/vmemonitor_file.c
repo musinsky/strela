@@ -17,6 +17,7 @@ FILE *openFile(const char *dname, const char *fname)
 
   fstream = fopen(fullname, "rb");
   if (fstream == NULL) perror("fopen failed");
+
   return fstream;
 }
 
@@ -125,5 +126,6 @@ int anotherName(const char *name)
     strcpy(current, name);
     return 0;
   }
+
   return -1;
 }

@@ -1,5 +1,5 @@
 // Musinsky Jan
-// 2015-06-15
+// 2015-06-24
 
 #include "vmemonitor_notify.h"
 
@@ -30,6 +30,12 @@ void closeWatch(int nfd)
 
 int waitFile(int nfd, char *fname)
 {
+  if (fname == NULL) {
+    fprintf(stderr, "no fname\n");
+    closeWatch(nfd);
+    return -1;
+  }
+
   ssize_t nread;
   char buf[BUF_SIZE];
   char *bp;
