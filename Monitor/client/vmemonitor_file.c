@@ -30,16 +30,19 @@ void closeFile(FILE *fstream)
 
 long findLastType(FILE *fstream, vmedata_type datatype, long ntimes)
 {
-  // backwards search for ntimes the datatype
+  // backwards search in fstream (VME data) for ntimes the datatype
   // return offset in bytes relative to begin (SEEK_SET) of the fstream
 
-  if (fstream == NULL) return -1;
+  if (fstream == NULL) {
+    fprintf(stderr, "no fstream\n");
+    return -1;
+  }
 
   size_t nread, iw, wordsize, bufsize;
   long filesize, blockpos, ndatawords, ndatatypes;
 
-  wordsize = sizeof(uint32_t); // minimal word size of data is 4 bytes (32 bits)
-  uint32_t dataword;           // one word of data
+  wordsize = sizeof(uint32_t); // minimal word size of VME data is 4 bytes (32 bits)
+  uint32_t dataword;           // one word of VME data
   uint32_t buf[BLOCK_SIZE];    // buffer of 4*BLOCK_SIZE = 16384 bytes size
 
   if (fseek(fstream, 0, SEEK_END) != 0) {
@@ -52,8 +55,8 @@ long findLastType(FILE *fstream, vmedata_type datatype, long ntimes)
     perror("ftell failed");
     return -1;
   }
-  if ((filesize % wordsize) != 0) {
-    fprintf(stderr, "size of file not divisible by %lu\n", wordsize);
+  if ((filesize % wordsize) != 0) { // specificity of VME data
+    fprintf(stderr, "size of VME file not divisible by %lu\n", wordsize);
     return -1;
   }
 
@@ -67,7 +70,7 @@ long findLastType(FILE *fstream, vmedata_type datatype, long ntimes)
       // fseek (after error) did not change current position
       bufsize = blockpos/wordsize;
       if (bufsize >= BLOCK_SIZE) {
-        fprintf(stderr, "something wrong in checkFile\n");
+        fprintf(stderr, "something wrong in findLastType\n");
         return -1;
       }
       fseek(fstream, 0, SEEK_SET); // rewind to beginning of the file
@@ -82,14 +85,14 @@ long findLastType(FILE *fstream, vmedata_type datatype, long ntimes)
     nread = fread(buf, wordsize, bufsize, fstream);
     for (iw = (nread-1); iw < nread; --iw) { // size_t {aka long unsigned int}
       dataword = buf[iw];
-      // printf("%12lu: [0x%08X]\n", filesize/wordsize - ndatawords - 1, dataword);
+      ndatawords++;
+      //      printf("%12lu: [0x%08X]\n", filesize/wordsize - ndatawords, dataword);
       if ((dataword >> 28) == datatype) {
         // skip end of spill data
         if ((datatype == VME_SHDR) && ((dataword >> 27) == 0x19)) continue;
         ndatatypes++;
-        if (ndatatypes == ntimes) return (filesize - (ndatawords + 1)*wordsize); // in bytes
+        if (ndatatypes == ntimes) return (filesize - ndatawords*wordsize); // in bytes
       }
-      ndatawords++;
     }
   } while (nread == BLOCK_SIZE);
 
