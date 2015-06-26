@@ -24,6 +24,7 @@ int watchDir(const char *dname)
 
 void closeWatch(int nfd)
 {
+  if (nfd == -1) return;
   // if (inotify_rm_watch(nfd, wd) == -1) perror("inotify_rm_watch failed");
   if (close(nfd) == -1) perror("close inotify failed");
 }
@@ -32,7 +33,6 @@ int waitFile(int nfd, char *fname)
 {
   if (fname == NULL) {
     fprintf(stderr, "no fname\n");
-    closeWatch(nfd);
     return -1;
   }
 
@@ -45,7 +45,6 @@ int waitFile(int nfd, char *fname)
   nread = read(nfd, buf, BUF_SIZE);
   if (nread == -1) {
     perror("read failed");
-    closeWatch(nfd);
     return -1;
   }
   if (nread == 0) {
@@ -60,7 +59,6 @@ int waitFile(int nfd, char *fname)
     // events sent by the kernel (from any watch)
     if (event->mask & IN_IGNORED) {
       printf("IN_IGNORED\n");
-      closeWatch(nfd);
       return -1;
     }
     if (event->mask & IN_Q_OVERFLOW) {
@@ -77,6 +75,7 @@ int waitFile(int nfd, char *fname)
     }
     strcpy(fname, event->name);
     return event->mask; // first (watching) event
+    // correct should be return list of files names, not only first
   }
 
   fprintf(stderr, "something wrong in waitFile\n");

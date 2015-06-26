@@ -1,5 +1,5 @@
 // Musinsky Jan
-// 2015-06-15
+// 2015-06-24
 
 #ifndef VMEMONITOR_NOTIFY_H
 #define VMEMONITOR_NOTIFY_H

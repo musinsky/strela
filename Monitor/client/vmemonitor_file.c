@@ -25,7 +25,6 @@ void closeFile(FILE *fstream)
 {
   if (fstream == NULL) return;
   if (fclose(fstream) != 0) perror("fclose failed");
-  fstream = NULL;
 }
 
 long findLastType(FILE *fstream, vmedata_type datatype, long ntimes)
