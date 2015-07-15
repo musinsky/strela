@@ -1,4 +1,4 @@
-# @(#) 18 Jun 2015
+# @(#) 15 Jul 2015
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
@@ -18,7 +18,7 @@ else
 CXXFLAGS	+= -std=c++11
 endif
 
-MODULES		= Strela VME
+MODULES		= VME Monitor Strela
 
 MODMAKEFILE	= Module.mk
 LNKFILE		= LinkDef
@@ -120,6 +120,8 @@ distsrc:
 		@tar --ignore-failed-read -cJvf $(DISTSRCNAME).tar.xz \
 		  $(ALLDIST) *.C macros/*.C macros/*.cxx sql README.md;
 		@echo -e "\n$(DISTSRCNAME).tar.xz done\n"
+		$(MAKE) -C Monitor/client/ distsrc # vmemonitor client
+		@mv Monitor/client/*.tar.xz .
 
 showbuild:
 		@echo "ROOTSYS        = $(realpath $(ROOTSYS))"

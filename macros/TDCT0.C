@@ -5,11 +5,12 @@
   .x Strela.C
   .L macros/TDCT0.C+
   TStrawCham::Tracking(-1)
+  TStrawTube::OnlyFirstNHits(1)
   gStrela->StrawCham()->SetTubesTimes(0, 0, 9000)
   gStrela->StrawCham()->GetTube(0)->SetShowHistograms("time")
   gStrela->AnalyzeEntries()
   TDCT0(); > seans_YYYY_MM_channels_updateT0.sql
-*/
+ */
 
 #include <TH1.h>
 #include <TF1.h>
@@ -24,7 +25,7 @@
 #include "TStrawTracker.h"
 #include "TStrawTube.h"
 
-const Double_t p0_mean = 1000, p0_pm = 500;
+const Double_t p0_mean = 2000, p0_pm = 1500;
 const Double_t p1_mean = 25, p1_min = 5, p1_max = 100;
 
 void FindT0(TStrawTube *tube, Double_t p1coef, Option_t *opt = "")
@@ -38,7 +39,8 @@ void FindT0(TStrawTube *tube, Double_t p1coef, Option_t *opt = "")
   TH1F *histo = tube->HisTime1();
   TF1 *fun = (TF1 *)gROOT->GetFunction("fun");
   if (!fun)
-    fun = new TF1("fun", "[2]+[3]*TMath::Erfc((x-[0])/([1]*TMath::Sqrt2()))");
+    //    fun = new TF1("fun", "[2]+[3]*TMath::Erfc((x-[0])/([1]*TMath::Sqrt2()))"); // OK je to sigma gausa
+    fun = new TF1("fun", "[2]+[3]*TMath::Erfc((x-[0])/[1])");
   fun->SetParameters(0, 0, 0, 0);
 
   // t0 time: slope / => p1 > 0 (p1 ~ 25)
