@@ -11,7 +11,7 @@ int watchDir(const char *dname)
     return -1;
   }
 
-  //  $ inotifywait -m --timefmt "%H:%M:%S" --format "%T => %e   %w%f" /data
+  //  $ inotifywait -m --timefmt "%H:%M:%S" --format "%T => %e   %w%f" /data_0
   //  int wd = inotify_add_watch(nfd, dname, IN_ALL_EVENTS);
   int wd = inotify_add_watch(nfd, dname, IN_CLOSE_WRITE | IN_MOVED_TO);
   if (wd == -1) {

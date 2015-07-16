@@ -1,10 +1,20 @@
 // Musinsky Jan
-// 2015-06-24
+// 2015-07-16
 
 #include "vmemonitor.h"
 #include "vmemonitor_notify.h"
 #include "vmemonitor_file.h"
 #include "vmemonitor_client.h"
+
+void printUsage(const char *name)
+{
+  fprintf(stderr, "Usage:\n %s [options] monitor-dir monitor-ext server port\n", name);
+  fprintf(stderr, "Options:\n");
+  fprintf(stderr, "  -v \t\t verbose mode\n");
+  fprintf(stderr, "  -h \t\t display this help and exit\n");
+  fprintf(stderr, "Example:\n %s -v /data_0 .dat strela.jinr.ru 7503\n", name);
+  exit(EXIT_FAILURE);
+}
 
 int main(int argc, char *argv[])
 {
@@ -12,11 +22,25 @@ int main(int argc, char *argv[])
   // TODO data send over TCP socket (use sendfile() instead send())
   // TODO timeout(~10s), send test signal after no new data
 
-  if (argc != 5) {
-    fprintf(stderr, "Usage:\n %s monitor-dir monitor-ext server port\n", argv[0]);
-    fprintf(stderr, "Example:\n %s /data .dat strela.jinr.ru 7503\n", argv[0]);
-    exit(EXIT_FAILURE);
+  int vmode, opt;
+
+  vmode = 0;
+  while ((opt = getopt(argc, argv, "hv")) != -1) {
+    switch (opt) {
+      case 'v':
+        vmode = 1;
+        break;
+      default: // 'h'
+        printUsage(argv[0]);
+    }
   }
+
+  if ((argc - optind) != 4) printUsage(argv[0]);
+
+  // skip all option arguments
+  optind--; // now argv[0] is last option argument
+  argc -= optind;
+  argv += optind;
 
   int fmask, notifyfd, socketfd;
   char datafname[NAME_MAX + 1]; // 256
