@@ -1,7 +1,8 @@
 // Musinsky Jan
-// 2015-06-24
+// 2015-07-21
 
 #include "vmemonitor_file.h"
+#include "vmemonitor.h"
 
 FILE *openFile(const char *dname, const char *fname)
 {
@@ -18,6 +19,11 @@ FILE *openFile(const char *dname, const char *fname)
   fstream = fopen(fullname, "rb");
   if (fstream == NULL) perror("fopen failed");
 
+  if (fstream && vmode) {
+    printTime();
+    fprintf(stderr, "open \t\t %s\n", fullname);
+  }
+
   return fstream;
 }
 
@@ -25,6 +31,11 @@ void closeFile(FILE *fstream)
 {
   if (fstream == NULL) return;
   if (fclose(fstream) != 0) perror("fclose failed");
+
+  if (vmode) {
+    printTime();
+    fprintf(stderr, "close file\n");
+  }
 }
 
 long findLastType(FILE *fstream, vmedata_type datatype, long ntimes)

@@ -1,7 +1,8 @@
 // Musinsky Jan
-// 2015-06-24
+// 2015-07-21
 
 #include "vmemonitor_client.h"
+#include "vmemonitor.h"
 
 int connectServer(const char *host, const char *port)
 {
@@ -36,6 +37,11 @@ int connectServer(const char *host, const char *port)
     return -1;
   }
 
+  if (vmode) {
+    printTime();
+    fprintf(stderr, "connect \t %s:%s\n", host, port);
+  }
+
   return sfd;
 }
 
@@ -44,6 +50,11 @@ void closeConnect(int sfd)
   if (sfd == -1) return;
   if (shutdown(sfd, SHUT_WR) == -1) perror("shutdown failed");
   if (close(sfd) == -1) perror("close socket failed");
+
+  if (vmode) {
+    printTime();
+    fprintf(stderr, "close socket\n");
+  }
 }
 
 int sendNotify(int sfd, const char *buffer)

@@ -1,30 +1,44 @@
 // Musinsky Jan
-// 2015-07-16
+// 2015-07-21
 
 #include "vmemonitor.h"
 #include "vmemonitor_notify.h"
 #include "vmemonitor_file.h"
 #include "vmemonitor_client.h"
 
+int vmode = 0;
+
 void printUsage(const char *name)
 {
-  fprintf(stderr, "Usage:\n %s [options] monitor-dir monitor-ext server port\n", name);
-  fprintf(stderr, "Options:\n");
-  fprintf(stderr, "  -v \t\t verbose mode\n");
-  fprintf(stderr, "  -h \t\t display this help and exit\n");
-  fprintf(stderr, "Example:\n %s -v /data_0 .dat strela.jinr.ru 7503\n", name);
+  fprintf(stdout, "Usage:\n %s [options] monitor-dir monitor-ext server port\n", name);
+  fprintf(stdout, "Options:\n");
+  fprintf(stdout, "  -v \t\t verbose mode\n");
+  fprintf(stdout, "  -h \t\t display this help and exit\n");
+  fprintf(stdout, "Example:\n %s -v /data_0 .dat strela.jinr.ru 7503\n", name);
   exit(EXIT_FAILURE);
+}
+
+void printTime(void)
+{
+  time_t t;
+  struct tm *lt;
+
+  t = time(NULL);
+  lt = localtime(&t);
+  if (lt == NULL) {
+    perror("localtime failed");
+    return;
+  }
+
+  fprintf(stderr, "%02d:%02d:%02d ", lt->tm_hour, lt->tm_min, lt->tm_sec);
 }
 
 int main(int argc, char *argv[])
 {
-  // TODO verbose mode (options or DEFINE) + LOG (journal)
   // TODO data send over TCP socket (use sendfile() instead send())
   // TODO timeout(~10s), send test signal after no new data
 
-  int vmode, opt;
-
-  vmode = 0;
+  int opt;
   while ((opt = getopt(argc, argv, "hv")) != -1) {
     switch (opt) {
       case 'v':
@@ -58,6 +72,11 @@ int main(int argc, char *argv[])
     closeFile(fdata);
     fdata = NULL;
 
+    if (vmode) {
+      printTime();
+      fprintf(stderr, "####### monitoring %s/*%s #######\n", argv[0], argv[1]);
+    }
+
     fmask = waitFile(notifyfd, datafname);
     if (fmask == -1) {
       closeWatch(notifyfd);
@@ -66,7 +85,6 @@ int main(int argc, char *argv[])
     if (fmask == 0) continue;
 
     if (endsWith(datafname, argv[1]) == -1) continue;
-    printf("datafname: %s\n", datafname);
 
     if ((anotherName(datafname) == 0) && (offsetdata != -1)) offsetdata = 0; // another file
     if (fmask & IN_MOVED_TO) /* mv vme.dat.tmp vme.dat */    offsetdata = 0; // recycle file
@@ -89,9 +107,18 @@ int main(int argc, char *argv[])
     // sendNotify(socketfd, datafname);
     // close connect + close file
 
-    tmp = offsetdata;
+    if (vmode) {
+      printTime();
+      fprintf(stderr, "send from \t %ld\n", offsetdata);
+    }
+    //tmp = offsetdata;
     offsetdata = sendFile(socketfd, offsetdata, fdata);
-    printf("data from: %12ld to: %12ld\n", tmp, offsetdata);
+
+    if (vmode) {
+      printTime();
+      fprintf(stderr, "send to \t %ld\n", offsetdata);
+    }
+    //printf("data from: %12ld to: %12ld\n", tmp, offsetdata);
   }
 
   exit(EXIT_SUCCESS);

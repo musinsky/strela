@@ -1,7 +1,8 @@
 // Musinsky Jan
-// 2015-06-24
+// 2015-07-21
 
 #include "vmemonitor_notify.h"
+#include "vmemonitor.h"
 
 int watchDir(const char *dname)
 {
@@ -58,11 +59,11 @@ int waitFile(int nfd, char *fname)
 
     // events sent by the kernel (from any watch)
     if (event->mask & IN_IGNORED) {
-      printf("IN_IGNORED\n");
+      fprintf(stderr, "IN_IGNORED\n");
       return -1;
     }
     if (event->mask & IN_Q_OVERFLOW) {
-      printf("IN_Q_OVERFLOW\n");
+      fprintf(stderr, "IN_Q_OVERFLOW\n");
       return 0;
     }
     // special flags, i.e. IN_ISDIR
@@ -73,6 +74,15 @@ int waitFile(int nfd, char *fname)
       fprintf(stderr, "length of inotify event name is 0\n");
       return 0;
     }
+
+    if (vmode) {
+      printTime();
+      fprintf(stderr, "notify \t %s ", event->name);
+      if      (event->mask & IN_MOVED_TO)    fprintf(stderr, "(MOVED_TO)\n");
+      else if (event->mask & IN_CLOSE_WRITE) fprintf(stderr, "(CLOSE_WRITE)\n");
+      else                                   fprintf(stderr, "(%d)\n", event->mask);
+    }
+
     strcpy(fname, event->name);
     return event->mask; // first (watching) event
     // correct should be return list of files names, not only first
