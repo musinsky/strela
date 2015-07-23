@@ -1,5 +1,5 @@
 // Musinsky Jan
-// 2015-07-21
+// 2015-07-23
 
 #include "vmemonitor_file.h"
 #include "vmemonitor.h"
@@ -101,7 +101,13 @@ long findLastType(FILE *fstream, vmedata_type datatype, long ntimes)
         // skip end of spill data
         if ((datatype == VME_SHDR) && ((dataword >> 27) == 0x19)) continue;
         ndatatypes++;
-        if (ndatatypes == ntimes) return (filesize - ndatawords*wordsize); // in bytes
+        if (ndatatypes == ntimes) {
+          if (vmode) {
+            printTime();
+            fprintf(stderr, "find last \t [0x%X] (%ldx)\n", datatype, ntimes);
+          }
+          return (filesize - ndatawords*wordsize); // in bytes
+        }
       }
     }
   } while (nread == BLOCK_SIZE);
