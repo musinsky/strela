@@ -1,5 +1,5 @@
 // Musinsky Jan
-// 2015-07-21
+// 2015-08-05
 
 #include "vmemonitor_client.h"
 #include "vmemonitor.h"
@@ -57,7 +57,7 @@ void closeConnect(int sfd)
   }
 }
 
-int sendNotify(int sfd, const char *buffer)
+int sendBuffer(int sfd, const char *buffer)
 {
   if (buffer == NULL) {
     fprintf(stderr, "no buffer\n");
@@ -79,16 +79,13 @@ int sendNotify(int sfd, const char *buffer)
   return 0;
 }
 
-
-
-// TODO: testing
-
 void sendInfo(int sfd, int info, long datafrom, long datato, const char *fname)
 {
-  char buf[NAME_MAX + 1 + sizeof(int) + 2*sizeof(long)]; // 276
+  // TODO: testing
+  char buf[BUF_INFO_SIZE];
 
-  size_t lenbytes;   // size_t  {aka long unsigned int}
-  ssize_t sentbytes; // ssize_t {aka long int}
+  size_t lenbytes;
+  ssize_t sentbytes;
 
   lenbytes = 0;
   memcpy(buf, &info, sizeof(info));                    // info code
@@ -101,11 +98,10 @@ void sendInfo(int sfd, int info, long datafrom, long datato, const char *fname)
   lenbytes += strlen(fname);
 
   sentbytes = send(sfd, buf, lenbytes, 0);
-  if (sentbytes == -1)
-    perror("send failed");
+  if (sentbytes == -1) perror("send failed");
+
   if (sentbytes != (ssize_t)lenbytes)
     fprintf(stderr, "sendInfo not deliver all bytes\n");
-
 
   //  // Write int value to socket
   //  void write_int(int sock, int value) {
@@ -135,9 +131,87 @@ void sendInfo(int sfd, int info, long datafrom, long datato, const char *fname)
    */
 }
 
+long sendFile(int sfd, off_t *foffset, FILE *fstream)
+{
+  // sendfile over socket (zero-copy) from foffset to end of the file
+  // return the total number of bytes sent
+  // foffset will be set to the offset of the byte following
+  // the last byte that was read (file size, next offset)
+
+  if (fstream == NULL) {
+    fprintf(stderr, "no fstream\n");
+    return -1;
+  }
+  if (foffset == NULL) {
+    fprintf(stderr, "no foffset\n");
+    return -1;
+  }
+
+  size_t lenbytes;   // size_t  {aka long unsigned int}
+  ssize_t sentbytes; // ssize_t {aka long int}
+  off_t filepos;     // off_t   {aka long int}
+  int fid;
+
+  fid = fstream->_fileno;
+  filepos = lseek(fid, 0, SEEK_END);
+  if (filepos == -1) {
+    perror("lseek SEEK_END failed");
+    return -1;
+  }
+  if ((*foffset) > filepos) {
+    fprintf(stderr, "offset: %ld > file size: %ld\n", *foffset, filepos);
+    return -1;
+  }
+  lenbytes = filepos;
+
+  filepos = lseek(fid, *foffset, SEEK_SET);
+  if (filepos == -1) {
+    perror("lseek SEEK_SET failed");
+    return -1;
+  }
+  lenbytes -= filepos;
+
+  if (vmode) {
+    printTime();
+    fprintf(stderr, "sendfile from \t %ld\n", *foffset);
+  }
+
+  // sendfile will transfer at most 0x7FFFF000 (2.147.479.552) bytes
+  // maximal write size of INT_MAX & PAGE_CACHE_MASK (2^31-1-4095)
+  size_t totalsent;
+
+  totalsent = 0;
+  while(totalsent < lenbytes) {
+    // foffset is adjusted to reflect the number of bytes read from fid
+    sentbytes = sendfile(sfd, fid, foffset, lenbytes - totalsent);
+    if (sentbytes == -1) {
+      perror("sendfile failed");
+      return -1;
+    }
+
+    totalsent += sentbytes;
+    //    if (vmode) {
+    //      printTime();
+    //      fprintf(stderr, "sendfile \t\t %ld\n", totalsent);
+    //    }
+  }
+
+  if (totalsent != lenbytes)
+    fprintf(stderr, "sendFile not deliver all bytes\n");
+
+  if (vmode) {
+    printTime();
+    fprintf(stderr, "sendfile to \t %ld (total %ld)\n", *foffset, totalsent);
+  }
+
+  return totalsent;
+}
 
 
-long sendFile(int sfd, long foffset, FILE *fstream)
+
+
+
+long sendFileOLD(int sfd, long foffset, FILE *fstream)
 {
   // send file over socket from foffset to end of the file
   // return last sended position (next offset) in bytes of the fstream
@@ -197,9 +271,6 @@ long sendFile(int sfd, long foffset, FILE *fstream)
     // If you have it in memory (because you processed it somehow, or just generated),
     // use the approach I mentioned earlier.
 
-    // takze predsa len na file, ktory sa cita zo suboru je asi najlpesie sendfile, neni to general way (only linux)
-    // !!! http://www.linuxcenter.ru/lib/articles/programming/sendfile.phtml !!!
-
     nsent = send(sfd, buf, nread*wordsize, 0);
     if (nsent == -1) {
       perror("send (sendFile) failed");
@@ -226,6 +297,18 @@ long sendFile(int sfd, long foffset, FILE *fstream)
   return ftell(fstream);  // foofset + totread
 }
 
+
+
+// takze predsa len na file, ktory sa cita zo suboru je asi najlpesie sendfile, neni to general way (only linux)
+// !!! http://www.linuxcenter.ru/lib/articles/programming/sendfile.phtml !!!
+
+// http://stackoverflow.com/questions/13215656/c-sendfile-and-send-difference
+
+
+// http://blog.superpat.com/2010/06/01/zero-copy-in-linux-with-sendfile-and-splice/
+// splice as recvfile
+
+
 // Nagle not optimal for streams
 
 // https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_MRG/1.2/html/Realtime_Tuning_Guide/sect-Realtime_Tuning_Guide-Application_Tuning_and_Deployment-TCP_NODELAY_and_Small_Buffer_Writes.html
@@ -236,6 +319,8 @@ long sendFile(int sfd, long foffset, FILE *fstream)
 
 // http://stackoverflow.com/questions/22124098/is-there-any-significant-difference-between-tcp-cork-and-tcp-nodelay-in-this-use
 
+// The TCP_NODELAY option allows to bypass Naggle, and then send the data as soon as it’s available.
+// https://t37.net/nginx-optimization-understanding-sendfile-tcp_nodelay-and-tcp_nopush.html
 
 // sending streaming data, disabling Nagle's algorithm is a better option. !!!!!!!!!!!!
 // so TCP_NODELAY is used for disabling nagle's algorithm.

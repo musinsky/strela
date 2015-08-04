@@ -1,5 +1,5 @@
 // Musinsky Jan
-// 2015-07-21
+// 2015-08-05
 
 #include "vmemonitor.h"
 #include "vmemonitor_notify.h"
@@ -35,7 +35,6 @@ void printTime(void)
 
 int main(int argc, char *argv[])
 {
-  // TODO data send over TCP socket (use sendfile() instead send())
   // TODO timeout(~10s), send test signal after no new data
 
   int opt;
@@ -56,7 +55,7 @@ int main(int argc, char *argv[])
 
   int fmask, notifyfd, socketfd;
   char datafname[NAME_MAX + 1]; // 256
-  long offsetdata, tmp;
+  long offsetdata;
   FILE *fdata;
 
   notifyfd = watchDir(argv[0]);
@@ -104,21 +103,7 @@ int main(int argc, char *argv[])
       if (offsetdata == -1) continue; // maybe sent any log message
     }
 
-    // sendNotify(socketfd, datafname);
-    // close connect + close file
-
-    if (vmode) {
-      printTime();
-      fprintf(stderr, "send from \t %ld\n", offsetdata);
-    }
-    //tmp = offsetdata;
-    offsetdata = sendFile(socketfd, offsetdata, fdata);
-
-    if (vmode) {
-      printTime();
-      fprintf(stderr, "send to \t %ld\n", offsetdata);
-    }
-    //printf("data from: %12ld to: %12ld\n", tmp, offsetdata);
+    sendFile(socketfd, &offsetdata, fdata);
   }
 
   exit(EXIT_SUCCESS);
