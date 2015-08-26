@@ -6,6 +6,6 @@
 
 //#pragma link C++ global gMonitor;
 
-#pragma link C++ class TVMEMonitor+;
+#pragma link C++ class TVMEServer+;
 
 #endif

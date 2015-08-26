@@ -1,11 +1,11 @@
-# @(#) 15 Jul 2015
+# @(#) 27 Aug 2015
 # module for Monitor
 
 # Author: Jan Musinsky
 
 MODULE	= Monitor
 MODDIR	= Monitor
-FILES	= TVMEMonitor
+FILES	= TVMEServer
 
 MONITORDOPT	:= $(LIBPREFIX)$(MODULE)
 MONITORCLEAN	:= $(OBJS) $(DICT) $(DICTH) $(DICTO)
