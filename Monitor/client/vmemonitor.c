@@ -1,5 +1,5 @@
 // Musinsky Jan
-// 2015-08-05
+// 2015-08-27
 
 #include "vmemonitor.h"
 #include "vmemonitor_notify.h"
@@ -36,6 +36,7 @@ void printTime(void)
 int main(int argc, char *argv[])
 {
   // TODO timeout(~10s), send test signal after no new data
+  // OBSOLETE but with signal https://github.com/perusio/linux-programming-by-example/blob/master/book/ch14/ch14-timers.c
 
   int opt;
   while ((opt = getopt(argc, argv, "hv")) != -1) {
@@ -103,7 +104,7 @@ int main(int argc, char *argv[])
       if (offsetdata == -1) continue; // maybe sent any log message
     }
 
-    sendFile(socketfd, &offsetdata, fdata);
+    sendFile(socketfd, &offsetdata, fdata, datafname);
   }
 
   exit(EXIT_SUCCESS);
