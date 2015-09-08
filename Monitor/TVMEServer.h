@@ -35,10 +35,7 @@ public:
   const char    *GetDataName() const { return fDataName.Data(); }
 
   virtual void   Print(Option_t *option = "") const;
-  void           OpenServer(Int_t port = 7503);
-  void           RecvData();
-  static void   *ThreadRecvData(void *ptr = 0);
-  void           CloseServer();
+  void           OpenServer(Int_t port = 7503, Bool_t inthread = kTRUE);
 
 private:
   TServerSocket *fServSock;  // server socket
@@ -50,6 +47,8 @@ private:
   Long_t         fDataTo;    // data to
   TString        fDataName;  // data name
 
+  static void   *ThreadRecvData(void *ptr = 0);
+  void           RecvData();
   void           ResetHeader();
   void           DecodeHeader(const char *buffer, Int_t bsize);
   FILE          *OpenFile() const;
