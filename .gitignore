@@ -7,3 +7,6 @@ lib/
 .project
 
 *.root
+
+Monitor/client/vmemonitor
+Monitor/client/*.o
