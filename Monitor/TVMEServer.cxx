@@ -1,7 +1,8 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    27 Aug 2015
+// @Date    08 Sep 2015
 
 #include <TServerSocket.h>
+#include <TThread.h>
 #include <TStopwatch.h>
 
 #include "TVMEServer.h"
@@ -12,6 +13,7 @@ ClassImp(TVMEServer)
 TVMEServer::TVMEServer()
 : TObject(),
   fServSock(0),
+  fThread(0),
   fStoreDir(),
   fDataCode(-1),
   fDataFrom(-1),
@@ -24,11 +26,45 @@ TVMEServer::TVMEServer()
 TVMEServer::~TVMEServer()
 {
   // Destructor
+  if (fThread) {
+    if (fThread->Kill() != 0) Info("Destructor", "thread kill with error");
+    delete fThread;
+    fThread = 0;
+  }
+
   SafeDelete(fServSock);
 }
 //______________________________________________________________________________
+void TVMEServer::Print(Option_t * /*option*/) const
+{
+  if (fServSock) fServSock->Print();
+  else Printf("no fServSock");
+
+  if (fThread) fThread->Print();
+  else Printf("no fThread");
+  TThread::Ps();
+}
+//______________________________________________________________________________
+void TVMEServer::CloseServer()
+{
+  if (!fServSock) return;
+  TSocket s(fServSock->GetLocalInetAddress(), fServSock->GetLocalPort());
+  if (s.IsValid()) s.SendRaw("", 0); // terminate sock = fServSock->Accept();
+
+  if (fThread) {
+    if (fThread->Kill() != 0) Warning("CloseServer", "thread kill with error");
+    delete fThread;
+    fThread = 0;
+  }
+
+  SafeDelete(fServSock);
+}
+
+//______________________________________________________________________________
 void TVMEServer::OpenServer(Int_t port)
 {
+  // init socket and start thread which will receive data (in background)
+
   if (fServSock) {
     Warning("OpenServer", "server socket already exists");
     return;
@@ -55,11 +91,38 @@ void TVMEServer::OpenServer(Int_t port)
    *
    * listen(sock, backlog); // backlog = kDefaultBacklog = 10
    */
+
+  if (fThread) {
+    Warning("OpenServer", "server thread already exists");
+    return;
+  }
+
+  fThread = new TThread("VMEServerThread", ThreadRecvData, (void *)this);
+  if (fThread->Run() != 0) Info("OpenServer", "thread run with error");
+}
+//______________________________________________________________________________
+void *TVMEServer::ThreadRecvData(void *ptr)
+{
+  if (!ptr) return 0;
+
+  TVMEServer *instance = (TVMEServer *)ptr;  // server instance
+  instance->RecvData();
+
+  Printf("server thread is done");
+  return ptr;
+
+  // https://root.cern.ch/root/htmldoc/TFastCgi.html
+  // https://root.cern.ch/phpBB3/viewtopic.php?f=3&t=18371#p78289     ex14b.tar.gz
+  // https://root.cern.ch/phpBB3/viewtopic.php?f=3&t=9594&start=30    gui_thread2.C
+  // if (fThread->GetState() == TThread::kRunningState)
+
+  // TThread::SetCancelOn(); // to allow to terminate (kill) the thread
+  // fThread->SetCancelAsynchronous();
 }
 //______________________________________________________________________________
 void TVMEServer::RecvData()
 {
-  // !!! call immediately after OpenServer !!!
+  // receiving data loop (call immediately after OpenServer)
 
   if (!fServSock) {
     Warning("RecvData", "first OpenServer");
@@ -75,6 +138,7 @@ void TVMEServer::RecvData()
   static TStopwatch timer;
 
   while (kTRUE) {
+    if (!fServSock) return; // close server (thread)
     totalrecv = 0;
     fdata = 0;
     SafeDelete(sock);
@@ -86,6 +150,7 @@ void TVMEServer::RecvData()
     }
 
     sock = fServSock->Accept();
+    if (!fServSock) return; // close server (thread)
     if (!sock || !sock->IsValid()) {
       Warning("RecvData", "accept failed");
       continue;
@@ -132,7 +197,12 @@ void TVMEServer::RecvData()
 
       if (AreDataValid()) {
         //  rewind(fdata);
+        //
+        //  thread add a lock/unlock mechanism in the loop (e.g. for every canvas update)
+        //  TThread::Lock();
         //  VME DECODE
+        //  canvas update
+        //  TThread::UnLock();
         fclose(fdata); // temporary
       } else
         fclose(fdata);
