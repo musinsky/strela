@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    21 Mar 2015
+// @Date    15 Jun 2016
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -107,6 +107,8 @@ public:
   void          CheckIntegrity(ETypeStatus type, Bool_t status, const char *where);
   void          CheckIntegrity2(ETypeStatus type, const char *where);
 
+  Int_t			GetNSpills() const { return fNSpills; }
+  Int_t			GetNEvents() const { return fNEvents; }
   TBits        *GetPrintType() const { return fPrintType; }
   Bool_t        PrintDataType(Int_t nlevel) const;
   const char   *GetTreeFileName() const { return fTreeFileName.Data(); }

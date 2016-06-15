@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    21 Mar 2015
+// @Date    15 Jun 2016
 
 #include <TMemFile.h>
 #include <TTree.h>
@@ -465,11 +465,18 @@ void TVMERawData::DecodeDataTQDC()
 //______________________________________________________________________________
 void TVMERawData::DecodeTQCHI()
 {
-  // 0x0 TQDC input counters high bits 31:16 (nothing interesting)
+  // 0x0 TQDC input counters high bits 31:16
   Int_t chi = fDataWord & 0xFFFF;       // (bits 0  - 15)
   Int_t ch  = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
 
-  // data (counters/rate) only between SHDR_END and STRL_END
+  //  data counters (0x0 and 0x1) only between SHDR_END and STRL_END
+  //
+  //  if (((fDataWord >> 19) & 0x1FF) == 0x1FF) // (bits 19 - 27)
+  //    => counter is time of last burst (no channel)
+  //    => time = (time & 0x0000FFFF) | (chi << 16);
+  //  else
+  //    => counters (by channel)
+  //    => count[ch] = (count[h] & 0x0000FFFF) | (chi << 16);
 
   if (!PrintDataType(3)) return;
   printf("TQCHI chi: %6d, ch: %d\n", chi, ch);
@@ -477,9 +484,18 @@ void TVMERawData::DecodeTQCHI()
 //______________________________________________________________________________
 void TVMERawData::DecodeTQCLO()
 {
-  // 0x1 TQDC input counters low bits 15:0 (nothing interesting)
+  // 0x1 TQDC input counters low bits 15:0
   Int_t clo = fDataWord & 0xFFFF;       // (bits 0  - 15)
   Int_t ch  = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
+
+  //  data counters (0x0 and 0x1) only between SHDR_END and STRL_END
+  //
+  //  if (((fDataWord >> 19) & 0x1FF) == 0x1FF) // (bits 19 - 27)
+  //    => counter is time of last burst (no channel)
+  //    => time = (time & 0xFFFF0000) | clo;
+  //  else
+  //    => counters (by channel)
+  //    => count[ch] = (count[h] & 0xFFFF0000) | clo;
 
   if (!PrintDataType(3)) return;
   printf("TQCLO clo: %6d, ch: %d\n", clo, ch);
