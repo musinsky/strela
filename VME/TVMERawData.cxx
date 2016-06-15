@@ -395,8 +395,9 @@ void TVMERawData::DecodeTLD()
   // see also daqlib/hptdc/hptdc.cpp (by Ilja Slepnev)
   //
   // for very high resolution, 21 bits (25ps)
+  // bits 0 - 18 + bits 19 - 20 = time bits 20:2 + 1:0
   // tm = ((fDataWord & 0x7FFFF) << 2) | ((fDataWord >> 19) & 0x3);
-  // and ! different channel decoding !
+  // and ! different channel (should be multiplied by 4) decoding !
 
   if (fModule && fEventTdc)
     fEventTdc->AddHitTdcCheck(fModule->GetFirstChannel() + fModule->MapChannel(id, ch), tm, kTRUE);
@@ -527,25 +528,26 @@ void TVMERawData::DecodeTQDC4()
   Int_t ch   = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
   Int_t mode = (fDataWord >> 26) & 0x3;  // (bits 26 - 27)
 
-  if (mode != 0) { // ADC timestamp
+  if (mode != 0) { // ADC (or trigger) timestamp
     Int_t ts  = fDataWord & 0xFFFF;      // (bits 0  - 15)
     Int_t wts = (fDataWord >> 16) & 0x7; // (bits 16 - 18)
 
-    if (wts == 0) {
+    if (wts == 0) {      // trigger timestamp
       if (fModule && fEventTqdcQ)
         fEventTqdcQ->AddHitTqdcQ(fModule->GetFirstChannel() + ch, ts, kFALSE);
 
       if (!PrintDataType(3)) return;
       printf("TQDC4 ts(TRIG): %6d, ch: %2d, wts: %d, mode: %d\n", ts, ch, wts, mode);
     }
-    else if (wts == 1) {
+    else if (wts == 1) { // ADC timestamp
       if (fModule && fEventTqdcQ)
         fEventTqdcQ->AddHitTqdcQ(fModule->GetFirstChannel() + ch, ts, kTRUE);
 
       if (!PrintDataType(3)) return;
       printf("TQDC4 ts(ADC ): %6d, ch: %2d, wts: %d, mode: %d\n", ts, ch, wts, mode);
     }
-    else {
+    else {               // undocumented (impossible) timestamp
+      Warning("DecodeTQDC4", "undocumented timestamp, wts = %d, channel = %d", wts, ch);
       if (!PrintDataType(3)) return;
       printf("TQDC4 ts(!!!!): %6d, ch: %2d, wts: %d, mode: %d\n", ts, ch, wts, mode);
     }
@@ -554,6 +556,7 @@ void TVMERawData::DecodeTQDC4()
     // normal resolution, 19 bits (100ps)
     Int_t tm = fDataWord & 0x7FFFF;      // (bits 0  - 18)
     //    // very high resolution, 21 bits (25ps)
+    //    // bits 0 - 18 + bits 24 - 25 = data bits 20:2 + 1:0
     //    tm = ((fDataWord & 0x7FFFF) << 2) | ((fDataWord >> 24) & 0x3);
 
     if (fModule && fEventTqdcT)
@@ -574,6 +577,7 @@ void TVMERawData::DecodeTQDC5()
     // normal resolution, 19 bits (100ps)
     Int_t tm = fDataWord & 0x7FFFF;      // (bits 0  - 18)
     //    // very high resolution, 21 bits (25ps)
+    //    // bits 0 - 18 + bits 24 - 25 = data bits 20:2 + 1:0
     //    tm = ((fDataWord & 0x7FFFF) << 2) | ((fDataWord >> 24) & 0x3);
 
     if (fModule && fEventTqdcT)
@@ -597,6 +601,7 @@ void TVMERawData::DecodeTQDC5()
     printf("TQDC5   sample: %6d, ch: %2d, mode: %d\n", sample, ch, mode);
   }
   else {
+    Warning("DecodeTQDC5", "unsupported mode, mode = %d, channel = %d", mode, ch);
     if (!PrintDataType(3)) return;
     printf("TQDC5 ch: %2d, unsupported mode: %d\n", ch, mode);
   }
