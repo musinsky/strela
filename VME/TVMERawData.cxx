@@ -266,7 +266,11 @@ void TVMERawData::DecodeMHDR()
   fModuleId = id;
 
   if (gVME) {
-    fModule = gVME->GetModule(ga); // suppose that ga is < 20
+    if (ga >= gVME->Modules()->GetSize()) { // suppose that ga is < 20
+      Error("DecodeMHDR", "module slot %d >= maximum slots %d", ga, gVME->Modules()->GetSize());
+      return;
+    }
+    fModule = gVME->GetModule(ga);
     if (fModule && (fModule->GetId() != id)) {
       Error("DecodeMHDR", "incorrect module ID %d != %d", id, fModule->GetId());
       fModule = 0;
@@ -528,6 +532,8 @@ void TVMERawData::DecodeTQDC4()
   Int_t ch   = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
   Int_t mode = (fDataWord >> 26) & 0x3;  // (bits 26 - 27)
 
+  // channels 16 - 31 are reserved (& 0x1F => always < 32)
+
   if (mode != 0) { // ADC (or trigger) timestamp
     Int_t ts  = fDataWord & 0xFFFF;      // (bits 0  - 15)
     Int_t wts = (fDataWord >> 16) & 0x7; // (bits 16 - 18)
@@ -572,6 +578,8 @@ void TVMERawData::DecodeTQDC5()
   // 0x5 TQDC data (TDC or ADC data)
   Int_t ch   = (fDataWord >> 19) & 0x1F; // (bits 19 - 23)
   Int_t mode = (fDataWord >> 26) & 0x3;  // (bits 26 - 27)
+
+  // channels 16 - 31 are reserved (& 0x1F => always < 32)
 
   if (mode == 0) {      // TDC data
     // normal resolution, 19 bits (100ps)
