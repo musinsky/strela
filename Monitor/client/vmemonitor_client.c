@@ -1,5 +1,5 @@
 // Musinsky Jan
-// 2015-08-27
+// 2016-06-20
 
 #include "vmemonitor_client.h"
 #include "vmemonitor.h"
@@ -36,6 +36,13 @@ int connectServer(const char *host, const char *port)
     fprintf(stderr, "no address succeeded connect\n");
     return -1;
   }
+
+  // set timeout value => sendfile failed: Resource temporarily unavailable
+  struct timeval timeout;
+  timeout.tv_sec = 1;
+  timeout.tv_usec = 0;
+  if (setsockopt(sfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) == -1)
+    perror("setsockopt failed");
 
   if (vmode) {
     printTime();
