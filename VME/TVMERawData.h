@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    15 Jun 2016
+// @Date    22 Jun 2016
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -27,7 +27,8 @@ public:
   };
   // Data options
   enum {
-    kWrongEvent = BIT(23) // Wrong event
+    kVerbose    = BIT(22), // Verbose mode
+    kWrongEvent = BIT(23)  // Wrong event
   };
   // Module Id
   enum EModuleId {
@@ -75,8 +76,13 @@ public:
   virtual ~TVMERawData();
 
   void          Reset();
+  void          DeleteTreeFile();
+  void          PrintDecodeFile(const char *fname) const;
   void          MakeTree(const char *fname);
   void          DecodeFile(const char *fname, Bool_t tree = kTRUE);
+  void          DecodeMonitor(FILE *file);
+
+  void          DecodeDataFile(FILE *file);
   void          DecodeDataWord();
   void          DecodeSHDR();
   void          DecodeSTRL();
@@ -106,11 +112,16 @@ public:
 
   void          CheckIntegrity(ETypeStatus type, Bool_t status, const char *where);
   void          CheckIntegrity2(ETypeStatus type, const char *where);
+  Bool_t        PrintDataType(Int_t nlevel) const;
 
+  ULong_t       GetNDataWords() const { return fNDataWords; }
   Int_t			GetNSpills() const { return fNSpills; }
   Int_t			GetNEvents() const { return fNEvents; }
   TBits        *GetPrintType() const { return fPrintType; }
-  Bool_t        PrintDataType(Int_t nlevel) const;
+  Bool_t        IsVerbose() const { return TestBit(kVerbose); }
+  void          Verbose(Bool_t set = kTRUE) { SetBit(kVerbose, set); }
+
+  TTree        *GetTree() const { return fTree; }
   const char   *GetTreeFileName() const { return fTreeFileName.Data(); }
   void          SetTreeFileName(const char *name) { fTreeFileName = name; }
 

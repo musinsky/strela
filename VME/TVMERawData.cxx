@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    15 Jun 2016
+// @Date    22 Jun 2016
 
 #include <TMemFile.h>
 #include <TTree.h>
@@ -35,12 +35,14 @@ TVMERawData::TVMERawData()
 {
   // Default constructor
   fPrintType = new TBits(16); // kPADD+1
+  Verbose(kTRUE);
 }
 //______________________________________________________________________________
 TVMERawData::~TVMERawData()
 {
   // Destructor
   SafeDelete(fPrintType);
+  DeleteTreeFile();
 }
 //______________________________________________________________________________
 void TVMERawData::Reset()
@@ -48,6 +50,35 @@ void TVMERawData::Reset()
   fNDataWords = fNSpills = fNEvents = 0;
   ResetBit(kSpill);
   ResetBit(kSpillEnd);
+}
+//______________________________________________________________________________
+void TVMERawData::DeleteTreeFile()
+{
+  TFile *tfile = 0;
+  if (fTree) tfile = fTree->GetCurrentFile();
+  SafeDelete(fEventTdc);
+  SafeDelete(fEventTqdcT);
+  SafeDelete(fEventTqdcQ);
+  SafeDelete(fTree);
+  if (tfile) delete tfile;
+}
+//______________________________________________________________________________
+void TVMERawData::PrintDecodeFile(const char *fname) const
+{
+  if (fname)
+    Printf("\ndata file: %s", fname);
+  else
+    Printf("\ndata monitor");
+  Printf("spills = %d", fNSpills);
+  Printf("events = %d", fNEvents);
+
+  if (!fTree) return;
+  TFile *tfile = fTree->GetCurrentFile();
+  Printf("\ntree/data file size = %6.2f %%", 100.0*tfile->GetSize()/(fNDataWords*sizeof(UInt_t)));
+  // sizeof(UInt_t) <=> UInt_t buffer[bufSize];
+  Printf("\ntree file: %s", tfile->GetName());
+  Printf("spills = %llu", fTree->Draw("", "EventEHDR == 0", "goff"));
+  Printf("events = %llu", fTree->GetEntries());
 }
 //______________________________________________________________________________
 void TVMERawData::MakeTree(const char *fname)
@@ -67,10 +98,10 @@ void TVMERawData::MakeTree(const char *fname)
   else if (fTreeFileName.IsWhitespace())
     treeFileName = "vme_data.root";
 
-  //  new TMemFile(treeFileName.Data(), "RECREATE", "", 0);
-  new TFile(treeFileName.Data(), "RECREATE");
+  if (fname == 0) new TMemFile("vme_memory.root", "RECREATE", "", 0); // no compress
+  else            new TFile(treeFileName.Data(), "RECREATE");
   fTree = new TTree("pp", gVME->GetName());
-  //  fTree->SetAutoSave(10000000);    // autosave when 10M entries written
+  fTree->SetAutoSave(10000000); // autosave (tree header) when 10M entries written
   //  fTree->SetAutoSave(-1000000000); // autosave when 1 Gbyte (unzipped) written
 
   fTree->Branch("EventEHDR", &fEventEHDR, "fEventEHDR/I");
@@ -96,7 +127,37 @@ void TVMERawData::DecodeFile(const char *fname, Bool_t tree)
   }
 
   Reset();
-  if (tree) MakeTree(fname);
+  if (tree) {
+    MakeTree(fname); // storage tree
+    if (!fTree) return;
+  }
+  DecodeDataFile(file);
+  fclose(file);
+
+  if (IsVerbose()) PrintDecodeFile(fname);
+  DeleteTreeFile();
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeMonitor(FILE *file)
+{
+  Reset();
+  DeleteTreeFile();
+  MakeTree(0); // memory tree
+  if (!fTree) return;
+  DecodeDataFile(file);
+  // file closed by user
+  //  fclose(file);
+
+  if (IsVerbose()) PrintDecodeFile(0);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeDataFile(FILE *file)
+{
+  if (!file) {
+    Error("DecodeDataFile", "no data file");
+    return;
+  }
+
   const size_t bufSize = 4096; // 4096 is blocksize in bytes (blockdev --getbsz /dev/sda1)
   UInt_t buffer[bufSize];      // data in buffer is 4 bytes (32 bits)
   size_t nread;
@@ -106,7 +167,8 @@ void TVMERawData::DecodeFile(const char *fname, Bool_t tree)
   fseek(file, 0L, SEEK_SET);
 
   do {
-    if (!(fNDataWords % 10000)) fprintf(stderr, "decoding progress: %6.2f %%\r", fNDataWords/nwords);
+    if (IsVerbose())
+      if (!(fNDataWords % 10000)) fprintf(stderr, "decoding progress: %6.2f %%\r", fNDataWords/nwords);
     nread = fread(buffer, sizeof(UInt_t), bufSize, file);
     for (size_t i = 0; i < nread; i++) {
       fDataWord = buffer[i];
@@ -114,25 +176,13 @@ void TVMERawData::DecodeFile(const char *fname, Bool_t tree)
       fNDataWords++;
     }
   } while (nread == bufSize);
-  fprintf(stderr, "decoding progress: %6.2f %%\n", fNDataWords/nwords);
+  if (IsVerbose()) fprintf(stderr, "decoding progress: %6.2f %%\n", fNDataWords/nwords);
 
-  if (fTree) {
-    TFile *tfile = fTree->GetCurrentFile();
-    tfile->Write();
-    Printf("\ntree file: %s", tfile->GetName());
-    Printf("events = %llu", fTree->GetEntries());
-    Printf("\ntree/data file size = %6.2f %%", 100.0*tfile->GetSize()/(fNDataWords*sizeof(UInt_t)));
-    SafeDelete(fEventTdc);
-    SafeDelete(fEventTqdcT);
-    SafeDelete(fEventTqdcQ);
-    SafeDelete(fTree);
-    delete tfile;
-  }
-  fclose(file);
+  // write tree
+  if (fTree) fTree->GetCurrentFile()->Write();
 
-  Printf("\ndata file: %s", fname);
-  Printf("spills = %d", fNSpills);
-  Printf("events = %d", fNEvents);
+  // file closed by user
+  //  fclose(file);
 }
 //______________________________________________________________________________
 void TVMERawData::DecodeDataWord()
