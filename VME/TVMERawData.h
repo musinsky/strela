@@ -19,16 +19,16 @@ class TVMERawData : public TObject {
 public:
   // Data type status bits
   enum ETypeStatus {
-    kSpill    = BIT(14), // Spill header/trailer
-    kSpillEnd = BIT(15), // Spill (end of data)
-    kEvent    = BIT(16), // Event header/trailer
-    kModule   = BIT(17), // Module header/trailer
-    kData     = BIT(18)  // Data (specifying by module)
+    kSpill    = BIT(14), // spill header/trailer
+    kSpillEnd = BIT(15), // spill (end of data)
+    kEvent    = BIT(16), // event header/trailer
+    kModule   = BIT(17), // module header/trailer
+    kData     = BIT(18)  // data (specifying by module)
   };
   // Data options
   enum {
-    kVerbose    = BIT(22), // Verbose mode
-    kWrongEvent = BIT(23)  // Wrong event
+    kVerbose    = BIT(22), // verbose mode
+    kWrongEvent = BIT(23)  // wrong event
   };
   // Module Id
   enum EModuleId {
@@ -40,14 +40,14 @@ public:
   };
   // Common data type
   enum ECommonType {
-    kMHDR = 0x8, // Module header
-    kMTRL = 0x9, // Module trailer
-    kEHDR = 0xA, // Event header
-    kETRL = 0xB, // Event trailer
-    kSHDR = 0xC, // Spill header
-    kSTRL = 0xD, // Spill trailer
-    kSTAT = 0xE, // Status
-    kPADD = 0xF  // Padding
+    kMHDR = 0x8, // module header
+    kMTRL = 0x9, // module trailer
+    kEHDR = 0xA, // event header
+    kETRL = 0xB, // event trailer
+    kSHDR = 0xC, // spill header
+    kSTRL = 0xD, // spill trailer
+    kSTAT = 0xE, // status
+    kPADD = 0xF  // padding
   };
   // TDC data type
   enum ETDCType {

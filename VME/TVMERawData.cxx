@@ -96,7 +96,7 @@ void TVMERawData::MakeTree(const char *fname)
     treeFileName += ".root";
   }
   else if (fTreeFileName.IsWhitespace())
-    treeFileName = "vme_data.root";
+    treeFileName = "vme_storage.root";
 
   if (fname == 0) new TMemFile("vme_memory.root", "RECREATE", "", 0); // no compress
   else            new TFile(treeFileName.Data(), "RECREATE");
