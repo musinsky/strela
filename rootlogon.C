@@ -1,9 +1,9 @@
 // Author: Jan Musinsky
-// 15/07/2015
+// 17/11/2016
 
 {
-  if (TClass::GetClass("TVME") || TClass::GetClass("TVMEMonitor") ||
-      TClass::GetClass("TStrela")) {
+  if (TClassTable::GetDict("TVME") || TClassTable::GetDict("TVMEMonitor") ||
+      TClassTable::GetDict("TStrela")) {
     Printf("Libraries was already loaded");
     return;
   }

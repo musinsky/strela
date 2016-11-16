@@ -115,8 +115,8 @@ public:
   Bool_t        PrintDataType(Int_t nlevel) const;
 
   ULong_t       GetNDataWords() const { return fNDataWords; }
-  Int_t			GetNSpills() const { return fNSpills; }
-  Int_t			GetNEvents() const { return fNEvents; }
+  Int_t         GetNSpills() const { return fNSpills; }
+  Int_t         GetNEvents() const { return fNEvents; }
   TBits        *GetPrintType() const { return fPrintType; }
   Bool_t        IsVerbose() const { return TestBit(kVerbose); }
   void          Verbose(Bool_t set = kTRUE) { SetBit(kVerbose, set); }
