@@ -1,11 +1,11 @@
-# @(#) 03 May 2015
+# @(#) 17 Nov 2016
 # module for VME
 
 # Author: Jan Musinsky
 
 MODULE	= VME
 MODDIR	= VME
-FILES	= TVME TVirtualModule TModulePhTDC TModuleTDC96 TModuleTDC64V TModuleTQDC16 \
+FILES	= TVME TVirtualModule TModulePhTDC TModuleTDC96 TModuleTDC64V TModuleTQDC16 TModuleMSC16V \
 	  TVMERawData TVirtualEvent TVirtualHit \
 	  TEventTdc THitTdc TEventTqdcT THitTqdcT TEventTqdcQ THitTqdcQ
 

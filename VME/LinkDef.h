@@ -12,6 +12,7 @@
 #pragma link C++ class TModuleTDC96+;
 #pragma link C++ class TModuleTDC64V+;
 #pragma link C++ class TModuleTQDC16+;
+#pragma link C++ class TModuleMSC16V+;
 
 #pragma link C++ class TVMERawData+;
 #pragma link C++ class TVirtualEvent+;

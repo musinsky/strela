@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    19 Feb 2015
+// @Date    17 Nov 2016
 
 #include <TMath.h>
 
@@ -15,6 +15,7 @@ ClassImp(TVME)
 TVME::TVME()
 : TNamed(),
   fModules(0),
+  fNChannelsMSC(0),
   fNChannelsTQDC(0),
   fNChannels(0),
   fChannel(0),
@@ -27,6 +28,7 @@ TVME::TVME()
 TVME::TVME(const char *name, const char *title)
 : TNamed(name, title),
   fModules(0),
+  fNChannelsMSC(0),
   fNChannelsTQDC(0),
   fNChannels(0),
   fChannel(0),
@@ -64,13 +66,18 @@ void TVME::CountChannels()
   if (!fModules) return;
 
   TVirtualModule *module;
+  fNChannelsMSC  = 0;
   fNChannelsTQDC = 0;
   fNChannels     = 0;
 
   for (Int_t im = 0; im < fModules->GetSize(); im++) {
     module = GetModule(im);
     if (!module) continue;
-    if (module->IsTQDC()) {
+    if (module->IsMSC()) {
+      module->SetFirstChannel(fNChannelsMSC);
+      fNChannelsMSC += module->GetModuleNChannels();
+    }
+    else if (module->IsTQDC()) {
       module->SetFirstChannel(fNChannelsTQDC);
       fNChannelsTQDC += module->GetModuleNChannels();
     }
@@ -85,13 +92,13 @@ void TVME::ReDecodeChannels()
 {
   if (!fModules) return;
 
+  CountChannels();
+  if (fNChannels == 0) return; // only other than TDC channels
+
   // from 2013_12 is no longer needed, but leaving feedback over fgReDecode
   //
   // for 2007_03, 2008_06, 2009_12, 2011_03 see in pomme.cxx
   Int_t moduleShift = 100 - 512, moduleDelta = 512, idMulti = 32;
-
-  CountChannels();
-  if (fNChannels == 0) return; // no TDC channels (only TQDC)
 
   DeleteChannels();
   fChannel  = new Int_t[fNChannels];

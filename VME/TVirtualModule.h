@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    19 Feb 2015
+// @Date    17 Nov 2016
 
 #ifndef STRELA_TVirtualModule
 #define STRELA_TVirtualModule
@@ -22,6 +22,7 @@ public:
 
   virtual const char *GetTitle() const;
 
+  virtual Bool_t IsMSC() const { return kFALSE; }
   virtual Bool_t IsTQDC() const { return kFALSE; }
   virtual Int_t  MapChannel(Int_t tdcid, Int_t tdcch) const;
   virtual Bool_t GetChannelIdCh(Int_t ch, Int_t &tdcid, Int_t &tdcch) const;

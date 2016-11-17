@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    19 Feb 2015
+// @Date    17 Nov 2016
 
 #ifndef STRELA_TVME
 #define STRELA_TVME
@@ -19,6 +19,7 @@ public:
   TObjArray      *Modules() const { return fModules; }
   TVirtualModule *GetModule(Int_t slot) const { return (TVirtualModule *)fModules->UncheckedAt(slot); }
   Int_t           GetNumOfEnabledModules() const { return fModules->GetEntries(); }
+  Int_t           GetNChannelsMSC() const { return fNChannelsMSC; }
   Int_t           GetNChannelsTQDC() const { return fNChannelsTQDC; }
   Int_t           GetNChannelsTDC() const { return fNChannels; }
   Int_t           GetNChannels() const { return fNChannels; }
@@ -32,8 +33,9 @@ public:
 
 private:
   TObjArray      *fModules;   //->list of all modules
+  Int_t           fNChannelsMSC;  // number of MSC  channels
   Int_t           fNChannelsTQDC; // number of TQDC channels
-  Int_t           fNChannels;     // number of TDC channels
+  Int_t           fNChannels;     // number of TDC  channels
   Int_t          *fChannel;   //[fNChannels] array of all TDC channels/nadc
   Int_t          *fIndexCha;  //[fNChannels] sorted index of TDC channels
   Int_t          *fSortCha;   //[fNChannels] sorted array of TDC channels
