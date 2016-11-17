@@ -21,8 +21,8 @@ public:
   Int_t         GetTTR() const { return fDelta ? fTime + fDelta : 0; }
 
 private:
-  UShort_t      fTime;  // leading time (19 bits word)
-  UShort_t      fDelta; // delta time
+  UShort_t      fTime;  // TDC leading time (19 or 21 bits word)
+  UShort_t      fDelta; // TDC delta time
 
   ClassDef(THitTdc, 1) // HitTdc
 };

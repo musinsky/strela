@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    22 Jun 2016
+// @Date    17 Nov 2016
 
 #include <TMemFile.h>
 #include <TTree.h>
@@ -616,7 +616,7 @@ void TVMERawData::DecodeTQDC4()
     //    tm = ((fDataWord & 0x7FFFF) << 2) | ((fDataWord >> 24) & 0x3);
 
     if (fModule && fEventTqdcT)
-      fEventTqdcT->AddHitTqdcT(fModule->GetFirstChannel() + ch, tm);
+      fEventTqdcT->AddHitTqdcTCheck(fModule->GetFirstChannel() + ch, tm, kFALSE); // ?!?!?!
 
     if (!PrintDataType(3)) return;
     printf("TQDC4 tm: %6d, ch: %2d, mode: %d\n", tm, ch, mode);
@@ -639,7 +639,7 @@ void TVMERawData::DecodeTQDC5()
     //    tm = ((fDataWord & 0x7FFFF) << 2) | ((fDataWord >> 24) & 0x3);
 
     if (fModule && fEventTqdcT)
-      fEventTqdcT->AddHitTqdcT(fModule->GetFirstChannel() + ch, tm);
+      fEventTqdcT->AddHitTqdcTCheck(fModule->GetFirstChannel() + ch, tm, kTRUE); // ?!?!?!
 
     if (!PrintDataType(3)) return;
     printf("TQDC5 tm: %6d, ch: %2d, mode: %d\n", tm, ch, mode);

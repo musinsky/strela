@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    19 Mar 2015
+// @Date    17 Nov 2016
 
 #ifndef STRELA_TEventTqdcT
 #define STRELA_TEventTqdcT
@@ -22,10 +22,12 @@ public:
   virtual void  Clear(Option_t *option = "");
   virtual void  Print(Option_t *option = "") const;
 
-  void          AddHitTqdcT(Int_t ch, Int_t t);
+  void          AddHitTqdcT(Int_t ch, Int_t tld);
+  void          AddHitTqdcTCheck(Int_t ch, Int_t tdc, Bool_t ld);
 
   Int_t         MultiTqdcT(Int_t ch) { return Multi(ch); }
-  Int_t         T(Int_t ch, Int_t multi);
+  Int_t         Time(Int_t ch, Int_t multi);
+  Int_t         Delta(Int_t ch, Int_t multi);
 
 private:
   Int_t         fTrigTime; // trigger time
