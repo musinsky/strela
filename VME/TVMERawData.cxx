@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    17 Nov 2016
+// @Date    21 Nov 2016
 
 #include <TMemFile.h>
 #include <TTree.h>
@@ -377,9 +377,9 @@ void TVMERawData::DecodeData()
       //    case kTDC96:
       //      DecodeDataTDC();
       //      return;
-      //    case kTTCM:
-      //      DecodeDataTTCM();
-      //      return;
+    case kMSC16V:
+      DecodeDataMSC();
+      return;
     default:
       break;
   }
@@ -671,6 +671,77 @@ void TVMERawData::DecodeTQERR()
   Int_t flag = fDataWord & 0x7FFF; // (bits 0  - 14)
 
   Warning("DecodeTQERR", "TQDC error flags: 0x%X", flag);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeDataMSC()
+{
+  // 0x0 - 0x5 only for MSC Data format
+
+  switch (fDataType) {
+    case kMSCG0:
+      DecodeMSCG0123();
+      return;
+    case kMSCG1:
+      DecodeMSCG0123();
+      return;
+    case kMSCG2:
+      DecodeMSCG0123();
+      return;
+    case kMSCG3:
+      DecodeMSCG0123();
+      return;
+    case kMSCTS:
+      DecodeMSCTS();
+      return;
+    case kMSCNT:
+      DecodeMSCNT();
+      return;
+    default:
+      break;
+  }
+
+  if (!PrintDataType(3)) return;
+  printf("DATA MSC not specified\n");
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeMSCG0123()
+{
+  // MSC input counters
+  // 0x0 group 0 (channels 00-03)
+  // 0x1 group 1 (channels 04-07)
+  // 0x2 group 2 (channels 08-11)
+  // 0x3 group 3 (channels 12-15)
+
+  const Int_t kChannels = 4;
+  Int_t cnt[kChannels];
+  cnt[0] = fDataWord         & 0x7F; // (bits 0  - 6)
+  cnt[1] = (fDataWord >> 7)  & 0x7F; // (bits 7  - 13)
+  cnt[2] = (fDataWord >> 14) & 0x7F; // (bits 14 - 20)
+  cnt[3] = (fDataWord >> 21) & 0x7F; // (bits 21 - 27)
+
+  if (!PrintDataType(3)) return;
+  for (Int_t ch = 0; ch < kChannels; ch++)
+    printf("MSCG0123 ch: %02d, cnt: %d\n", kChannels*fDataType + ch, cnt[ch]);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeMSCTS()
+{
+  // 0x4 MSC timestamp
+  Int_t ts = fDataWord & 0xFFFFFFF;  // (bits 0  - 27)
+
+  if (!PrintDataType(3)) return;
+  printf("MSCTS ts: %d\n", ts);
+}
+//______________________________________________________________________________
+void TVMERawData::DecodeMSCNT()
+{
+  // 0x5 MSC spill hit counters
+  Int_t cnt = fDataWord & 0xFFFFFFF; // (bits 0  - 27)
+
+  // spill hit counters only between SHDR_END and STRL_END
+
+  if (!PrintDataType(3)) return;
+  printf("MSCNT cnt: %d\n", cnt);
 }
 //______________________________________________________________________________
 void TVMERawData::CheckIntegrity(ETypeStatus type, Bool_t status, const char *where)

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    22 Jun 2016
+// @Date    21 Nov 2016
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
@@ -36,6 +36,7 @@ public:
     kTDC96  = 0x05, // TDC (obsolete)
     kTQDC16 = 0x09, // TQDC
     kTTCM   = 0x0A, // TTCM (not used)
+    kMSC16V = 0x0F, // MSC
     kTDC64V = 0x10  // TDC
   };
   // Common data type
@@ -70,6 +71,15 @@ public:
   // TQDC options
   enum {
     kADCBits = 14 // ADC sampling resolution
+  };
+  // MSC data type
+  enum EMSCType {
+    kMSCG0 = 0x0, // MSC group 0
+    kMSCG1 = 0x1, // MSC group 1
+    kMSCG2 = 0x2, // MSC group 2
+    kMSCG3 = 0x3, // MSC group 3
+    kMSCTS = 0x4, // MSC timestamp
+    kMSCNT = 0x5  // MSC spill hit counters
   };
 
   TVMERawData();
@@ -109,6 +119,11 @@ public:
   void          DecodeTQDC4();
   void          DecodeTQDC5();
   void          DecodeTQERR();
+  // MSC decoding
+  void          DecodeDataMSC();
+  void          DecodeMSCG0123();
+  void          DecodeMSCTS();
+  void          DecodeMSCNT();
 
   void          CheckIntegrity(ETypeStatus type, Bool_t status, const char *where);
   void          CheckIntegrity2(ETypeStatus type, const char *where);
