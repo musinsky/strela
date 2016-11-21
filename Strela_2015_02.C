@@ -37,7 +37,14 @@ void Strela_2015_02()
   t11->SetMaxResTan(0.250);
   t12->SetMaxResTan(0.250);
 
-  gROOT->LoadMacro("macros/DisplayTracker.C+");
+  if (gROOT->GetVersionInt() < 60000) { // ROOT5
+    gROOT->LoadMacro("macros/DisplayTracker.C+");
+  }
+  else {                                // ROOT6
+    R__LOAD_LIBRARY(macros/DisplayTracker.C+);
+    // with gInterpreter not working
+    // gInterpreter->LoadMacro("macros/DisplayTracker.C+");
+  }
   DisplayTracker(t2, 0, t12, t1, 0, t11);
   gStrela->GetDisplay()->GetCanvas()->SetWindowSize(650, 600);
   t1->GetTube(0)->SetShowHistograms();
