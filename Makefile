@@ -111,7 +111,7 @@ debug:		all
 
 clean:
 		@rm -fv $(DEPENDFILE) $(DEPENDFILE).bak \
-		  $(OBJDIR)/*.so $(OBJDIR)/*.d # foreign build files
+		  $(OBJDIR)/*.$(DllSuf) $(OBJDIR)/*.d $(OBJDIR)/*.$(PCMSUF) # foreign build files
 
 distclean:	clean
 
