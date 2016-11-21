@@ -1,4 +1,4 @@
-# @(#) 15 Jul 2015
+# @(#) 22 Nov 2016
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
@@ -78,9 +78,9 @@ $(OBJDIR)/%.$(ObjSuf) : %.$(SrcSuf)
 $(DICTPREFIX)%.$(SrcSuf) :
 		@echo "Generating dictionary $@ ..."
 		$(checkdir)
-ifeq ($(ROOTCINT),)
+ifeq ($(ROOTCINT),) # ROOT6
 		$(call checkdir1,$(LIBDIR)) # needed for pcm and rootmap
-		@$(ROOTCLING) -f $@ $(call $@DictOpt) -c -I$(INCDIR) $^
+		@$(ROOTCLING) -f $@ $(call $@DictOpt) -I$(INCDIR) $^
 else
 		@$(ROOTCINT) -f $@ -c -I$(INCDIR) $^
 endif

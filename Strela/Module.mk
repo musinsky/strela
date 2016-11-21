@@ -1,4 +1,4 @@
-# @(#) 03 May 2015
+# @(#) 22 Nov 2016
 # module for Strela
 
 # Author: Jan Musinsky
@@ -24,7 +24,7 @@ ALLDIST		+= $(SRCS) $(HDRS) $(LNKDEF) $(MODDIR)/$(MODMAKEFILE)
 ALLDEPEND	+= $(SRCS)
 
 $(DICT)DictOpt	= $(call DictOpt,$(STRELADOPT))
-#$(MODLIB)Extra	= # nothing yet
+#$(MODLIB)Extra	= -L$(ROOTSYS)/lib -lGpad -lSQLIO
 
 # local rules
 $(MODDIR):	$(MODLIB)
