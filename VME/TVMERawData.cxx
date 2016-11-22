@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    21 Nov 2016
+// @Date    22 Nov 2016
 
 #include <TMemFile.h>
 #include <TTree.h>
@@ -26,6 +26,8 @@ TVMERawData::TVMERawData()
   fEventMHDR(0),
   fModuleId(0),
   fPrintType(0),
+  fMSCChan(0),
+  fMSCCnt(),
   fTree(0),
   fEventTdc(0),
   fEventTqdcT(0),
@@ -87,6 +89,9 @@ void TVMERawData::MakeTree(const char *fname)
     Error("MakeTree", "gVME not initialized");
     return;
   }
+
+  if (fMSCCnt.GetSize() != gVME->GetNChannelsMSC()) // only once
+    fMSCCnt.Set(gVME->GetNChannelsMSC());
 
   TString treeFileName = fTreeFileName;
   if (fTreeFileName == "root") {
@@ -324,6 +329,11 @@ void TVMERawData::DecodeMHDR()
     if (fModule && (fModule->GetId() != id)) {
       Error("DecodeMHDR", "incorrect module ID %d != %d", id, fModule->GetId());
       fModule = 0;
+    }
+
+    if (TestBit(kSpillEnd)) { // MSC reset channel
+      if (fModule && fModule->IsMSC())
+        fMSCChan = 0;
     }
   }
 
@@ -739,6 +749,7 @@ void TVMERawData::DecodeMSCNT()
   Int_t cnt = fDataWord & 0xFFFFFFF; // (bits 0  - 27)
 
   // spill hit counters only between SHDR_END and STRL_END
+  if (fModule) fMSCCnt.AddAt(cnt, fModule->GetFirstChannel() + (fMSCChan++));
 
   if (!PrintDataType(3)) return;
   printf("MSCNT cnt: %d\n", cnt);

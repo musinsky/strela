@@ -1,11 +1,12 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    21 Nov 2016
+// @Date    22 Nov 2016
 
 #ifndef STRELA_TVMERawData
 #define STRELA_TVMERawData
 
 #include <TBits.h>
 #include <TString.h>
+#include <TArrayI.h>
 
 class TTree;
 
@@ -133,6 +134,7 @@ public:
   Int_t         GetNSpills() const { return fNSpills; }
   Int_t         GetNEvents() const { return fNEvents; }
   TBits        *GetPrintType() const { return fPrintType; }
+  TArrayI       GetMSCCnt() const { return fMSCCnt; }
   Bool_t        IsVerbose() const { return TestBit(kVerbose); }
   void          Verbose(Bool_t set = kTRUE) { SetBit(kVerbose, set); }
 
@@ -150,6 +152,8 @@ private:
   Int_t         fEventMHDR;  // event number in MHDR
   Int_t         fModuleId;   // module Id from MHDR
   TBits        *fPrintType;  // table of bits to print type of data
+  Int_t         fMSCChan;    // MSC channel (current)
+  TArrayI       fMSCCnt;     // MSC counter
 
   TTree          *fTree;
   TEventTdc      *fEventTdc;
