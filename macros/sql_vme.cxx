@@ -7,7 +7,7 @@
 #include "TVME.h"
 #include "TVirtualModule.h"
 
-TList *list = new TList();
+TList *list6 = new TList();
 
 const Int_t kMaxCh = 8;    // max. number of channels in one layer
 const Int_t kMaxPins = 16; // number of pins in one connector/cable
@@ -152,8 +152,8 @@ public:
 TVirtualChamber::TVirtualChamber(const TString *names)
 : TObject()
 {
-  if (list->IsEmpty()) TLayer::ResetCounter();
-  list->Add(this);
+  if (list6->IsEmpty()) TLayer::ResetCounter();
+  list6->Add(this);
 
   fNLayers = 4;
   fLayers = new TLayer* [fNLayers];
@@ -165,14 +165,14 @@ void TVirtualChamber::Print(Option_t *option) const
 {
   TString opt = option;
 
-  if (list->First() != this) {
+  if (list6->First() != this) {
     if (opt.Contains("channels")) Printf("--\n-- next cham\n--");
     else if (opt.Contains("layers")) printf("\n");
   }
   for (Int_t i = 0; i < fNLayers; i++) {
     opt = option;
-    if ((list->First() == this) && (i == 0)) opt += "first";
-    if ((list->Last() == this) && (i == (fNLayers - 1))) opt += "last";
+    if ((list6->First() == this) && (i == 0)) opt += "first";
+    if ((list6->Last() == this) && (i == (fNLayers - 1))) opt += "last";
     fLayers[i]->Print(opt.Data());
     if ((i != (fNLayers - 1)) && opt.Contains("channels")) printf("\n");
   }
