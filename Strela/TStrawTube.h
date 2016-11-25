@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    13 Jun 2014
+// @Date    25 Nov 2016
 
 #ifndef STRELA_TStrawTube
 #define STRELA_TStrawTube
@@ -46,6 +46,7 @@ private:
   static Int_t  fgShowHistograms; //  on/off drawing histograms
   TH1F         *fhTime1;   //! raw time (all hits)
   TH1F         *fhTime2;   //! time (if found track) or pure track time
+  TH1F         *fhDelta;   //! delta time (leading - trailing)
   TH1F         *fhRad1;    //! radius (all hits)
   TH1F         *fhRad2;    //! radius (if found track)
   TH1F         *fhDis1;    //! distance (from real track)
@@ -94,6 +95,7 @@ public:
 
   TH1F         *HisTime1() const { return fhTime1; }
   TH1F         *HisTime2() const { return fhTime2; }
+  TH1F         *HisDelta() const { return fhDelta; }
   TH1F         *HisRad1() const { return fhRad1; }
   TH1F         *HisRad2() const { return fhRad2; }
   TH1F         *HisDis1() const { return fhDis1; }

@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    01 Jul 2014
+// @Date    25 Nov 2016
 
 #include <TH2.h>
 #include <TSpline.h>
@@ -41,6 +41,7 @@ TStrawTube::TStrawTube()
   fNHits    = 0;
   fhTime1   = 0;
   fhTime2   = 0;
+  fhDelta   = 0;
   fhRad1    = 0;
   fhRad2    = 0;
   fhDis1    = 0;
@@ -66,6 +67,7 @@ TStrawTube::TStrawTube(Double_t center) : TEllipse()
   fNHits    = 0;
   fhTime1   = 0;
   fhTime2   = 0;
+  fhDelta   = 0;
   fhRad1    = 0;
   fhRad2    = 0;
   fhDis1    = 0;
@@ -211,18 +213,21 @@ void TStrawTube::InitHistograms()
     return;
   }
 
-  fhTime1 = new TH1F(Form("%s_time1", GetName()), Form("T0 = %d, tdc   <%d, %d>; 10ns", fT0, fTMin, fTMax),
-                     9000/30, 0, 9000);
+  //  fhTime1 = new TH1F(Form("%s_time1", GetName()), Form("T0 = %d, tdc   <%d, %d>; 10ns", fT0, fTMin, fTMax),
+  fhTime1 = new TH1F(Form("%s_time1", GetName()), GetTitle(), 9000/30, 0, 9000);
   fhTime1->SetMinimum(0);
-  fhTime1->SetLineColor(kGray + 1);
+  //  fhTime1->SetLineColor(kGray + 1);
   gStrela->HistoManager(fhTime1, "add");
   fhTime2 = new TH1F(Form("%s_time2", GetName()), Form("tdc   <%d, %d>; 10ns", fTMin, fTMax),
                      9000/30, 0, 9000);
   fhTime2->SetMinimum(0);
   gStrela->HistoManager(fhTime2, "add");
+  fhDelta = new TH1F(Form("%s_delta", GetName()), Form("%s_delta", GetName()), 1200/3, 0, 1200);
+  fhDelta->SetMinimum(0);
+  gStrela->HistoManager(fhDelta, "add");
   fhRad1 = new TH1F(Form("%s_rad1", GetName()), "radius(1); cm", 200*GetRange(), 0, GetRange());
   fhRad1->SetMinimum(0);
-  fhRad1->SetLineColor(kGray + 1);
+  //  fhRad1->SetLineColor(kGray + 1);
   gStrela->HistoManager(fhRad1, "add");
   fhRad2 = new TH1F(Form("%s_rad2", GetName()), "radius(2); cm", 200*GetRange(), 0, GetRange());
   fhRad2->SetMinimum(0);
@@ -234,7 +239,7 @@ void TStrawTube::InitHistograms()
   fhDis2 = new TH1F(Form("%s_dis2", GetName()), "distance(2) from wire; cm",
                     50*GetRange(), -GetRange(), GetRange());
   fhDis2->SetMinimum(0);
-  fhDis2->SetLineColor(kGray + 1);
+  //  fhDis2->SetLineColor(kGray + 1);
   gStrela->HistoManager(fhDis2, "add");
   fhEffi = new TH1F(Form("%s_effi", GetName()), "efficiency; distance from wire, cm; efficiency",
                     50*GetRange(), -GetRange(), GetRange());
@@ -280,8 +285,8 @@ void TStrawTube::TimesChanged()
   if (!fhTime1)
     InitHistograms(); // only once
   else {
-    fhTime1->SetTitle(Form("T0 = %d, tdc   <%d, %d>", fT0, fTMin, fTMax));
-    fhTime2->SetTitle(Form("tdc   <%d, %d>", fTMin, fTMax));
+    //    fhTime1->SetTitle(Form("T0 = %d, tdc   <%d, %d>", fT0, fTMin, fTMax));
+    //    fhTime2->SetTitle(Form("tdc   <%d, %d>", fTMin, fTMax));
   }
 }
 //______________________________________________________________________________
