@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    28 Nov 2016
+// @Date    17 Nov 2016
 
 #ifndef STRELA_TVME
 #define STRELA_TVME
@@ -8,7 +8,6 @@
 #include <TObjArray.h>
 
 class TVirtualModule;
-class THttpMonitor;
 
 class TVME : public TNamed {
 
@@ -27,14 +26,10 @@ public:
   Int_t          *GetChannel() const { return fChannel; }
   static void     ReDecode(Bool_t enable) { fgReDecode = enable; }
   static Bool_t   IsReDecode() { return fgReDecode; }
-  THttpMonitor   *GetHttpMonitor() const { return fHttpMonitor; }
-  void            RegisterHttpMonitor(THttpMonitor *hm);
 
   void            ReDecodeChannels();
   Int_t           SearchChannel(Int_t nadc) const;
   const char     *GetChannelInfo(Int_t nadc) const;
-  void            SwitchResetCycle();
-  void            ResetMonitors(const char *arg1);
 
 private:
   TObjArray      *fModules;   //->list of all modules
@@ -45,7 +40,6 @@ private:
   Int_t          *fIndexCha;  //[fNChannels] sorted index of TDC channels
   Int_t          *fSortCha;   //[fNChannels] sorted array of TDC channels
   static Bool_t   fgReDecode; // switch ReDecode
-  THttpMonitor   *fHttpMonitor;   // http monitor
 
   void            DeleteChannels();
   void            CountChannels();

@@ -1,5 +1,5 @@
 // Author: Jan Musinsky
-// 22/11/2016
+// 28/11/2016
 
 {
   if (TClassTable::GetDict("TVME") || TClassTable::GetDict("TVMEMonitor") ||
@@ -22,9 +22,10 @@
   gSystem->Load("libGpad.so");
   gSystem->Load("libSQLIO.so");
   gSystem->Load("libTree.so");
+  gSystem->Load("libRHTTP.so");
   gSystem->Load("lib/libVME.so");
-  gSystem->Load("lib/libMonitor.so");
   gSystem->Load("lib/libStrela.so");
+  gSystem->Load("lib/libMonitor.so");
 
   // with explicitly linking the dependent libraries
   // R__LOAD_LIBRARY(lib/libVME);
