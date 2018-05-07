@@ -1,5 +1,5 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    22 Nov 2016
+// @Date    07 May 2018
 
 #include <TMemFile.h>
 #include <TTree.h>
@@ -749,7 +749,8 @@ void TVMERawData::DecodeMSCNT()
   Int_t cnt = fDataWord & 0xFFFFFFF; // (bits 0  - 27)
 
   // spill hit counters only between SHDR_END and STRL_END
-  if (fModule) fMSCCnt.AddAt(cnt, fModule->GetFirstChannel() + (fMSCChan++));
+  if (fModule && (fMSCCnt.GetSize() > 0))
+    fMSCCnt.AddAt(cnt, fModule->GetFirstChannel() + (fMSCChan++));
 
   if (!PrintDataType(3)) return;
   printf("MSCNT cnt: %d\n", cnt);
@@ -774,21 +775,21 @@ void TVMERawData::CheckIntegrity2(ETypeStatus type, const char *where)
 
   if (type == kData) {               // data inside module
     if (TestBit(kModule) == kFALSE) {
-      Warning("CheckIntegrity", "%s out of MHDR", where);
+      Warning("CheckIntegrity2", "%s out of MHDR", where);
       SetBit(kWrongEvent, kTRUE);
     }
     CheckIntegrity2(kModule, where); // recursive check module (and event)
   }
   else if (type == kModule) {        // module inside event
     if (TestBit(kEvent) == kFALSE) {
-      Warning("CheckIntegrity", "%s out of EHDR", where);
+      Warning("CheckIntegrity2", "%s out of EHDR", where);
       SetBit(kWrongEvent, kTRUE);
     }
     CheckIntegrity2(kEvent, where);  // recursive check event
   }
   else if (type == kEvent) {         // event inside spill
     if ((TestBit(kSpill) == kFALSE) && (TestBit(kSpillEnd) == kFALSE))
-      Warning("CheckIntegrity", "%s out of SHDR", where);
+      Warning("CheckIntegrity2", "%s out of SHDR", where);
   }
 }
 //______________________________________________________________________________
