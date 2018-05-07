@@ -1,16 +1,17 @@
-# @(#) 22 Nov 2016
+# @(#) 07 May 2018
 # Top level Makefile for Strela
 
 # Author: Jan Musinsky
 
-include $(ROOTSYS)/etc/Makefile.arch
+ROOTSYS2	= $(shell root-config --prefix)
+include $(ROOTSYS2)/etc/Makefile.arch
 HdrSuf		= h
 
 ifeq ($(MAKECMDGOALS),debug)
 CXXFLAGS	+= -DDEBUG
 endif
 CXXFLAGS	+= -Wshadow -Woverloaded-virtual
-CXXFLAGS	+= -Wextra -Wformat=2 -Wreorder -Wpedantic
+CXXFLAGS	+= -Wextra -Wformat=2 -Wreorder -Wpedantic # -Wold-style-cast
 ifeq ($(ROOTCINT),) # ROOT6
 CXXFLAGS	+= -Wdeprecated-declarations # enforce to enable
 DICTCXXFLAGS	= -Wno-format-nonliteral # dict warning (enabled by format=2)
@@ -124,7 +125,7 @@ distsrc:
 		@mv Monitor/client/*.tar.xz .
 
 showbuild:
-		@echo "ROOTSYS        = $(realpath $(ROOTSYS))"
+		@echo "ROOTSYS2       = $(realpath $(ROOTSYS2))"
 		@echo "ROOT VERSION   = $(shell $(RC) --version)"
 		@echo "PLATFORM       = $(PLATFORM)"
 		@echo "ARCH           = $(ARCH)"
