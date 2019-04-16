@@ -1,4 +1,4 @@
-// 2019-04-15
+// 2019-04-16
 // Jan Musinsky
 
 #include <TSystem.h>
@@ -12,11 +12,10 @@ public:
   Long64_t fSize;  // total size in bytes (from FileStat_t)
   Long_t   fMtime; // modification date   (from FileStat_t)
   Int_t    fRun;   // digit run number
-  Int_t    fCnt;   // count of duplicates
 
-  FileInfoStat() : TNamed(), fSize(0), fMtime(0), fRun(0), fCnt(0) { }
+  FileInfoStat() : TNamed(), fSize(0), fMtime(0), fRun(0) { }
   FileInfoStat(const char *name, const char *title) : TNamed(name, title),
-      fSize(0), fMtime(0), fRun(0), fCnt(0) { }
+      fSize(0), fMtime(0), fRun(0) { }
   virtual ~FileInfoStat() { }
   virtual  Bool_t IsSortable() const { return kTRUE; }
   virtual  Int_t Compare(const TObject *obj) const
@@ -33,7 +32,7 @@ public:
 };
 ClassImp(FileInfoStat)
 
-void DigitRunFiles(const char *dirname = nullptr)
+void DigitRunFiles(const char *dirname = nullptr, Bool_t lns = kFALSE)
 {
   // find all *.fext regular files in dirname and try convert to digit run number
 
@@ -95,27 +94,59 @@ void DigitRunFiles(const char *dirname = nullptr)
   }
   gSystem->FreeDirectory(dir);
 
-  files->Sort(kSortAscending); // sort by FileModifyDate
-  TString sfext = fext;
-  sfext.Remove(TString::kLeading, '.');
-  for (Int_t i = 0; i < files->GetEntries(); i++) {
-    fis = (FileInfoStat *)files->At(i);
-    TDatime dt(fis->fMtime); // UNIX Epoch time
-    TString digitfile = "";
-    if ((fis->fRun) > 0) digitfile = TString::Format("run%03d.%s", fis->fRun, sfext.Data());
-    Int_t cnt = std::count(runs.begin(), runs.end(), fis->fRun);
-    fis->fCnt = cnt;
-    TString status = "";
-    if (cnt != 1) status = TString::Format("[%dx]", cnt);
-
-    Printf("%12lld %s %10s %4s => %s", fis->fSize, dt.AsSQLString(), digitfile.Data(),
-           status.Data(), fis->GetName());
+  // print status
+  TString bla = dname;
+  bla.Remove(TString::kLeading, '/');
+  bla.ReplaceAll("/", ".");
+  FILE *fstatus = fopen(TString::Format("%s.status", bla.Data()), "w");
+  FILE *fnolink = fopen(TString::Format("%s.nolink", bla.Data()), "w");
+  if (!fstatus || !fnolink) {
+    Printf("not writable dir \"%s\"", gSystem->pwd());
+    delete files;
+    return;
   }
 
-  Int_t cnt2 = std::count_if(runs.begin(), runs.end(), [](Int_t r){return r > 999;});
-  if (cnt2) Printf("%d NNNN (4digit) files", cnt2);
+  Printf("\ncreated \"%s\" (status and nolink) files", bla.Data());
+  TDatime dt; // UNIX Epoch time (01.01.1995 => 31.12.2058) (datime as 32bit word)
+  TString sfext = fext;
+  sfext.Remove(TString::kLeading, '.');
+  Int_t cnt = std::count_if(runs.begin(), runs.end(), [](Int_t r){return r > 0;});
+  bla = TString::Format("# %s\n# %s:%s/", dt.AsSQLString(), gSystem->HostName(),
+                        dname.Data());
+  fprintf(fstatus, "%s\n# %d (*.%s) regular files were found => %d files were digitized\n\n",
+          bla.Data(), files->GetEntries(), sfext.Data(), cnt);
+  fprintf(fnolink, "%s\n# files without links (were not digitized or multiple)\n\n",
+          bla.Data());
+
+  files->Sort(kSortAscending); // sort by FileModifyDate
+  for (Int_t i = 0; i < files->GetEntries(); i++) {
+    fis = (FileInfoStat *)files->At(i);
+    dt.Set(fis->fMtime); // UNIX Epoch time (TDatime origin 01.01.1995)
+    TString digitfile = "";
+    if ((fis->fRun) > 0) digitfile = TString::Format("run%03d.%s", fis->fRun, sfext.Data());
+    TString status = "";
+    cnt = std::count(runs.begin(), runs.end(), fis->fRun);
+    if (cnt != 1) status = TString::Format("[%dx]", cnt);
+    bla = TString::Format("%12lld %s %10s %4s => %s", fis->fSize, dt.AsSQLString(),
+                          digitfile.Data(), status.Data(), fis->GetName());
+    fprintf(fstatus, "%s\n", bla.Data());
+    if (((fis->fRun) < 1) || (cnt != 1)) { // no link
+      fprintf(fnolink, "%s   %s/%s\n", bla.Data(), fis->GetTitle(), fis->GetName());
+    } else if (lns) { // make symbolic links
+      // don't use "--force" (any dirname ~ same digitfile)
+      gSystem->Exec(TString::Format("ln -s %s/%s %s", fis->GetTitle(), fis->GetName(),
+                                    digitfile.Data()));
+    }
+  }
+
+  cnt = std::count_if(runs.begin(), runs.end(), [](Int_t r){return r > 999;});
+  if (cnt) Printf("%d NNNN (4 digit) files", cnt);
+
   delete files; // owner FileInfoStat objects
+  fclose(fstatus);
+  fclose(fnolink);
 }
-// https://www.dyclassroom.com/c/c-file-handling-read-and-write-multiple-data
-// http://www.cplusplus.com/reference/cstdio/fprintf/
+
+// cd /mnt/free1/data_raw/2013_12
 // ls --time-style='+%Y-%m-%d %H:%M:%S' -ltr /mnt/free1/data_raw/2013_12/*.dat # -Gg
+// sed -i '1 i\\' $HOME/mmm
