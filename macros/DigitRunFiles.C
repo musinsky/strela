@@ -1,5 +1,12 @@
-// 2019-04-16
+// 2019-04-17
 // Jan Musinsky
+
+/*
+ * root[] .L DigitRunFiles.C
+ * root[] DigitRunFiles("/mnt/free1/data_raw/2013_12/")
+ * root[] DigitRunFiles("/mnt/free1/data_raw/2013_12/", kTRUE)
+ * root[] DigitRunFiles("/mnt/free1/data_raw/2014_03/")
+ */
 
 #include <TSystem.h>
 #include <TPRegexp.h>
@@ -32,17 +39,16 @@ public:
 };
 ClassImp(FileInfoStat)
 
-void DigitRunFiles(const char *dirname = nullptr, Bool_t lns = kFALSE)
+void DigitRunFiles(const char *dirname = "", Bool_t lns = kFALSE)
 {
-  // find all *.fext regular files in dirname and try convert to digit run number
+  // find all (*.fext) regular files in dirname and try convert to digit run number
 
-  if (!dirname) dirname = "/mnt/free1/data_raw/2013_12";
   const char *fext = ".dat"; // case sensitive (pattern ".fext" better than only "fext")
   TString dname = dirname;
-  dname.Remove(TString::kTrailing, '/'); // only cosmetic
+  dname.Remove(TString::kTrailing, '/'); // only cosmetic (/full/path/  = /full/path//)
   void *dir = gSystem->OpenDirectory(dname.Data());
   if (!dir) {
-    Printf("no files in dir \"%s\"", dname.Data());
+    Printf("directory \"%s\" does not exist", dname.Data());
     return;
   }
 
@@ -67,8 +73,11 @@ void DigitRunFiles(const char *dirname = nullptr, Bool_t lns = kFALSE)
     // YYYY-MM-DD_HH-MM-SS (19 characters)
     // test YYYY from 1970 (start POSIX, UNIX Epoch time) to 2099
     // test HH from 00 to 23
-    // https://regex101.com/r/mQT9HR/1
-    TPRegexp re("(19[7-9]\\d{1}|20\\d{2})-(\\d{2})-(\\d{2})_([0-1]\\d{1}|2[0-3])-(\\d{2})-(\\d{2})");
+    // https://regex101.com/r/ssDS6q/1
+    // UPDATE TDatime origin 01.01.1995 (datime as 32bit word, 01.01.1995 => 31.12.2058)
+    // test YYYY from 1995 (start TDatime origin) to 2058
+    // https://regex101.com/r/ssDS6q/3
+    TPRegexp re("(199[5-9]|20[0-4]\\d{1}|205[0-8])-(\\d{2})-(\\d{2})_([0-1]\\d{1}|2[0-3])-(\\d{2})-(\\d{2})");
     //    TObjArray *matches = re.MatchS(fname);
     //    for (Int_t i = 0; i < matches->GetEntries(); i++) {
     //      const TString match = ((TObjString *)matches->At(i))->GetString();
@@ -106,8 +115,9 @@ void DigitRunFiles(const char *dirname = nullptr, Bool_t lns = kFALSE)
     return;
   }
 
-  Printf("\ncreated \"%s\" (status and nolink) files", bla.Data());
-  TDatime dt; // UNIX Epoch time (01.01.1995 => 31.12.2058) (datime as 32bit word)
+  Printf("created \"%s.status\" file", bla.Data());
+  Printf("created \"%s.nolink\" file", bla.Data());
+  TDatime dt; // TDatime origin 01.01.1995
   TString sfext = fext;
   sfext.Remove(TString::kLeading, '.');
   Int_t cnt = std::count_if(runs.begin(), runs.end(), [](Int_t r){return r > 0;});
@@ -121,7 +131,7 @@ void DigitRunFiles(const char *dirname = nullptr, Bool_t lns = kFALSE)
   files->Sort(kSortAscending); // sort by FileModifyDate
   for (Int_t i = 0; i < files->GetEntries(); i++) {
     fis = (FileInfoStat *)files->At(i);
-    dt.Set(fis->fMtime); // UNIX Epoch time (TDatime origin 01.01.1995)
+    dt.Set(fis->fMtime); // UNIX Epoch time (TDatime from 1995 to 2058)
     TString digitfile = "";
     if ((fis->fRun) > 0) digitfile = TString::Format("run%03d.%s", fis->fRun, sfext.Data());
     TString status = "";
@@ -133,20 +143,23 @@ void DigitRunFiles(const char *dirname = nullptr, Bool_t lns = kFALSE)
     if (((fis->fRun) < 1) || (cnt != 1)) { // no link
       fprintf(fnolink, "%s   %s/%s\n", bla.Data(), fis->GetTitle(), fis->GetName());
     } else if (lns) { // make symbolic links
-      // don't use "--force" (any dirname ~ same digitfile)
+      // don't use "--force" (more dirname with the same digitfile)
       gSystem->Exec(TString::Format("ln -s %s/%s %s", fis->GetTitle(), fis->GetName(),
                                     digitfile.Data()));
     }
   }
 
   cnt = std::count_if(runs.begin(), runs.end(), [](Int_t r){return r > 999;});
-  if (cnt) Printf("%d NNNN (4 digit) files", cnt);
+  if (cnt) Printf("%d files with NNNN (4 digit run numbers)", cnt);
 
   delete files; // owner FileInfoStat objects
   fclose(fstatus);
   fclose(fnolink);
 }
 
-// cd /mnt/free1/data_raw/2013_12
-// ls --time-style='+%Y-%m-%d %H:%M:%S' -ltr /mnt/free1/data_raw/2013_12/*.dat # -Gg
-// sed -i '1 i\\' $HOME/mmm
+/*
+ * # cd /mnt/free1/data_raw/2013_12/
+ * # ls --time-style='+%Y-%m-%d %H:%M:%S' -ltr *.dat > $HOME/runs_files
+ * # sed -i '1 i\\' $HOME/runs_files   # add a newline to the begin
+ * # mcdiff $HOME/runs_files $HOME/mnt.free1.data_raw.2013_12.status
+ */
