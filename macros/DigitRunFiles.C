@@ -1,4 +1,4 @@
-// 2019-04-17
+// 2019-04-25
 // Jan Musinsky
 
 /*
@@ -121,8 +121,7 @@ void DigitRunFiles(const char *dirname = "", Bool_t lns = kFALSE)
   TString sfext = fext;
   sfext.Remove(TString::kLeading, '.');
   Int_t cnt = std::count_if(runs.begin(), runs.end(), [](Int_t r){return r > 0;});
-  bla = TString::Format("# %s\n# %s:%s/", dt.AsSQLString(), gSystem->HostName(),
-                        dname.Data());
+  bla.Form("# %s\n# %s:%s/", dt.AsSQLString(), gSystem->HostName(), dname.Data());
   fprintf(fstatus, "%s\n# %d (*.%s) regular files were found => %d files were digitized\n\n",
           bla.Data(), files->GetEntries(), sfext.Data(), cnt);
   fprintf(fnolink, "%s\n# files without links (were not digitized or multiple)\n\n",
@@ -133,12 +132,12 @@ void DigitRunFiles(const char *dirname = "", Bool_t lns = kFALSE)
     fis = (FileInfoStat *)files->At(i);
     dt.Set(fis->fMtime); // UNIX Epoch time (TDatime from 1995 to 2058)
     TString digitfile = "";
-    if ((fis->fRun) > 0) digitfile = TString::Format("run%03d.%s", fis->fRun, sfext.Data());
+    if ((fis->fRun) > 0) digitfile.Form("run%03d.%s", fis->fRun, sfext.Data());
     TString status = "";
     cnt = std::count(runs.begin(), runs.end(), fis->fRun);
-    if (cnt != 1) status = TString::Format("[%dx]", cnt);
-    bla = TString::Format("%12lld %s %10s %4s => %s", fis->fSize, dt.AsSQLString(),
-                          digitfile.Data(), status.Data(), fis->GetName());
+    if (cnt != 1) status.Form("[%dx]", cnt);
+    bla.Form("%12lld %s %10s %4s => %s", fis->fSize, dt.AsSQLString(),
+             digitfile.Data(), status.Data(), fis->GetName());
     fprintf(fstatus, "%s\n", bla.Data());
     if (((fis->fRun) < 1) || (cnt != 1)) { // no link
       fprintf(fnolink, "%s   %s/%s\n", bla.Data(), fis->GetTitle(), fis->GetName());
