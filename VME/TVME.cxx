@@ -1,11 +1,10 @@
 // @Author  Jan Musinsky <musinsky@gmail.com>
-// @Date    28 Nov 2016
+// @Date    17 Nov 2016
 
 #include <TMath.h>
 
 #include "TVME.h"
 #include "TVirtualModule.h"
-#include "THttpMonitor.h"
 
 TVME *gVME = 0;
 Bool_t TVME::fgReDecode = kFALSE;
@@ -21,8 +20,7 @@ TVME::TVME()
   fNChannels(0),
   fChannel(0),
   fIndexCha(0),
-  fSortCha(0),
-  fHttpMonitor(0)
+  fSortCha(0)
 {
   // Default constructor
 }
@@ -35,8 +33,7 @@ TVME::TVME(const char *name, const char *title)
   fNChannels(0),
   fChannel(0),
   fIndexCha(0),
-  fSortCha(0),
-  fHttpMonitor(0)
+  fSortCha(0)
 {
   // Normal constructor
   if (gVME) {
@@ -140,23 +137,4 @@ Int_t TVME::SearchChannel(Int_t nadc) const
 const char *TVME::GetChannelInfo(Int_t nadc) const
 {
   return Form("[%3d][%4d]", SearchChannel(nadc), nadc);
-}
-//______________________________________________________________________________
-void TVME::RegisterHttpMonitor(THttpMonitor *hm)
-{
-  if (!hm) return;
-  if (fHttpMonitor) {
-    Error("RegisterHttpMonitor", "only one instance of THttpMonitor allowed");
-  }
-  fHttpMonitor = hm;
-}
-//______________________________________________________________________________
-void TVME::SwitchResetCycle()
-{
-  if (fHttpMonitor) fHttpMonitor->SwitchResetCycle();
-}
-//______________________________________________________________________________
-void TVME::ResetMonitors(const char *arg1)
-{
-  if (fHttpMonitor) fHttpMonitor->ResetMonitors(arg1);
 }
